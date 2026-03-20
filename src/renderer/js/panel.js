@@ -12,7 +12,13 @@ const Panel = (() => {
       const d = await window.vortexAPI.invoke('app:downloadsPage');
       if (d) _resolvedUrls.downloads = 'file:///' + d.replace(/\\/g, '/');
     } catch (_) {}
+    try {
+      const b = await window.vortexAPI.invoke('app:bookmarksPage');
+      if (b) _resolvedUrls.bookmarks = 'file:///' + b.replace(/\\/g, '/');
+    } catch (_) {}
   }
+
+  let _currentType = null;
 
   function open(type) {
     _resolve().then(() => {
@@ -23,23 +29,33 @@ const Panel = (() => {
       const panel    = document.getElementById('floating-panel');
       const backdrop = document.getElementById('panel-backdrop');
 
-      title.textContent = type === 'settings' ? 'Settings' : 'Downloads';
+      const titles = { settings: 'Settings', downloads: 'Downloads', bookmarks: 'Bookmarks' };
+      title.textContent = titles[type] || type;
+      _currentType = type;
 
-      // When iframe loads, fire ready event so ipc.js can inject data
-      if (type === 'downloads') {
-        frame.onload = () => {
-          document.dispatchEvent(new CustomEvent('vortex-downloads-ready', { detail: frame }));
-          frame.onload = null;
-        };
-      } else {
-        frame.onload = null;
-      }
+      _setFrameOnload(frame, type);
 
       frame.src = url;
       backdrop.classList.add('visible');
       panel.classList.add('visible');
       document.body.classList.add('panel-open');
     });
+  }
+
+  function _setFrameOnload(frame, type) {
+    if (type === 'downloads') {
+      frame.onload = () => {
+        document.dispatchEvent(new CustomEvent('vortex-downloads-ready', { detail: frame }));
+        frame.onload = null;
+      };
+    } else if (type === 'bookmarks') {
+      frame.onload = () => {
+        document.dispatchEvent(new CustomEvent('vortex-bookmarks-ready', { detail: frame }));
+        frame.onload = null;
+      };
+    } else {
+      frame.onload = null;
+    }
   }
 
   function close() {
@@ -64,8 +80,9 @@ const Panel = (() => {
     document.getElementById('panel-refresh').addEventListener('click', () => {
       const frame = document.getElementById('panel-frame');
       const btn = document.getElementById('panel-refresh');
-      // Spin animation
       btn.classList.add('spinning');
+      // Re-set onload so data gets re-injected after reload
+      if (_currentType) _setFrameOnload(frame, _currentType);
       frame.contentWindow?.location.reload();
       setTimeout(() => btn.classList.remove('spinning'), 600);
     });
