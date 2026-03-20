@@ -1,6 +1,22 @@
 const DEFAULT_URL = 'https://www.google.com';
 const CACHE_REFRESH_MS = 5 * 60 * 1000;
 
+// Settings defaults (mirrored from settings.html)
+const SETTINGS_DEFAULTS = {
+  startup: 'session', homepage: 'https://www.google.com',
+  engine: 'google', suggestions: true, prefetch: true,
+};
+
+// Load settings from storage/settings.json
+async function loadSettings() {
+  try {
+    const stored = await Storage.read('settings');
+    return Object.assign({}, SETTINGS_DEFAULTS, stored || {});
+  } catch {
+    return { ...SETTINGS_DEFAULTS };
+  }
+}
+
 function warmDefaultPageCache() {
   const wv = document.createElement('webview');
   wv.src = DEFAULT_URL;
@@ -19,13 +35,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   Navigation.render();
   await WebView.init();
 
-  // Try to restore last session, fall back to default page
-  const restored = await Session.restore();
+  // Load settings first, then decide startup behavior
+  const appSettings = await loadSettings();
+
+  // Apply settings to modules
+  Navigation.applySettings(appSettings);
+
+  let restored = false;
+  if (appSettings.startup === 'session') {
+    restored = await Session.restore();
+  } else if (appSettings.startup === 'homepage') {
+    Tabs.createTab(appSettings.homepage || DEFAULT_URL);
+    restored = true;
+  }
   if (!restored) {
-    Tabs.createTab(DEFAULT_URL);
+    Tabs.createTab(Navigation.newTabURL());
   }
 
   Session.initAutoSave();
   Navigation.initShortcuts();
   Panel.init();
+
+  // Listen for settings changes from the settings panel
+  IPC.on('settings:changed', (s) => {
+    Navigation.applySettings(s);
+  });
+  // Also handle postMessage from settings iframe
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.__vortexAction && e.data.channel === 'settings:changed') {
+      Navigation.applySettings(e.data.payload);
+    }
+  });
 });

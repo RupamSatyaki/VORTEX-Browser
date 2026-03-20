@@ -937,14 +937,38 @@
             askdl: false, opendl: false,
         };
 
-        function load() {
-            try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('vortex_settings') || '{}')); }
-            catch { return { ...DEFAULTS }; }
+        // Use parent bridge if available (iframe context), else fallback to vortexAPI directly
+        async function _invoke(channel, ...args) {
+            if (window.parent && window.parent.__vortexInvoke) {
+                return window.parent.__vortexInvoke(channel, ...args);
+            }
+            if (window.vortexAPI) return window.vortexAPI.invoke(channel, ...args);
+            return null;
         }
 
-        function save(settings) {
-            localStorage.setItem('vortex_settings', JSON.stringify(settings));
-            if (window.vortexAPI) window.vortexAPI.send('settings:changed', settings);
+        async function load() {
+            try {
+                const stored = await _invoke('storage:read', 'settings');
+                return Object.assign({}, DEFAULTS, stored || {});
+            } catch {
+                // Fallback to localStorage if IPC not available
+                try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('vortex_settings') || '{}')); }
+                catch { return { ...DEFAULTS }; }
+            }
+        }
+
+        async function save(s) {
+            try {
+                await _invoke('storage:write', 'settings', s);
+            } catch {
+                localStorage.setItem('vortex_settings', JSON.stringify(s));
+            }
+            // Notify main browser window of changed settings
+            if (window.parent && window.parent.postMessage) {
+                window.parent.postMessage({ __vortexAction: true, channel: 'settings:changed', payload: s }, '*');
+            } else if (window.vortexAPI) {
+                window.vortexAPI.send('settings:changed', s);
+            }
         }
 
         function applyToUI(s) {
@@ -958,8 +982,13 @@
             set('set-askdl', s.askdl); set('set-opendl', s.opendl);
         }
 
-        let settings = load();
-        applyToUI(settings);
+        let settings = { ...DEFAULTS };
+
+        // Load async then apply to UI
+        load().then(s => {
+            settings = s;
+            applyToUI(settings);
+        });
 
         // Auto-save on any change
         document.querySelectorAll('select, input[type="checkbox"], input[type="text"]').forEach(el => {
@@ -985,10 +1014,10 @@
             if (window.vortexAPI) window.vortexAPI.send('shell:openExternal', 'https://github.com/RupamSatyaki/VORTEX-Browser');
         });
 
-        document.getElementById('btn-reset').addEventListener('click', () => {
+        document.getElementById('btn-reset').addEventListener('click', async () => {
             if (confirm('Reset all settings to defaults?')) {
                 settings = { ...DEFAULTS };
-                save(settings);
+                await save(settings);
                 applyToUI(settings);
             }
         });

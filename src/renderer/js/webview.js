@@ -208,10 +208,13 @@ const WebView = (() => {
     container.appendChild(wv);
     webviews[tabId] = wv;
     _attachRegularListeners(wv, tabId);
+    _attachFindListener(wv);
   }
 
   function switchTo(tabId) {
     activeId = tabId;
+    // Close find bar when switching tabs
+    _closeFindBar();
     Object.entries(webviews).forEach(([id, wv]) => {
       wv.classList.toggle('active', id === tabId);
     });
@@ -294,7 +297,95 @@ const WebView = (() => {
   function print()     { const wv = webviews[activeId]; if (wv) wv.print(); }
   function savePage()  { const wv = webviews[activeId]; if (wv) wv.savePage(require('path').join(require('os').homedir(), 'Downloads', 'page.html'), 'HTMLComplete').catch(()=>{}); }
   function openDevTools() { const wv = webviews[activeId]; if (wv) wv.openDevTools(); }
-  function findInPage()   { const wv = webviews[activeId]; if (wv) wv.findInPage(''); }
+
+  // ── Find in Page ───────────────────────────────────────────────────────────
+  let _findActive = false;
+
+  function findInPage() {
+    const bar   = document.getElementById('find-bar');
+    const input = document.getElementById('find-input');
+    if (!bar || !input) return;
+
+    if (!_findActive) {
+      _findActive = true;
+      bar.classList.add('visible');
+      input.value = '';
+      document.getElementById('find-count').textContent = '';
+      input.classList.remove('no-match');
+      input.focus();
+      input.select();
+    } else {
+      // Already open — just focus
+      input.focus();
+      input.select();
+    }
+  }
+
+  function _closeFindBar() {
+    const bar = document.getElementById('find-bar');
+    if (!bar) return;
+    _findActive = false;
+    bar.classList.remove('visible');
+    const wv = webviews[activeId];
+    if (wv) { try { wv.stopFindInPage('clearSelection'); } catch (_) {} }
+    document.getElementById('find-count').textContent = '';
+    document.getElementById('find-input').classList.remove('no-match');
+  }
+
+  function _doFind(forward = true) {
+    const wv    = webviews[activeId];
+    const input = document.getElementById('find-input');
+    if (!wv || !input) return;
+    const query = input.value.trim();
+    if (!query) { document.getElementById('find-count').textContent = ''; return; }
+
+    wv.findInPage(query, { forward, findNext: true, matchCase: false });
+  }
+
+  // Wire up find bar events once DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('find-input');
+    const wv_getter = () => webviews[activeId];
+
+    input.addEventListener('input', () => {
+      const wv = wv_getter();
+      const q  = input.value.trim();
+      input.classList.remove('no-match');
+      if (!q) { document.getElementById('find-count').textContent = ''; if (wv) { try { wv.stopFindInPage('clearSelection'); } catch(_){} } return; }
+      if (wv) wv.findInPage(q, { forward: true, findNext: false, matchCase: false });
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter')  { e.preventDefault(); _doFind(!e.shiftKey); }
+      if (e.key === 'Escape') { e.preventDefault(); _closeFindBar(); }
+    });
+
+    document.getElementById('find-next').addEventListener('click',  () => _doFind(true));
+    document.getElementById('find-prev').addEventListener('click',  () => _doFind(false));
+    document.getElementById('find-close').addEventListener('click', () => _closeFindBar());
+
+    // Listen for found-in-page results to update count
+    document.getElementById('webview-container').addEventListener('found-in-page', (e) => {
+      // bubbles up from active webview
+    });
+  });
+
+  // Attach found-in-page listener per webview
+  function _attachFindListener(wv) {
+    wv.addEventListener('found-in-page', (e) => {
+      const count = document.getElementById('find-count');
+      const input = document.getElementById('find-input');
+      if (!count) return;
+      const { activeMatchOrdinal, matches } = e.result;
+      if (matches === 0) {
+        count.textContent = 'No results';
+        input.classList.add('no-match');
+      } else {
+        count.textContent = `${activeMatchOrdinal}/${matches}`;
+        input.classList.remove('no-match');
+      }
+    });
+  }
 
   // ── Zoom ───────────────────────────────────────────────────────────────────
   const zoomLevels = {};
