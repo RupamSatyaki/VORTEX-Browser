@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://suggestqueries.google.com;" />
   <title>Vortex</title>
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -67,6 +67,7 @@
 
   <script src="js/ipc.js"></script>
   <script src="js/prefetch.js"></script>
+  <script src="js/omnibox.js"></script>
   <script src="js/tabPreview.js"></script>
   <script src="js/tabHistory.js"></script>
   <script src="js/contextMenu.js"></script>
