@@ -135,15 +135,18 @@ const Navigation = (() => {
 
     urlBar.addEventListener('blur', () => {
       firstClick = true; // reset for next focus
+      Omnibox.onBlur();
     });
 
     urlBar.addEventListener('keydown', (e) => {
+      if (Omnibox.onKeydown(e)) return; // omnibox handled it
       if (e.key === 'Enter') navigate();
       if (e.key === 'Escape') { urlBar.blur(); }
     });
 
     urlBar.addEventListener('input', (e) => {
       Prefetch.onInput(e.target.value);
+      Omnibox.onInput(e.target.value);
       updateSecurityIcon(''); // searching — show search icon
     });
 
@@ -718,5 +721,5 @@ const Navigation = (() => {
     });
   }
 
-  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL, initProfile: _initProfile };
+  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL, initProfile: _initProfile, _getSearchEngine: () => _searchEngine };
 })();
