@@ -280,17 +280,14 @@ const WebView = (() => {
   }
 
   async function init() {
-    try {
-      webviewPreloadPath = await window.vortexAPI.invoke('app:webviewPreload');
-    } catch (_) {}
-    try {
-      const p = await window.vortexAPI.invoke('app:downloadsPage');
-      if (p) downloadsPageUrl = 'file:///' + p.replace(/\\/g, '/');
-    } catch (_) {}
-    try {
-      const p = await window.vortexAPI.invoke('app:settingsPage');
-      if (p) settingsPageUrl = 'file:///' + p.replace(/\\/g, '/');
-    } catch (_) {}
+    const [preloadPath, downloadsPath, settingsPath] = await Promise.all([
+      window.vortexAPI.invoke('app:webviewPreload').catch(() => null),
+      window.vortexAPI.invoke('app:downloadsPage').catch(() => null),
+      window.vortexAPI.invoke('app:settingsPage').catch(() => null),
+    ]);
+    if (preloadPath) webviewPreloadPath = preloadPath;
+    if (downloadsPath) downloadsPageUrl = 'file:///' + downloadsPath.replace(/\\/g, '/');
+    if (settingsPath)  settingsPageUrl  = 'file:///' + settingsPath.replace(/\\/g, '/');
     _preloadAll();
   }
 

@@ -1,5 +1,4 @@
 const DEFAULT_URL = 'https://www.google.com';
-const CACHE_REFRESH_MS = 5 * 60 * 1000;
 
 // Settings defaults (mirrored from settings.html)
 const SETTINGS_DEFAULTS = {
@@ -17,30 +16,24 @@ async function loadSettings() {
   }
 }
 
-function warmDefaultPageCache() {
-  const wv = document.createElement('webview');
-  wv.src = DEFAULT_URL;
-  wv.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px;left:-9999px;';
-  document.body.appendChild(wv);
-  wv.addEventListener('did-finish-load', () => {
-    setTimeout(() => { if (wv.isConnected) wv.reload(); }, CACHE_REFRESH_MS);
-  });
-}
 
 document.addEventListener('DOMContentLoaded', async () => {
-  warmDefaultPageCache();
-
+  // Non-blocking UI init first
   TabPreview.init();
   ContextMenu.init();
   Navigation.render();
-  await WebView.init();
+  Panel.init();
 
-  // Load settings first, then decide startup behavior
-  const appSettings = await loadSettings();
+  // Parallel: WebView init + settings load + tab history load
+  const [, appSettings] = await Promise.all([
+    WebView.init(),
+    loadSettings(),
+  ]);
 
-  // Apply settings to modules
+  // Apply settings immediately
   Navigation.applySettings(appSettings);
 
+  // Session restore / startup tab — after settings known
   let restored = false;
   if (appSettings.startup === 'session') {
     restored = await Session.restore();
@@ -55,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   Session.initAutoSave();
   Navigation.initShortcuts();
   Navigation.initProfile();
-  Panel.init();
 
   // Listen for settings changes from the settings panel
   IPC.on('settings:changed', (s) => {
