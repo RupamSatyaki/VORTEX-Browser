@@ -1,4 +1,10 @@
 const { app } = require('electron');
+
+// Suppress noisy ERR_ABORTED (-3) from webview navigations (YouTube, SPAs, etc.)
+process.on('uncaughtException', (err) => {
+  if (err && err.errno === -3) return;
+  console.error(err);
+});
 const WindowManager = require('./src/main/windowManager');
 const MenuManager = require('./src/main/menuManager');
 const IpcHandler = require('./src/main/ipcHandler');

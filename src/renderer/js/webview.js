@@ -275,5 +275,43 @@ const WebView = (() => {
   function goForward() { const wv = webviews[activeId]; if (wv && wv.canGoForward()) wv.goForward(); }
   function reload()    { const wv = webviews[activeId]; if (wv) wv.reload(); }
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload };
+  // ── Zoom ───────────────────────────────────────────────────────────────────
+  const zoomLevels = {};
+
+  function _getZoom(tabId) { return zoomLevels[tabId] ?? 1.0; }
+
+  function _applyZoom(tabId, level) {
+    const wv = webviews[tabId];
+    if (!wv) return;
+    level = Math.min(3.0, Math.max(0.25, level));
+    zoomLevels[tabId] = level;
+    wv.setZoomFactor(level);
+    if (tabId === activeId) _showZoomBar(level);
+  }
+
+  function zoomIn()    { _applyZoom(activeId, _getZoom(activeId) + 0.1); }
+  function zoomOut()   { _applyZoom(activeId, _getZoom(activeId) - 0.1); }
+  function zoomReset() { _applyZoom(activeId, 1.0); }
+
+  function _showZoomBar(level) {
+    const bar = document.getElementById('zoom-status-bar');
+    if (!bar) return;
+    const pct = Math.round(level * 100);
+    bar.querySelector('#zoom-pct').textContent = pct + '%';
+    bar.classList.add('visible');
+    clearTimeout(bar._hideTimer);
+    if (pct === 100) {
+      bar._hideTimer = setTimeout(() => bar.classList.remove('visible'), 1500);
+    }
+  }
+
+  // Keyboard shortcuts: Ctrl+= / Ctrl+- / Ctrl+0
+  document.addEventListener('keydown', (e) => {
+    if (!e.ctrlKey) return;
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); zoomIn(); }
+    else if (e.key === '-') { e.preventDefault(); zoomOut(); }
+    else if (e.key === '0') { e.preventDefault(); zoomReset(); }
+  });
+
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, zoomIn, zoomOut, zoomReset };
 })();

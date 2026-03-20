@@ -587,3 +587,59 @@ webview.vortex-wv.active iframe {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ── Zoom Status Bar ── */
+#zoom-status-bar {
+  position: fixed;
+  bottom: 10px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #1a2e2e;
+  border: 1px solid #2e4a4c;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  color: #7aadad;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+#zoom-status-bar.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+}
+
+#zoom-pct {
+  min-width: 38px;
+  text-align: center;
+  font-weight: 600;
+  color: #c8e8e5;
+}
+
+#zoom-status-bar button {
+  background: transparent;
+  border: none;
+  color: #4a8080;
+  cursor: pointer;
+  font-size: 15px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+#zoom-status-bar button:hover {
+  background: #253f40;
+  color: #00c8b4;
+}
