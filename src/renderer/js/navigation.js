@@ -247,12 +247,9 @@ const Navigation = (() => {
 
   function applySettings(s) {
     if (s.engine) _searchEngine = s.engine;
-    if (typeof s.prefetch === 'boolean') {
-      Prefetch.setEnabled(s.prefetch);
-    }
-    if (typeof s.suggestions === 'boolean') {
-      Prefetch.setSuggestionsEnabled(s.suggestions);
-    }
+    if (typeof s.prefetch === 'boolean') Prefetch.setEnabled(s.prefetch);
+    if (typeof s.suggestions === 'boolean') Prefetch.setSuggestionsEnabled(s.suggestions);
+    if (typeof s.tabpreview === 'boolean') TabPreview.setEnabled(s.tabpreview);
   }
 
   function setURL(url) {

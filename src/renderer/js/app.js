@@ -4,7 +4,7 @@ const CACHE_REFRESH_MS = 5 * 60 * 1000;
 // Settings defaults (mirrored from settings.html)
 const SETTINGS_DEFAULTS = {
   startup: 'session', homepage: 'https://www.google.com',
-  engine: 'google', suggestions: true, prefetch: true,
+  engine: 'google', suggestions: true, prefetch: true, tabpreview: true,
 };
 
 // Load settings from storage/settings.json
