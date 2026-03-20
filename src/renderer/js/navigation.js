@@ -151,6 +151,35 @@ const Navigation = (() => {
       const url = urlBar.value;
       if (url) navigator.clipboard.writeText(url);
     });
+
+    // Bookmark button — toggle add/remove
+    document.getElementById('btn-bookmark').addEventListener('click', async () => {
+      const url = urlBar.value;
+      if (!url || url.startsWith('vortex://')) return;
+      const btn = document.getElementById('btn-bookmark');
+      const isBookmarked = btn.classList.contains('bookmarked');
+      if (isBookmarked) {
+        // Remove — find by URL
+        const list = await BookmarkStore.load();
+        const bm = list.find(b => b.url === url);
+        if (bm) {
+          await BookmarkStore.remove(bm.id);
+          window._forwardToBookmarksFrame && window._forwardToBookmarksFrame('bookmark:removed', bm.id);
+        }
+        btn.classList.remove('bookmarked');
+        btn.title = 'Bookmark this page';
+      } else {
+        // Add
+        const title = document.title.replace(' — Vortex', '') || url;
+        const entry = { id: Date.now().toString(), url, title, addedAt: Date.now() };
+        const added = await BookmarkStore.add(entry);
+        if (added) {
+          window._forwardToBookmarksFrame && window._forwardToBookmarksFrame('bookmark:added', entry);
+        }
+        btn.classList.add('bookmarked');
+        btn.title = 'Remove bookmark';
+      }
+    });
   }
 
   function updateSecurityIcon(url) {
@@ -224,6 +253,8 @@ const Navigation = (() => {
     const bar = document.getElementById('url-bar');
     if (bar) bar.value = url;
     updateSecurityIcon(url);
+    // Update bookmark icon state
+    if (window._updateBookmarkIcon) window._updateBookmarkIcon();
   }
 
   let _progressTimer = null;
@@ -365,7 +396,7 @@ const Navigation = (() => {
         case 'new-window':   window.vortexAPI.send('window:new'); break;
         case 'history':      Tabs.createTab('vortex://history'); break;
         case 'downloads':    Panel.open('downloads'); break;
-        case 'bookmarks':    Tabs.createTab('vortex://bookmarks'); break;
+        case 'bookmarks':    Panel.open('bookmarks'); break;
         case 'find':         WebView.findInPage(); break;
         case 'print':        WebView.print(); break;
         case 'save-page':    WebView.savePage(); break;
