@@ -379,6 +379,12 @@ body {
   border: 1px solid #4a8a8f;
 }
 
+.user-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: #e0f4f4;
+}
+
 .user-icon:hover {
   background: linear-gradient(135deg, #00c8b4, #36676c);
 }
@@ -1066,6 +1072,12 @@ webview.vortex-wv.active iframe {
   box-shadow: 0 2px 8px rgba(0,200,180,0.3);
 }
 
+.pd-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+}
+
 .pd-info {
   flex: 1;
   min-width: 0;
@@ -1171,6 +1183,92 @@ webview.vortex-wv.active iframe {
 .user-icon.active {
   background: rgba(0,200,180,0.2);
   color: #00c8b4;
+}
+
+/* ── Profile Dropdown — status row & picker ── */
+.pd-status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.pd-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--sc, #22c55e);
+}
+
+.pd-status-label {
+  font-size: 11px;
+  color: #4a8080;
+}
+
+.pd-bio {
+  font-size: 11px;
+  color: #3a6060;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-status-picker {
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pd-status-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #7aadad;
+  transition: background 0.1s, color 0.1s;
+  user-select: none;
+}
+
+.pd-status-opt svg {
+  flex-shrink: 0;
+}
+
+.pd-status-opt:hover {
+  background: #162e2e;
+  color: #c8e8e5;
+}
+
+.pd-status-opt.active {
+  color: var(--sc, #22c55e);
+  background: rgba(0,0,0,0.15);
+}
+
+.pd-status-opt .pd-status-dot {
+  background: var(--sc, #22c55e);
+}
+
+/* Status dot on toolbar user button */
+.user-icon.has-status {
+  position: relative;
+}
+
+.user-icon.has-status::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--status-color, #22c55e);
+  border: 1.5px solid #1a2e2e;
+  pointer-events: none;
 }
 
 /* ── Tab Drag & Drop ── */

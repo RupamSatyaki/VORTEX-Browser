@@ -228,6 +228,11 @@ window.addEventListener('DOMContentLoaded', () => {
       IPC.send('settings:changed', payload);
       return;
     }
+    if (channel === 'profile:changed') {
+      // Dispatch a custom event so navigation.js _initProfile listener picks it up
+      window.dispatchEvent(new CustomEvent('vortex-profile-changed', { detail: payload }));
+      return;
+    }
     if (channel === 'bookmark:remove') {
       BookmarkStore.remove(payload).then(() => {
         _forwardToBookmarksFrame('bookmark:removed', payload);
