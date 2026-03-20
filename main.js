@@ -11,8 +11,17 @@ const IpcHandler = require('./src/main/ipcHandler');
 const Storage = require('./src/main/storage');
 
 app.commandLine.appendSwitch('force-dark-mode');
-app.commandLine.appendSwitch('enable-features', 'WebContentsForceDark,BackForwardCache');
-app.commandLine.appendSwitch('back-forward-cache-memory-cache-size-limit-kb', '51200');
+app.commandLine.appendSwitch('enable-features', 'WebContentsForceDark,BackForwardCache,NetworkServiceInProcess2');
+app.commandLine.appendSwitch('back-forward-cache-memory-cache-size-limit-kb', '102400'); // 100MB back/fwd cache
+app.commandLine.appendSwitch('disk-cache-size', String(512 * 1024 * 1024)); // 512MB disk cache
+app.commandLine.appendSwitch('memory-cache-size', String(128 * 1024 * 1024)); // 128MB memory cache
+app.commandLine.appendSwitch('disable-http2-alternative-service-with-different-host'); // avoid h2 renegotiation delays
+app.commandLine.appendSwitch('enable-quic'); // HTTP/3 QUIC support (faster on lossy networks)
+app.commandLine.appendSwitch('quic-version', 'h3'); // force HTTP/3
+app.commandLine.appendSwitch('ignore-gpu-blocklist'); // enable GPU acceleration
+app.commandLine.appendSwitch('enable-gpu-rasterization'); // GPU rasterization for faster rendering
+app.commandLine.appendSwitch('enable-zero-copy'); // zero-copy texture uploads
+app.commandLine.appendSwitch('num-raster-threads', '4'); // parallel raster threads
 
 app.whenReady().then(() => {
   Storage.registerStorageHandlers();

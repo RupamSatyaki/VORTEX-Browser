@@ -199,6 +199,7 @@ const WebView = (() => {
     container.appendChild(wv);
     webviews[tabId] = wv;
     _attachRegularListeners(wv, tabId);
+    _reapplyZoomOnLoad(wv, tabId);
   }
 
   function switchTo(tabId) {
@@ -225,6 +226,9 @@ const WebView = (() => {
           })();
         `).catch(() => {});
       }
+
+      // Show zoom bar with this tab's zoom level
+      _showZoomBar(_getZoom(tabId));
     }
   }
 
@@ -283,9 +287,15 @@ const WebView = (() => {
   function _applyZoom(tabId, level) {
     const wv = webviews[tabId];
     if (!wv) return;
-    level = Math.min(3.0, Math.max(0.25, level));
+    level = parseFloat(Math.min(3.0, Math.max(0.25, level)).toFixed(2));
     zoomLevels[tabId] = level;
-    wv.setZoomFactor(level);
+
+    // Set zoom via main process using the webContentsId
+    try {
+      const wcId = wv.getWebContentsId();
+      window.vortexAPI.invoke('webview:setZoom', wcId, level).catch(() => {});
+    } catch (_) {}
+
     if (tabId === activeId) _showZoomBar(level);
   }
 
@@ -303,6 +313,14 @@ const WebView = (() => {
     if (pct === 100) {
       bar._hideTimer = setTimeout(() => bar.classList.remove('visible'), 1500);
     }
+  }
+
+  // Re-apply zoom when a tab's webview finishes loading (survives navigation)
+  function _reapplyZoomOnLoad(wv, tabId) {
+    wv.addEventListener('did-finish-load', () => {
+      const level = _getZoom(tabId);
+      if (level !== 1.0) _applyZoom(tabId, level);
+    });
   }
 
   // Keyboard shortcuts: Ctrl+= / Ctrl+- / Ctrl+0

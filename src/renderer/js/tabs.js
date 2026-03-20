@@ -18,11 +18,12 @@ const Tabs = (() => {
     WebView.createWebview(id, url);
     WebView.switchTo(id);
     render();
+    _notifyChanged();
     return id;
   }
 
   function closeTab(id) {
-    if (tabs.length === 1) return; // keep at least one tab
+    if (tabs.length === 1) return;
     WebView.destroyWebview(id);
     tabs = tabs.filter(t => t.id !== id);
     if (activeTabId === id) {
@@ -30,12 +31,14 @@ const Tabs = (() => {
       WebView.switchTo(activeTabId);
     }
     render();
+    _notifyChanged();
   }
 
   function setActiveTab(id) {
     activeTabId = id;
     WebView.switchTo(id);
     render();
+    _notifyChanged();
   }
 
   function updateTab(id, data) {
@@ -69,7 +72,13 @@ const Tabs = (() => {
     return tabs.find(t => t.id === activeTabId) || null;
   }
 
+  function getAllTabs() { return [...tabs]; }
+
   function getActiveId() { return activeTabId; }
+
+  function _notifyChanged() {
+    document.dispatchEvent(new CustomEvent('vortex:tab-changed'));
+  }
 
   function render() {
     const container = document.getElementById('tabbar-container');
@@ -146,5 +155,5 @@ const Tabs = (() => {
     container.appendChild(controls);
   }
 
-  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getActiveId, render };
+  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, render };
 })();
