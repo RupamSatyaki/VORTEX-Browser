@@ -454,23 +454,121 @@ const Navigation = (() => {
 
   // ── Profile Dropdown ───────────────────────────────────────────────────────
 
-  let _profileName = 'Vortex User';
+  let _profileName    = 'Vortex User';
   let _profileInitial = 'V';
+  let _profileStatus  = 'online';
+  let _profileAvatar     = null; // icon id (e.g. 'rocket') or null
+  let _profileAvatarType = 'emoji'; // 'emoji' | 'image'
+  let _profileAvatarData = null; // base64 dataURL when avatarType === 'image'
+  let _profileBio     = '';
+
+  // SVG icons for status indicators
+  const _STATUS_ICONS = {
+    online:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+    dnd:     `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
+    silent:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#eab308" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`,
+    away:    `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#f97316" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    offline: `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2.5"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.56 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`,
+    focus:   `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#3b82f6" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  };
+
+  const _STATUS_MAP = {
+    online:  { label: 'Online',          color: '#22c55e' },
+    dnd:     { label: 'Do Not Disturb',  color: '#ef4444' },
+    silent:  { label: 'Silent',          color: '#eab308' },
+    away:    { label: 'Away',            color: '#f97316' },
+    offline: { label: 'Offline',         color: '#6b7280' },
+    focus:   { label: 'Focus',           color: '#3b82f6' },
+  };
+
+  function _applyProfileData(p) {
+    if (!p) return;
+    _profileName       = p.name        || 'Vortex User';
+    _profileInitial    = _profileName[0].toUpperCase();
+    _profileStatus     = p.status      || 'online';
+    _profileAvatar     = p.avatar      || null;
+    _profileAvatarType = p.avatarType  || 'emoji';
+    _profileAvatarData = p.avatarData  || null;
+    _profileBio        = p.bio         || '';
+    _syncUserBtn();
+  }
+
+  // SVG avatar icons map (same set as settings.html)
+  const _AVATAR_ICONS = {
+    fox:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6 2 3 7 3 12c0 3 1.5 5.5 4 7l1-3h8l1 3c2.5-1.5 4-4 4-7 0-5-3-10-9-10z"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M3 4 L6 9M21 4 L18 9"/></svg>`,
+    rocket:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>`,
+    zap:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    flame:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    star:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+    shield:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+    cpu:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>`,
+    code:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+    ghost:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 10h.01M15 10h.01M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"/></svg>`,
+    crown:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg>`,
+    diamond:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0z"/></svg>`,
+    eye:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    feather:  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/></svg>`,
+    globe:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+    moon:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    music:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+    target:   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    terminal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+    wave:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></svg>`,
+    atom:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5z"/></svg>`,
+  };
+
+  function _syncUserBtn() {
+    const btn = document.getElementById('btn-user');
+    if (!btn) return;
+    const st = _STATUS_MAP[_profileStatus] || _STATUS_MAP.online;
+    if (_profileAvatarType === 'image' && _profileAvatarData) {
+      btn.innerHTML = `<img src="${_profileAvatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+    } else {
+      const svgIcon = _AVATAR_ICONS[_profileAvatar];
+      btn.innerHTML = svgIcon || _profileInitial;
+    }
+    btn.style.setProperty('--status-color', st.color);
+    btn.classList.add('has-status');
+  }
 
   function _buildProfileMenu() {
-    if (document.getElementById('profile-dropdown')) return;
+    // Remove old if exists (rebuild fresh to reflect latest data)
+    const old = document.getElementById('profile-dropdown');
+    if (old) old.remove();
+
+    const st = _STATUS_MAP[_profileStatus] || _STATUS_MAP.online;
 
     const menu = document.createElement('div');
     menu.id = 'profile-dropdown';
+
+    const avatarHTML = _profileAvatarType === 'image' && _profileAvatarData
+      ? `<img src="${_profileAvatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`
+      : (_AVATAR_ICONS[_profileAvatar] || _profileInitial);
+
     menu.innerHTML = `
       <div class="pd-header">
-        <div class="pd-avatar" id="pd-avatar">${_profileInitial}</div>
+        <div class="pd-avatar" id="pd-avatar">${avatarHTML}</div>
         <div class="pd-info">
-          <div class="pd-name" id="pd-name" contenteditable="false" spellcheck="false">${_profileName}</div>
-          <div class="pd-edit-hint">Click name to edit</div>
+          <div class="pd-name">${_profileName}</div>
+          <div class="pd-status-row">
+            <span class="pd-status-dot" style="background:${st.color}"></span>
+            <span class="pd-status-label">${_STATUS_ICONS[_profileStatus] || ''} ${st.label}</span>
+          </div>
+          ${_profileBio ? `<div class="pd-bio">${_profileBio}</div>` : ''}
         </div>
       </div>
       <div class="pd-sep"></div>
+      <div class="pd-status-picker">
+        ${Object.entries(_STATUS_MAP).map(([k, v]) => `
+          <div class="pd-status-opt${_profileStatus === k ? ' active' : ''}" data-status="${k}" style="--sc:${v.color}">
+            <span class="pd-status-dot"></span>${_STATUS_ICONS[k]} ${v.label}
+          </div>`).join('')}
+      </div>
+      <div class="pd-sep"></div>
+      <div class="pd-item" data-action="profile-settings">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Edit Profile
+      </div>
       <div class="pd-item" data-action="bookmarks">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         Bookmarks
@@ -483,25 +581,15 @@ const Navigation = (() => {
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Downloads
       </div>
-      <div class="pd-sep"></div>
       <div class="pd-item" data-action="settings">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Settings
       </div>
       <div class="pd-sep"></div>
       <div class="pd-stat-row">
-        <div class="pd-stat" id="pd-stat-tabs">
-          <span class="pd-stat-num">0</span>
-          <span class="pd-stat-label">Tabs</span>
-        </div>
-        <div class="pd-stat" id="pd-stat-bm">
-          <span class="pd-stat-num">0</span>
-          <span class="pd-stat-label">Bookmarks</span>
-        </div>
-        <div class="pd-stat" id="pd-stat-dl">
-          <span class="pd-stat-num">0</span>
-          <span class="pd-stat-label">Downloads</span>
-        </div>
+        <div class="pd-stat" id="pd-stat-tabs"><span class="pd-stat-num">0</span><span class="pd-stat-label">Tabs</span></div>
+        <div class="pd-stat" id="pd-stat-bm"><span class="pd-stat-num">0</span><span class="pd-stat-label">Bookmarks</span></div>
+        <div class="pd-stat" id="pd-stat-dl"><span class="pd-stat-num">0</span><span class="pd-stat-label">Downloads</span></div>
       </div>
       <div class="pd-sep"></div>
       <div class="pd-item pd-danger" data-action="clear-data">
@@ -512,29 +600,22 @@ const Navigation = (() => {
 
     document.body.appendChild(menu);
 
-    // Name edit
-    const nameEl = document.getElementById('pd-name');
-    nameEl.addEventListener('click', (e) => {
-      e.stopPropagation();
-      nameEl.contentEditable = 'true';
-      nameEl.focus();
-      const range = document.createRange();
-      range.selectNodeContents(nameEl);
-      window.getSelection().removeAllRanges();
-      window.getSelection().addRange(range);
-    });
-    nameEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
-    });
-    nameEl.addEventListener('blur', () => {
-      nameEl.contentEditable = 'false';
-      _profileName = nameEl.textContent.trim() || 'Vortex User';
-      _profileInitial = _profileName[0].toUpperCase();
-      nameEl.textContent = _profileName;
-      document.getElementById('pd-avatar').textContent = _profileInitial;
-      document.getElementById('btn-user').textContent = _profileInitial;
-      // Persist
-      try { localStorage.setItem('vortex_profile_name', _profileName); } catch(_) {}
+    // Status picker
+    menu.querySelectorAll('.pd-status-opt').forEach(opt => {
+      opt.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        _profileStatus = opt.dataset.status;
+        // Save to storage
+        try {
+          const p = await window.vortexAPI.invoke('storage:read', 'profile') || {};
+          p.status = _profileStatus;
+          await window.vortexAPI.invoke('storage:write', 'profile', p);
+        } catch(_) {}
+        _syncUserBtn();
+        _closeProfileMenu();
+        // Reopen to reflect new status
+        _toggleProfileMenu();
+      });
     });
 
     // Item actions
@@ -543,6 +624,7 @@ const Navigation = (() => {
       if (!item) return;
       _closeProfileMenu();
       switch (item.dataset.action) {
+        case 'profile-settings': Panel.open('settings'); break; // opens settings, user navigates to Profile tab
         case 'bookmarks':   Panel.open('bookmarks'); break;
         case 'history':     Tabs.createTab('vortex://history'); break;
         case 'downloads':   Panel.open('downloads'); break;
@@ -561,16 +643,12 @@ const Navigation = (() => {
     const tabCount = Tabs.getAllTabs ? Tabs.getAllTabs().length : 0;
     const tabEl = document.getElementById('pd-stat-tabs');
     if (tabEl) tabEl.querySelector('.pd-stat-num').textContent = tabCount;
-
-    // Bookmarks count
     if (window.BookmarkStore) {
       BookmarkStore.load().then(list => {
         const bmEl = document.getElementById('pd-stat-bm');
         if (bmEl) bmEl.querySelector('.pd-stat-num').textContent = list.length;
       }).catch(() => {});
     }
-
-    // Downloads count from badge
     const badge = document.getElementById('dl-badge');
     const dlEl = document.getElementById('pd-stat-dl');
     if (dlEl && badge) dlEl.querySelector('.pd-stat-num').textContent = badge.textContent || '0';
@@ -580,9 +658,6 @@ const Navigation = (() => {
     _buildProfileMenu();
     const menu = document.getElementById('profile-dropdown');
     const btn  = document.getElementById('btn-user');
-    if (menu.classList.contains('visible')) {
-      _closeProfileMenu(); return;
-    }
     const rect = btn.getBoundingClientRect();
     menu.style.top   = (rect.bottom + 6) + 'px';
     menu.style.right = (window.innerWidth - rect.right) + 'px';
@@ -596,17 +671,23 @@ const Navigation = (() => {
     if (menu) menu.classList.remove('visible');
   }
 
-  // Restore saved profile name
-  function _initProfile() {
+  // Load profile from storage on init
+  async function _initProfile() {
     try {
-      const saved = localStorage.getItem('vortex_profile_name');
-      if (saved) {
-        _profileName = saved;
-        _profileInitial = saved[0].toUpperCase();
-        const btn = document.getElementById('btn-user');
-        if (btn) btn.textContent = _profileInitial;
+      const p = await window.vortexAPI.invoke('storage:read', 'profile');
+      _applyProfileData(p);
+    } catch(_) {
+      _syncUserBtn();
+    }
+    // Listen for profile changes from settings iframe
+    window.addEventListener('message', (e) => {
+      if (e.data && e.data.__vortexAction && e.data.channel === 'profile:changed') {
+        _applyProfileData(e.data.payload);
       }
-    } catch(_) {}
+    });
+    window.addEventListener('vortex-profile-changed', (e) => {
+      _applyProfileData(e.detail);
+    });
   }
 
   // Global keyboard shortcuts
