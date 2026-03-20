@@ -29,6 +29,27 @@
     <button id="zoom-reset-btn" title="Reset zoom">↺</button>
   </div>
 
+  <!-- Floating Panel (Settings / Downloads) -->
+  <div id="panel-backdrop"></div>
+  <div id="floating-panel">
+    <div id="panel-header">
+      <span id="panel-title"></span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button id="panel-refresh" title="Refresh">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/>
+          </svg>
+        </button>
+        <button id="panel-close" title="Close (Esc)">
+          <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <iframe id="panel-frame" frameborder="0"></iframe>
+  </div>
+
   <script src="js/ipc.js"></script>
   <script src="js/prefetch.js"></script>
   <script src="js/tabPreview.js"></script>
@@ -36,6 +57,7 @@
   <script src="js/tabs.js"></script>
   <script src="js/navigation.js"></script>
   <script src="js/webview.js"></script>
+  <script src="js/panel.js"></script>
   <script src="js/session.js"></script>
   <script src="js/app.js"></script>
 </body>

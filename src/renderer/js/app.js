@@ -26,4 +26,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   Session.initAutoSave();
+  Navigation.initShortcuts();
+  Panel.init();
 });

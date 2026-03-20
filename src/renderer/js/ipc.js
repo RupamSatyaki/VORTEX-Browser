@@ -45,26 +45,36 @@ const DownloadHistory = {
   },
 };
 
-// ── Forward events to downloads webview ──────────────────────────────────────
+// ── Forward events to downloads iframe ───────────────────────────────────────
 
-function _forwardToDownloadsWV(channel, data) {
-  document.querySelectorAll('webview.vortex-wv').forEach(wv => {
-    if ((wv.src || '').includes('downloads.html')) {
-      const payload = JSON.stringify({ channel, data });
-      wv.executeJavaScript(
-        `window.dispatchEvent(new CustomEvent('vortex-ipc',{detail:${JSON.stringify(payload)}}))`
-      ).catch(() => {});
-    }
-  });
+function _forwardToDownloadsFrame(channel, data) {
+  const frame = document.getElementById('panel-frame');
+  if (!frame || !frame.contentWindow) return;
+  // Only send if downloads panel is open
+  const titleEl = document.getElementById('panel-title');
+  if (!titleEl || titleEl.textContent !== 'Downloads') return;
+  try {
+    frame.contentWindow.postMessage({ __vortexIPC: true, channel, data }, '*');
+  } catch (_) {}
 }
 
-async function _injectHistory(wv) {
+async function _injectHistoryToFrame(frame) {
   const history = await DownloadHistory.load();
-  if (!history.length) return;
-  const payload = JSON.stringify({ channel: 'download:history', data: history });
-  wv.executeJavaScript(
-    `window.dispatchEvent(new CustomEvent('vortex-ipc',{detail:${JSON.stringify(payload)}}))`
-  ).catch(() => {});
+  try {
+    frame.contentWindow.postMessage(
+      { __vortexIPC: true, channel: 'download:history', data: history },
+      '*'
+    );
+  } catch (_) {}
+  // Also inject any active downloads
+  _activeDownloads.forEach((dl) => {
+    try {
+      frame.contentWindow.postMessage(
+        { __vortexIPC: true, channel: 'download:start', data: dl },
+        '*'
+      );
+    } catch (_) {}
+  });
 }
 
 // ── Active downloads (in-memory for live updates) ────────────────────────────
@@ -77,13 +87,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   IPC.on('download:start', (data) => {
     _activeDownloads.set(data.id, { ...data, receivedFormatted: '0 B', percent: 0, speed: '' });
-    _forwardToDownloadsWV('download:start', data);
+    _forwardToDownloadsFrame('download:start', data);
   });
 
   IPC.on('download:update', (data) => {
     const existing = _activeDownloads.get(data.id);
     if (existing) Object.assign(existing, data);
-    _forwardToDownloadsWV('download:update', data);
+    _forwardToDownloadsFrame('download:update', data);
   });
 
   IPC.on('download:done', async (data) => {
@@ -98,24 +108,28 @@ window.addEventListener('DOMContentLoaded', () => {
     };
 
     await DownloadHistory.add(entry);
-    _forwardToDownloadsWV('download:done', entry);
+    _forwardToDownloadsFrame('download:done', entry);
   });
 
   IPC.on('download:removed', async (id) => {
     await DownloadHistory.remove(id);
-    _forwardToDownloadsWV('download:removed', id);
+    _forwardToDownloadsFrame('download:removed', id);
   });
 
-  // When downloads page loads — inject history + active downloads
+  // Mark a file as deleted in history (file no longer exists on disk)
+  IPC.on('download:markDeleted', async ({ id }) => {
+    const history = await DownloadHistory.load();
+    const entry = history.find(d => d.id === id);
+    if (entry) {
+      entry.status = 'deleted';
+      await Storage.write('downloads_history', history);
+      DownloadHistory._cache = history;
+    }
+  });
+
+  // When downloads panel iframe loads — inject history + active downloads
   document.addEventListener('vortex-downloads-ready', async (e) => {
-    const wv = e.detail;
-    await _injectHistory(wv);
-    _activeDownloads.forEach((dl) => {
-      const payload = JSON.stringify({ channel: 'download:start', data: dl });
-      wv.executeJavaScript(
-        `window.dispatchEvent(new CustomEvent('vortex-ipc',{detail:${JSON.stringify(payload)}}))`
-      ).catch(() => {});
-    });
+    await _injectHistoryToFrame(e.detail);
   });
 
   // Handle postMessage actions from downloads.html

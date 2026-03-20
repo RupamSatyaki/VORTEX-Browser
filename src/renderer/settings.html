@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="dark" />
+    <title>Settings — Vortex</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #0d1f1f;
+            color: #c8e8e5;
+        }
+
+        body {
+            display: flex;
+            flex-direction: row;
+            position: fixed;
+            inset: 0;
+        }
+
+        /* ── Sidebar ── */
+        #sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: #0f2222;
+            border-right: 1px solid #1e3838;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 24px 0 16px;
+        }
+
+        #sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        #sidebar::-webkit-scrollbar-thumb {
+            background: #1a4a4a;
+            border-radius: 2px;
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 18px 20px;
+            border-bottom: 1px solid #1e3838;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-logo-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #00c8b4, #1a6a6a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 800;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logo span {
+            font-size: 16px;
+            font-weight: 700;
+            color: #e0f4f4;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 18px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #7aadad;
+            border-radius: 0;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            user-select: none;
+        }
+
+        .nav-item:hover {
+            background: #162e2e;
+            color: #c8e8e5;
+        }
+
+        .nav-item.active {
+            background: #1a3838;
+            color: #00c8b4;
+            border-left-color: #00c8b4;
+        }
+
+        .nav-item svg {
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        .nav-item.active svg {
+            opacity: 1;
+        }
+
+        .nav-sep {
+            height: 1px;
+            background: #1e3838;
+            margin: 8px 0;
+        }
+
+        /* ── Main content ── */
+        #content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 32px 40px;
+            min-width: 0;
+        }
+
+        #content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #content::-webkit-scrollbar-thumb {
+            background: #1a4a4a;
+            border-radius: 3px;
+        }
+
+        #content::-webkit-scrollbar-thumb:hover {
+            background: #00c8b4;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #e0f4f4;
+            margin-bottom: 24px;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: #122222;
+            border: 1px solid #1e3838;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .card-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-bottom: 1px solid #1a3030;
+            transition: background 0.12s;
+        }
+
+        .card-row:last-child {
+            border-bottom: none;
+        }
+
+        .card-row:hover {
+            background: #162e2e;
+        }
+
+        .row-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            background: rgba(0, 200, 180, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #00c8b4;
+            flex-shrink: 0;
+        }
+
+        .row-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .row-label {
+            font-size: 13px;
+            color: #c8e8e5;
+        }
+
+        .row-desc {
+            font-size: 11px;
+            color: #4a8080;
+            margin-top: 2px;
+        }
+
+        /* Toggle switch */
+        .toggle {
+            position: relative;
+            width: 40px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-track {
+            position: absolute;
+            inset: 0;
+            border-radius: 11px;
+            background: #1e3838;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle input:checked+.toggle-track {
+            background: #00c8b4;
+        }
+
+        .toggle-track::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.2s;
+        }
+
+        .toggle input:checked+.toggle-track::after {
+            transform: translateX(18px);
+        }
+
+        /* Select */
+        .setting-select {
+            background: #1a3838;
+            border: 1px solid #2e4a4c;
+            border-radius: 7px;
+            color: #c8e8e5;
+            font-size: 12px;
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .setting-select:focus {
+            border-color: #00c8b4;
+        }
+
+        /* Input */
+        .setting-input {
+            background: #1a3838;
+            border: 1px solid #2e4a4c;
+            border-radius: 7px;
+            color: #c8e8e5;
+            font-size: 12px;
+            padding: 6px 10px;
+            outline: none;
+            width: 220px;
+            transition: border-color 0.2s;
+        }
+
+        .setting-input:focus {
+            border-color: #00c8b4;
+        }
+
+        /* Button */
+        .setting-btn {
+            background: rgba(0, 200, 180, 0.1);
+            border: 1px solid #2e6a65;
+            border-radius: 7px;
+            color: #00c8b4;
+            font-size: 12px;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .setting-btn:hover {
+            background: rgba(0, 200, 180, 0.2);
+            border-color: #00c8b4;
+        }
+
+        .setting-btn.danger {
+            border-color: #6a2e2e;
+            color: #c86060;
+            background: rgba(200, 60, 60, 0.08);
+        }
+
+        .setting-btn.danger:hover {
+            background: rgba(200, 60, 60, 0.18);
+            border-color: #c86060;
+        }
+
+        /* Shortcut table */
+        .shortcut-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .shortcut-table tr {
+            border-bottom: 1px solid #1a3030;
+        }
+
+        .shortcut-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .shortcut-table td {
+            padding: 10px 18px;
+            font-size: 13px;
+        }
+
+        .shortcut-table td:first-child {
+            color: #c8e8e5;
+        }
+
+        .shortcut-table td:last-child {
+            text-align: right;
+        }
+
+        .kbd {
+            display: inline-block;
+            background: #1a3838;
+            border: 1px solid #2e4a4c;
+            border-radius: 4px;
+            padding: 2px 7px;
+            font-size: 11px;
+            color: #7aadad;
+            font-family: monospace;
+        }
+
+        /* About section */
+        .about-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px;
+            text-align: center;
+            gap: 12px;
+        }
+
+        .about-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #00c8b4, #1a6a6a);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .about-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #e0f4f4;
+        }
+
+        .about-ver {
+            font-size: 13px;
+            color: #4a8080;
+        }
+
+        .about-desc {
+            font-size: 13px;
+            color: #7aadad;
+            max-width: 360px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">V</div>
+            <span>Settings</span>
+        </div>
+
+        <div class="nav-item active" data-section="appearance">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+            </svg>
+            Appearance
+        </div>
+        <div class="nav-item" data-section="startup">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+            On Startup
+        </div>
+        <div class="nav-item" data-section="search">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+            </svg>
+            Search Engine
+        </div>
+        <div class="nav-item" data-section="privacy">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            Privacy & Security
+        </div>
+        <div class="nav-item" data-section="performance">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            Performance
+        </div>
+        <div class="nav-item" data-section="downloads">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Downloads
+        </div>
+        <div class="nav-sep"></div>
+        <div class="nav-item" data-section="shortcuts">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
+            Keyboard Shortcuts
+        </div>
+        <div class="nav-item" data-section="about">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            About Vortex
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="content">
+
+        <!-- Appearance -->
+        <div class="section active" id="sec-appearance">
+            <div class="section-title">Appearance</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5" />
+                            <line x1="12" y1="1" x2="12" y2="3" />
+                            <line x1="12" y1="21" x2="12" y2="23" />
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                            <line x1="1" y1="12" x2="3" y2="12" />
+                            <line x1="21" y1="12" x2="23" y2="12" />
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Theme</div>
+                        <div class="row-desc">Choose browser color theme</div>
+                    </div>
+                    <select class="setting-select" id="set-theme">
+                        <option value="dark">Dark</option>
+                        <option value="darker">Darker</option>
+                        <option value="teal">Teal Accent</option>
+                    </select>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="15 3 21 3 21 9" />
+                            <polyline points="9 21 3 21 3 15" />
+                            <line x1="21" y1="3" x2="14" y2="10" />
+                            <line x1="3" y1="21" x2="10" y2="14" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Font Size</div>
+                        <div class="row-desc">Default page font size</div>
+                    </div>
+                    <select class="setting-select" id="set-fontsize">
+                        <option value="small">Small (14px)</option>
+                        <option value="medium" selected>Medium (16px)</option>
+                        <option value="large">Large (18px)</option>
+                        <option value="xlarge">X-Large (20px)</option>
+                    </select>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Show Tab Previews</div>
+                        <div class="row-desc">Thumbnail preview on tab hover</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-tabpreview" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Show Bookmarks Bar</div>
+                        <div class="row-desc">Display bookmarks below toolbar</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-bookmarksbar" />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- On Startup -->
+        <div class="section" id="sec-startup">
+            <div class="section-title">On Startup</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Startup Behavior</div>
+                        <div class="row-desc">What to open when Vortex starts</div>
+                    </div>
+                    <select class="setting-select" id="set-startup">
+                        <option value="session">Restore last session</option>
+                        <option value="newtab">Open new tab</option>
+                        <option value="homepage">Open homepage</option>
+                    </select>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="2" y1="12" x2="22" y2="12" />
+                            <path
+                                d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Homepage URL</div>
+                        <div class="row-desc">Used when startup is set to homepage</div>
+                    </div>
+                    <input class="setting-input" id="set-homepage" type="text" value="https://www.google.com"
+                        placeholder="https://..." />
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Engine -->
+        <div class="section" id="sec-search">
+            <div class="section-title">Search Engine</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <path d="m21 21-4.35-4.35" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Default Search Engine</div>
+                        <div class="row-desc">Used in address bar searches</div>
+                    </div>
+                    <select class="setting-select" id="set-engine">
+                        <option value="google">Google</option>
+                        <option value="bing">Bing</option>
+                        <option value="duckduckgo">DuckDuckGo</option>
+                        <option value="brave">Brave Search</option>
+                        <option value="ecosia">Ecosia</option>
+                    </select>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Search Suggestions</div>
+                        <div class="row-desc">Show suggestions while typing in address bar</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-suggestions" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="section" id="sec-privacy">
+            <div class="section-title">Privacy & Security</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Block Trackers</div>
+                        <div class="row-desc">Block known tracking scripts</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-trackers" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">HTTPS Only Mode</div>
+                        <div class="row-desc">Warn before loading HTTP sites</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-https" />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Clear Browsing Data</div>
+                        <div class="row-desc">History, cache, cookies</div>
+                    </div>
+                    <button class="setting-btn danger" id="btn-clear-data">Clear Now</button>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Do Not Track</div>
+                        <div class="row-desc">Send DNT header to websites</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-dnt" />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance -->
+        <div class="section" id="sec-performance">
+            <div class="section-title">Performance</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Hardware Acceleration</div>
+                        <div class="row-desc">Use GPU for faster rendering</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-gpu" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M18 20V10" />
+                            <path d="M12 20V4" />
+                            <path d="M6 20v-6" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Preload Pages</div>
+                        <div class="row-desc">Prefetch links on hover for faster navigation</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-prefetch" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3" />
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Cache Size</div>
+                        <div class="row-desc">Disk cache for faster repeat visits</div>
+                    </div>
+                    <select class="setting-select" id="set-cache">
+                        <option value="128">128 MB</option>
+                        <option value="256">256 MB</option>
+                        <option value="512" selected>512 MB</option>
+                        <option value="1024">1 GB</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Downloads -->
+        <div class="section" id="sec-downloads">
+            <div class="section-title">Downloads</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Download Location</div>
+                        <div class="row-desc">Where files are saved by default</div>
+                    </div>
+                    <button class="setting-btn" id="btn-dl-path">Change Folder</button>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Ask Where to Save</div>
+                        <div class="row-desc">Prompt for location before each download</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-askdl" />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                            <circle cx="12" cy="12" r="3" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Open After Download</div>
+                        <div class="row-desc">Automatically open completed downloads</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-opendl" />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keyboard Shortcuts -->
+        <div class="section" id="sec-shortcuts">
+            <div class="section-title">Keyboard Shortcuts</div>
+            <div class="card">
+                <table class="shortcut-table">
+                    <tr>
+                        <td>New Tab</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">T</span></td>
+                    </tr>
+                    <tr>
+                        <td>Close Tab</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">W</span></td>
+                    </tr>
+                    <tr>
+                        <td>New Window</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">N</span></td>
+                    </tr>
+                    <tr>
+                        <td>Reload</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">R</span></td>
+                    </tr>
+                    <tr>
+                        <td>Hard Reload</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span class="kbd">R</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Address Bar Focus</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">L</span></td>
+                    </tr>
+                    <tr>
+                        <td>Find in Page</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">F</span></td>
+                    </tr>
+                    <tr>
+                        <td>Downloads</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">J</span></td>
+                    </tr>
+                    <tr>
+                        <td>History</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">H</span></td>
+                    </tr>
+                    <tr>
+                        <td>Bookmarks</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">B</span></td>
+                    </tr>
+                    <tr>
+                        <td>Zoom In</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">=</span></td>
+                    </tr>
+                    <tr>
+                        <td>Zoom Out</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">−</span></td>
+                    </tr>
+                    <tr>
+                        <td>Reset Zoom</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">0</span></td>
+                    </tr>
+                    <tr>
+                        <td>Next Tab</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">Tab</span></td>
+                    </tr>
+                    <tr>
+                        <td>Previous Tab</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">Shift</span> + <span
+                                class="kbd">Tab</span></td>
+                    </tr>
+                    <tr>
+                        <td>Developer Tools</td>
+                        <td><span class="kbd">F12</span></td>
+                    </tr>
+                    <tr>
+                        <td>Fullscreen</td>
+                        <td><span class="kbd">F11</span></td>
+                    </tr>
+                    <tr>
+                        <td>Settings</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">,</span></td>
+                    </tr>
+                    <tr>
+                        <td>Print</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">P</span></td>
+                    </tr>
+                    <tr>
+                        <td>Save Page</td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">S</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- About -->
+        <div class="section" id="sec-about">
+            <div class="section-title">About Vortex</div>
+            <div class="card">
+                <div class="about-hero">
+                    <div class="about-logo">V</div>
+                    <div class="about-name">Vortex Browser</div>
+                    <div class="about-ver" id="about-ver">Version —</div>
+                    <div class="about-desc">A fast, minimal Electron-based browser built for speed and simplicity. Open
+                        source and privacy-focused.</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">GitHub Repository</div>
+                        <div class="row-desc">github.com/RupamSatyaki/VORTEX-Browser</div>
+                    </div>
+                    <button class="setting-btn" id="btn-github">Open</button>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10" />
+                            <path d="M3.51 15a9 9 0 1 0 .49-3.51" />
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Reset All Settings</div>
+                        <div class="row-desc">Restore defaults</div>
+                    </div>
+                    <button class="setting-btn danger" id="btn-reset">Reset</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- #content -->
+
+    <script>
+        // ── Navigation ──────────────────────────────────────────────────────────────
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                item.classList.add('active');
+                document.getElementById('sec-' + item.dataset.section).classList.add('active');
+            });
+        });
+
+        // ── Settings storage ────────────────────────────────────────────────────────
+        const DEFAULTS = {
+            theme: 'dark', fontsize: 'medium', tabpreview: true, bookmarksbar: false,
+            startup: 'session', homepage: 'https://www.google.com',
+            engine: 'google', suggestions: true,
+            trackers: true, https: false, dnt: false,
+            gpu: true, prefetch: true, cache: '512',
+            askdl: false, opendl: false,
+        };
+
+        function load() {
+            try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('vortex_settings') || '{}')); }
+            catch { return { ...DEFAULTS }; }
+        }
+
+        function save(settings) {
+            localStorage.setItem('vortex_settings', JSON.stringify(settings));
+            if (window.vortexAPI) window.vortexAPI.send('settings:changed', settings);
+        }
+
+        function applyToUI(s) {
+            const set = (id, val) => { const el = document.getElementById(id); if (el) { if (el.type === 'checkbox') el.checked = val; else el.value = val; } };
+            set('set-theme', s.theme); set('set-fontsize', s.fontsize);
+            set('set-tabpreview', s.tabpreview); set('set-bookmarksbar', s.bookmarksbar);
+            set('set-startup', s.startup); set('set-homepage', s.homepage);
+            set('set-engine', s.engine); set('set-suggestions', s.suggestions);
+            set('set-trackers', s.trackers); set('set-https', s.https); set('set-dnt', s.dnt);
+            set('set-gpu', s.gpu); set('set-prefetch', s.prefetch); set('set-cache', s.cache);
+            set('set-askdl', s.askdl); set('set-opendl', s.opendl);
+        }
+
+        let settings = load();
+        applyToUI(settings);
+
+        // Auto-save on any change
+        document.querySelectorAll('select, input[type="checkbox"], input[type="text"]').forEach(el => {
+            el.addEventListener('change', () => {
+                const key = el.id.replace('set-', '');
+                settings[key] = el.type === 'checkbox' ? el.checked : el.value;
+                save(settings);
+            });
+        });
+
+        // ── Buttons ─────────────────────────────────────────────────────────────────
+        document.getElementById('btn-clear-data').addEventListener('click', () => {
+            if (confirm('Clear all browsing data? This cannot be undone.')) {
+                if (window.vortexAPI) window.vortexAPI.send('browser:clearData');
+                localStorage.removeItem('browser_session');
+                localStorage.removeItem('vortex_session_sync');
+                document.getElementById('btn-clear-data').textContent = 'Cleared ✓';
+                setTimeout(() => document.getElementById('btn-clear-data').textContent = 'Clear Now', 2000);
+            }
+        });
+
+        document.getElementById('btn-github').addEventListener('click', () => {
+            if (window.vortexAPI) window.vortexAPI.send('shell:openExternal', 'https://github.com/RupamSatyaki/VORTEX-Browser');
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            if (confirm('Reset all settings to defaults?')) {
+                settings = { ...DEFAULTS };
+                save(settings);
+                applyToUI(settings);
+            }
+        });
+
+        document.getElementById('btn-dl-path').addEventListener('click', () => {
+            if (window.vortexAPI) window.vortexAPI.send('settings:pickDownloadFolder');
+        });
+
+        // ── Version ─────────────────────────────────────────────────────────────────
+        if (window.vortexAPI) {
+            window.vortexAPI.invoke('app:version').then(v => {
+                document.getElementById('about-ver').textContent = 'Version ' + v;
+            }).catch(() => { });
+        }
+
+        // ── Hash navigation (vortex://settings#shortcuts etc.) ──────────────────────
+        function goToHash() {
+            const hash = location.hash.replace('#', '');
+            if (!hash) return;
+            const item = document.querySelector(`.nav-item[data-section="${hash}"]`);
+            if (item) item.click();
+        }
+        goToHash();
+        window.addEventListener('hashchange', goToHash);
+    </script>
+</body>
+
+</html>

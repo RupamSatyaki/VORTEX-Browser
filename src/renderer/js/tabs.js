@@ -12,6 +12,10 @@ const Tabs = (() => {
   }
 
   function createTab(url = 'https://www.google.com') {
+    // Settings and Downloads open as floating panel, not a tab
+    if (url === 'vortex://settings')  { Panel.open('settings');  return null; }
+    if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
+
     const id = Date.now().toString();
     tabs.push({ id, url, title: 'New Tab', favicon: null });
     activeTabId = id;
@@ -75,6 +79,18 @@ const Tabs = (() => {
   function getAllTabs() { return [...tabs]; }
 
   function getActiveId() { return activeTabId; }
+
+  function switchNext() {
+    const idx = tabs.findIndex(t => t.id === activeTabId);
+    const next = tabs[(idx + 1) % tabs.length];
+    if (next) setActiveTab(next.id);
+  }
+
+  function switchPrev() {
+    const idx = tabs.findIndex(t => t.id === activeTabId);
+    const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+    if (prev) setActiveTab(prev.id);
+  }
 
   function _notifyChanged() {
     document.dispatchEvent(new CustomEvent('vortex:tab-changed'));
@@ -155,5 +171,5 @@ const Tabs = (() => {
     container.appendChild(controls);
   }
 
-  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, render };
+  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render };
 })();
