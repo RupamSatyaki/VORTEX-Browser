@@ -103,6 +103,11 @@ const Navigation = (() => {
     document.getElementById('nav-reload').addEventListener('click', () => WebView.reload());
     document.getElementById('btn-downloads').addEventListener('click', () => Tabs.createTab('vortex://downloads'));
 
+    // Zoom buttons
+    document.getElementById('zoom-in-btn').addEventListener('click', () => WebView.zoomIn());
+    document.getElementById('zoom-out-btn').addEventListener('click', () => WebView.zoomOut());
+    document.getElementById('zoom-reset-btn').addEventListener('click', () => WebView.zoomReset());
+
     const urlBar = document.getElementById('url-bar');
 
     // First click → select all; second click → normal cursor placement
