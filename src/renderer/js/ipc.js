@@ -132,10 +132,15 @@ window.addEventListener('DOMContentLoaded', () => {
     await _injectHistoryToFrame(e.detail);
   });
 
-  // Handle postMessage actions from downloads.html
+  // Handle postMessage actions from downloads.html and settings.html
   window.addEventListener('message', (e) => {
     if (!e.data || !e.data.__vortexAction) return;
     const { channel, payload } = e.data;
+    if (channel === 'settings:changed') {
+      // Broadcast to app.js listener
+      IPC.send('settings:changed', payload);
+      return;
+    }
     IPC.send(channel, payload);
   });
 });
