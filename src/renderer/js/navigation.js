@@ -173,16 +173,51 @@ const Navigation = (() => {
     old.replaceWith(tmp.firstElementChild);
   }
 
+  // Search engine URL templates
+  const SEARCH_ENGINES = {
+    google:     'https://www.google.com/search?q=',
+    bing:       'https://www.bing.com/search?q=',
+    duckduckgo: 'https://duckduckgo.com/?q=',
+    brave:      'https://search.brave.com/search?q=',
+    ecosia:     'https://www.ecosia.org/search?q=',
+  };
+
+  // Homepage for each engine (opened on new tab)
+  const ENGINE_HOME = {
+    google:     'https://www.google.com',
+    bing:       'https://www.bing.com',
+    duckduckgo: 'https://duckduckgo.com',
+    brave:      'https://search.brave.com',
+    ecosia:     'https://www.ecosia.org',
+  };
+
+  function _newTabURL() {
+    return ENGINE_HOME[_searchEngine] || 'https://www.google.com';
+  }
+
+  let _searchEngine = 'google';
+
   function navigate() {
     let url = document.getElementById('url-bar').value.trim();
     if (!url) return;
     if (!/^https?:\/\//i.test(url)) {
+      const base = SEARCH_ENGINES[_searchEngine] || SEARCH_ENGINES.google;
       url = url.includes('.') && !url.includes(' ')
         ? 'https://' + url
-        : `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+        : base + encodeURIComponent(url);
     }
     WebView.loadURL(url);
     document.getElementById('url-bar').blur();
+  }
+
+  function applySettings(s) {
+    if (s.engine) _searchEngine = s.engine;
+    if (typeof s.prefetch === 'boolean') {
+      Prefetch.setEnabled(s.prefetch);
+    }
+    if (typeof s.suggestions === 'boolean') {
+      Prefetch.setSuggestionsEnabled(s.suggestions);
+    }
   }
 
   function setURL(url) {
@@ -326,7 +361,7 @@ const Navigation = (() => {
       if (!item) return;
       _closeMenu();
       switch (item.dataset.action) {
-        case 'new-tab':      Tabs.createTab('https://www.google.com'); break;
+        case 'new-tab':      Tabs.createTab(_newTabURL()); break;
         case 'new-window':   window.vortexAPI.send('window:new'); break;
         case 'history':      Tabs.createTab('vortex://history'); break;
         case 'downloads':    Panel.open('downloads'); break;
@@ -390,7 +425,7 @@ const Navigation = (() => {
       if (e.key === 'F11') { e.preventDefault(); window.vortexAPI.send('window:fullscreen'); return; }
       if (!e.ctrlKey) return;
       switch (e.key) {
-        case 't': e.preventDefault(); Tabs.createTab('https://www.google.com'); break;
+        case 't': e.preventDefault(); Tabs.createTab(_newTabURL()); break;
         case 'n': e.preventDefault(); window.vortexAPI.send('window:new'); break;
         case 'w': e.preventDefault(); { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); } break;
         case 'h': e.preventDefault(); Tabs.createTab('vortex://history'); break;
@@ -411,5 +446,5 @@ const Navigation = (() => {
     });
   }
 
-  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts };
+  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL };
 })();

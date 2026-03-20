@@ -36,18 +36,25 @@ const Prefetch = (() => {
     document.head.appendChild(pre);
   }
 
+  let _enabled = true;
+  let _suggestionsEnabled = true;
+
+  function setEnabled(val) { _enabled = val; }
+  function setSuggestionsEnabled(val) { _suggestionsEnabled = val; }
+
   // Call this when user types in URL bar
   function onInput(value) {
+    if (!_suggestionsEnabled) return;
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
       const origin = getURL(value);
       if (origin) inject(origin);
-    }, 200); // 200ms debounce — don't fire on every keystroke
+    }, 200);
   }
 
   // Call this when a page finishes loading — prefetch links + inject speculative hover loader
   function prefetchPageLinks(wv) {
-    if (!wv) return;
+    if (!_enabled || !wv) return;
 
     // DNS prefetch for top origins on page
     wv.executeJavaScript(`
@@ -128,5 +135,5 @@ const Prefetch = (() => {
     `).catch(() => {});
   }
 
-  return { onInput, prefetchPageLinks };
+  return { onInput, prefetchPageLinks, setEnabled, setSuggestionsEnabled };
 })();
