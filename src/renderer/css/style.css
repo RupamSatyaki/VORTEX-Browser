@@ -301,6 +301,15 @@ body {
   stroke-width: 2;
 }
 
+/* Bookmark button — filled state when page is bookmarked */
+#btn-bookmark.bookmarked svg {
+  fill: #00c8b4;
+  stroke: #00c8b4;
+}
+#btn-bookmark.bookmarked {
+  color: #00c8b4;
+}
+
 /* AI Mode */
 .ai-mode {
   background: rgba(0, 200, 180, 0.1);
