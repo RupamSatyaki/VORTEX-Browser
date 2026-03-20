@@ -13,7 +13,7 @@ function createMainWindow() {
     minWidth: 800,
     minHeight: 600,
     title: 'Vortex',
-    frame: false,        // removes native OS header/titlebar
+    frame: false,
     titleBarStyle: 'hidden',
     webPreferences: {
       preload: path.join(__dirname, '../../preload.js'),
@@ -22,6 +22,7 @@ function createMainWindow() {
       webviewTag: true,
       webSecurity: false,
       allowRunningInsecureContent: true,
+      backgroundThrottling: false, // keep background webview active
     },
   });
 

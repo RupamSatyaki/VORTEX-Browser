@@ -76,27 +76,40 @@ const Prefetch = (() => {
 
         let hoverTimer = null;
         let lastHref = '';
+        const prerendered = new Set();
 
         document.addEventListener('mouseover', (e) => {
           const a = e.target.closest('a[href]');
           if (!a) return;
           const href = a.href;
-          if (!href || href === lastHref || href.startsWith('javascript')) return;
+          if (!href || href === lastHref || href.startsWith('javascript') || href.startsWith('#')) return;
 
           clearTimeout(hoverTimer);
-          // Wait 150ms before prefetching — avoids firing on quick mouse movements
           hoverTimer = setTimeout(() => {
             lastHref = href;
             try {
+              const origin = new URL(href).origin;
+
               // dns-prefetch
-              if (!document.querySelector('link[rel="dns-prefetch"][href="' + new URL(href).origin + '"]')) {
+              if (!document.querySelector('link[rel="dns-prefetch"][href="' + origin + '"]')) {
                 const d = document.createElement('link');
                 d.rel = 'dns-prefetch';
-                d.href = new URL(href).origin;
+                d.href = origin;
                 document.head.appendChild(d);
               }
-              // prefetch the actual page resource
-              if (!document.querySelector('link[rel="prefetch"][href="' + href + '"]')) {
+
+              // preconnect — TCP + TLS handshake
+              if (!document.querySelector('link[rel="preconnect"][href="' + origin + '"]')) {
+                const c = document.createElement('link');
+                c.rel = 'preconnect';
+                c.href = origin;
+                c.crossOrigin = 'anonymous';
+                document.head.appendChild(c);
+              }
+
+              // prefetch the actual page (downloads into cache)
+              if (!prerendered.has(href) && prerendered.size < 3) {
+                prerendered.add(href);
                 const p = document.createElement('link');
                 p.rel = 'prefetch';
                 p.href = href;
@@ -104,7 +117,7 @@ const Prefetch = (() => {
                 document.head.appendChild(p);
               }
             } catch(_) {}
-          }, 150);
+          }, 120);
         });
 
         document.addEventListener('mouseout', (e) => {
