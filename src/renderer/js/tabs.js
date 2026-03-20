@@ -96,6 +96,137 @@ const Tabs = (() => {
     document.dispatchEvent(new CustomEvent('vortex:tab-changed'));
   }
 
+  // ── Drag-and-drop reorder (hold 300ms to activate) ────────────────────────
+  let _drag = null;
+
+  function _initDrag(el, tabId) {
+    let _holdTimer = null;
+    let _dragActive = false;
+    let _downEvent = null;
+    let _pointerId = null;
+
+    el.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 || e.target.closest('.tab-close')) return;
+      _downEvent = e;
+      _dragActive = false;
+      _pointerId = e.pointerId;
+
+      _holdTimer = setTimeout(() => {
+        _dragActive = true;
+        _startDrag(el, tabId, _downEvent);
+        try { el.setPointerCapture(_pointerId); } catch(_) {}
+      }, 300);
+    });
+
+    el.addEventListener('pointermove', (e) => {
+      if (!_dragActive || !_drag || _drag.tabId !== tabId) return;
+      _moveDrag(e);
+    });
+
+    // pointerup on element
+    el.addEventListener('pointerup', (e) => {
+      clearTimeout(_holdTimer);
+      if (_dragActive && _drag && _drag.tabId === tabId) {
+        _endDrag();
+      } else if (!_dragActive) {
+        setActiveTab(tabId);
+      }
+      _dragActive = false;
+      _pointerId = null;
+    });
+
+    el.addEventListener('pointercancel', () => {
+      clearTimeout(_holdTimer);
+      if (_drag && _drag.tabId === tabId) _endDrag(true);
+      _dragActive = false;
+      _pointerId = null;
+    });
+  }
+
+  // Global safety net — catches pointerup that fires outside the tab element
+  document.addEventListener('pointerup', () => {
+    if (_drag) _endDrag();
+  });
+  document.addEventListener('pointercancel', () => {
+    if (_drag) _endDrag(true);
+  });
+
+  function _startDrag(el, tabId, e) {
+    const rect = el.getBoundingClientRect();
+    const ghost = el.cloneNode(true);
+    ghost.id = 'tab-drag-ghost';
+    ghost.style.cssText = `
+      position:fixed;top:${rect.top}px;left:${rect.left}px;
+      width:${rect.width}px;height:${rect.height}px;
+      pointer-events:none;z-index:99999;
+      opacity:0.88;transform:scale(1.05);
+      box-shadow:0 8px 28px rgba(0,0,0,0.55);
+      border-radius:8px;transition:transform 0.08s ease;
+    `;
+    document.body.appendChild(ghost);
+    el.classList.add('tab-dragging');
+
+    _drag = {
+      tabId, ghost, el,
+      offsetX: e.clientX - rect.left,
+      originIndex: tabs.findIndex(t => t.id === tabId),
+      lastIndex:   tabs.findIndex(t => t.id === tabId),
+    };
+  }
+
+  function _moveDrag(e) {
+    const { ghost } = _drag;
+    const container = document.getElementById('tabbar-container');
+    const cr = container.getBoundingClientRect();
+
+    ghost.style.left = Math.max(cr.left, Math.min(cr.right - ghost.offsetWidth, e.clientX - _drag.offsetX)) + 'px';
+
+    const tabEls = [...container.querySelectorAll('.tab:not(.tab-dragging)')];
+    let targetIndex = tabEls.length;
+    for (let i = 0; i < tabEls.length; i++) {
+      const mid = tabEls[i].getBoundingClientRect().left + tabEls[i].offsetWidth / 2;
+      if (e.clientX < mid) { targetIndex = i; break; }
+    }
+
+    if (targetIndex !== _drag.lastIndex) {
+      const arr = [...tabs];
+      const [moved] = arr.splice(_drag.originIndex, 1);
+      arr.splice(targetIndex, 0, moved);
+      tabs = arr;
+      _drag.originIndex = targetIndex;
+      _drag.lastIndex   = targetIndex;
+      _renderDragging();
+    }
+  }
+
+  function _endDrag(cancel = false) {
+    if (!_drag) return;
+    // Remove ghost — by reference and by ID as safety net
+    try { _drag.ghost.remove(); } catch(_) {}
+    document.getElementById('tab-drag-ghost')?.remove();
+    document.querySelector('.tab-dragging')?.classList.remove('tab-dragging');
+    _drag = null;
+    render();
+    if (!cancel) _notifyChanged();
+  }
+
+  // Lightweight re-render during drag — only reorders DOM, no full rebuild
+  function _renderDragging() {
+    const container = document.getElementById('tabbar-container');
+    const tabEls = [...container.querySelectorAll('.tab')];
+    const newBtn = container.querySelector('.tab-add');
+    const controls = container.querySelector('.window-controls');
+
+    // Reorder existing tab elements to match tabs array order
+    tabs.forEach((tab, i) => {
+      const el = tabEls.find(e => e.dataset.id === tab.id);
+      if (el) {
+        // Insert before newBtn to keep order
+        container.insertBefore(el, newBtn);
+      }
+    });
+  }
+
   function render() {
     const container = document.getElementById('tabbar-container');
     container.innerHTML = '';
@@ -137,9 +268,9 @@ const Tabs = (() => {
       el.appendChild(iconEl);
       el.appendChild(titleEl);
       el.appendChild(closeBtn);
-      el.addEventListener('click', () => setActiveTab(tab.id));
       el.addEventListener('mouseenter', () => TabPreview.show(el, tab.id, tab.title));
       el.addEventListener('mouseleave', () => TabPreview.hide());
+      _initDrag(el, tab.id);
       container.appendChild(el);
     });
 
