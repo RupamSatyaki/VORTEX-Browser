@@ -1,5 +1,22 @@
-const { ipcMain, BrowserWindow, webContents, session, shell } = require('electron');
+const { ipcMain, BrowserWindow, webContents, session, shell, net } = require('electron');
 const path = require('path');
+
+// Top sites to pre-resolve DNS on startup for instant first load
+const DNS_PREFETCH_HOSTS = [
+  'www.google.com', 'www.youtube.com', 'www.github.com',
+  'www.reddit.com', 'www.twitter.com', 'www.wikipedia.org',
+  'fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net',
+];
+
+function prewarmDNS() {
+  // Fire dummy HEAD requests to force DNS resolution + TCP preconnect
+  DNS_PREFETCH_HOSTS.forEach(host => {
+    const req = net.request({ method: 'HEAD', url: `https://${host}`, redirect: 'manual' });
+    req.on('response', () => {});
+    req.on('error', () => {});
+    req.end();
+  });
+}
 
 // Active downloads map: id -> { item, startTime, lastBytes, lastTime }
 const activeDownloads = new Map();
@@ -18,6 +35,20 @@ function formatBytes(bytes) {
 }
 
 function registerHandlers() {
+  // ── Session optimizations ──────────────────────────────────────────────────
+  const ses = session.defaultSession;
+
+  // Aggressive cache — serve from cache even if stale, revalidate in background
+  ses.webRequest.onBeforeSendHeaders((details, callback) => {
+    const headers = details.requestHeaders;
+    // Hint to servers we accept cached responses
+    if (!headers['Cache-Control']) headers['Cache-Control'] = 'max-stale=3600';
+    callback({ requestHeaders: headers });
+  });
+
+  // Pre-warm DNS for top sites immediately on startup
+  prewarmDNS();
+
   ipcMain.handle('app:version', () => require('../../package.json').version);
 
   ipcMain.handle('app:webviewPreload', () =>
@@ -157,6 +188,14 @@ function registerHandlers() {
     } catch {
       return null;
     }
+  });
+
+  // Set zoom factor on a webview's webContents
+  ipcMain.handle('webview:setZoom', (_e, wcId, factor) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (wc) wc.setZoomFactor(factor);
+    } catch (_) {}
   });
 }
 
