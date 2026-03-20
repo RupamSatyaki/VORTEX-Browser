@@ -180,6 +180,12 @@ const Navigation = (() => {
         btn.title = 'Remove bookmark';
       }
     });
+
+    // Profile button → dropdown
+    document.getElementById('btn-user').addEventListener('click', (e) => {
+      e.stopPropagation();
+      _toggleProfileMenu();
+    });
   }
 
   function updateSecurityIcon(url) {
@@ -449,6 +455,163 @@ const Navigation = (() => {
     if (menu) menu.classList.remove('visible');
   }
 
+  // ── Profile Dropdown ───────────────────────────────────────────────────────
+
+  let _profileName = 'Vortex User';
+  let _profileInitial = 'V';
+
+  function _buildProfileMenu() {
+    if (document.getElementById('profile-dropdown')) return;
+
+    const menu = document.createElement('div');
+    menu.id = 'profile-dropdown';
+    menu.innerHTML = `
+      <div class="pd-header">
+        <div class="pd-avatar" id="pd-avatar">${_profileInitial}</div>
+        <div class="pd-info">
+          <div class="pd-name" id="pd-name" contenteditable="false" spellcheck="false">${_profileName}</div>
+          <div class="pd-edit-hint">Click name to edit</div>
+        </div>
+      </div>
+      <div class="pd-sep"></div>
+      <div class="pd-item" data-action="bookmarks">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        Bookmarks
+      </div>
+      <div class="pd-item" data-action="history">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        History
+      </div>
+      <div class="pd-item" data-action="downloads">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Downloads
+      </div>
+      <div class="pd-sep"></div>
+      <div class="pd-item" data-action="settings">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+      <div class="pd-sep"></div>
+      <div class="pd-stat-row">
+        <div class="pd-stat" id="pd-stat-tabs">
+          <span class="pd-stat-num">0</span>
+          <span class="pd-stat-label">Tabs</span>
+        </div>
+        <div class="pd-stat" id="pd-stat-bm">
+          <span class="pd-stat-num">0</span>
+          <span class="pd-stat-label">Bookmarks</span>
+        </div>
+        <div class="pd-stat" id="pd-stat-dl">
+          <span class="pd-stat-num">0</span>
+          <span class="pd-stat-label">Downloads</span>
+        </div>
+      </div>
+      <div class="pd-sep"></div>
+      <div class="pd-item pd-danger" data-action="clear-data">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Clear Browsing Data
+      </div>
+    `;
+
+    document.body.appendChild(menu);
+
+    // Name edit
+    const nameEl = document.getElementById('pd-name');
+    nameEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      nameEl.contentEditable = 'true';
+      nameEl.focus();
+      const range = document.createRange();
+      range.selectNodeContents(nameEl);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+    nameEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); nameEl.blur(); }
+    });
+    nameEl.addEventListener('blur', () => {
+      nameEl.contentEditable = 'false';
+      _profileName = nameEl.textContent.trim() || 'Vortex User';
+      _profileInitial = _profileName[0].toUpperCase();
+      nameEl.textContent = _profileName;
+      document.getElementById('pd-avatar').textContent = _profileInitial;
+      document.getElementById('btn-user').textContent = _profileInitial;
+      // Persist
+      try { localStorage.setItem('vortex_profile_name', _profileName); } catch(_) {}
+    });
+
+    // Item actions
+    menu.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-action]');
+      if (!item) return;
+      _closeProfileMenu();
+      switch (item.dataset.action) {
+        case 'bookmarks':   Panel.open('bookmarks'); break;
+        case 'history':     Tabs.createTab('vortex://history'); break;
+        case 'downloads':   Panel.open('downloads'); break;
+        case 'settings':    Panel.open('settings'); break;
+        case 'clear-data':
+          if (confirm('Clear all browsing data? This cannot be undone.')) {
+            window.vortexAPI.send('browser:clearData');
+            localStorage.removeItem('browser_session');
+          }
+          break;
+      }
+    });
+  }
+
+  function _updateProfileStats() {
+    const tabCount = Tabs.getAllTabs ? Tabs.getAllTabs().length : 0;
+    const tabEl = document.getElementById('pd-stat-tabs');
+    if (tabEl) tabEl.querySelector('.pd-stat-num').textContent = tabCount;
+
+    // Bookmarks count
+    if (window.BookmarkStore) {
+      BookmarkStore.load().then(list => {
+        const bmEl = document.getElementById('pd-stat-bm');
+        if (bmEl) bmEl.querySelector('.pd-stat-num').textContent = list.length;
+      }).catch(() => {});
+    }
+
+    // Downloads count from badge
+    const badge = document.getElementById('dl-badge');
+    const dlEl = document.getElementById('pd-stat-dl');
+    if (dlEl && badge) dlEl.querySelector('.pd-stat-num').textContent = badge.textContent || '0';
+  }
+
+  function _toggleProfileMenu() {
+    _buildProfileMenu();
+    const menu = document.getElementById('profile-dropdown');
+    const btn  = document.getElementById('btn-user');
+    if (menu.classList.contains('visible')) {
+      _closeProfileMenu(); return;
+    }
+    const rect = btn.getBoundingClientRect();
+    menu.style.top   = (rect.bottom + 6) + 'px';
+    menu.style.right = (window.innerWidth - rect.right) + 'px';
+    menu.classList.add('visible');
+    _updateProfileStats();
+    setTimeout(() => document.addEventListener('click', _closeProfileMenu, { once: true }), 0);
+  }
+
+  function _closeProfileMenu() {
+    const menu = document.getElementById('profile-dropdown');
+    if (menu) menu.classList.remove('visible');
+  }
+
+  // Restore saved profile name
+  function _initProfile() {
+    try {
+      const saved = localStorage.getItem('vortex_profile_name');
+      if (saved) {
+        _profileName = saved;
+        _profileInitial = saved[0].toUpperCase();
+        const btn = document.getElementById('btn-user');
+        if (btn) btn.textContent = _profileInitial;
+      }
+    } catch(_) {}
+  }
+
   // Global keyboard shortcuts
   function _initShortcuts() {
     document.addEventListener('keydown', (e) => {
@@ -477,5 +640,5 @@ const Navigation = (() => {
     });
   }
 
-  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL };
+  return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL, initProfile: _initProfile };
 })();

@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   Session.initAutoSave();
   Navigation.initShortcuts();
+  Navigation.initProfile();
   Panel.init();
 
   // Listen for settings changes from the settings panel
