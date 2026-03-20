@@ -4,6 +4,7 @@ const WebView = (() => {
   let activeId = null;
   let webviewPreloadPath = '';
   let downloadsPageUrl = '';
+  let settingsPageUrl = '';
 
   // Preloaded hidden webviews for vortex:// internal pages
   const preloaded = {};
@@ -16,7 +17,8 @@ const WebView = (() => {
   `;
 
   const VORTEX_PAGES = {
-    'vortex://downloads': { fileUrl: () => downloadsPageUrl, title: 'Downloads' }
+    'vortex://downloads': { fileUrl: () => downloadsPageUrl, title: 'Downloads' },
+    'vortex://settings':  { fileUrl: () => settingsPageUrl,  title: 'Settings'  },
   };
 
   // Returns favicon URL for any website using Google's favicon CDN
@@ -87,6 +89,9 @@ const WebView = (() => {
   // ── Regular webview listeners ───────────────────────────────────────────────
 
   function _attachRegularListeners(wv, tabId) {
+    // Prevent MaxListenersExceeded warning
+    wv.setMaxListeners && wv.setMaxListeners(30);
+
     function forceIframeSize() {
       try {
         const iframe = wv.shadowRoot && wv.shadowRoot.querySelector('iframe');
@@ -97,7 +102,6 @@ const WebView = (() => {
     }
 
     wv.addEventListener('dom-ready', forceIframeSize);
-    wv.addEventListener('did-finish-load', forceIframeSize);
 
     wv.addEventListener('did-start-loading', () => {
       if (activeId === tabId) Navigation.startProgress();
@@ -119,10 +123,15 @@ const WebView = (() => {
       if (activeId === tabId) Navigation.setURL(e.url);
     });
 
+    // Single did-finish-load handler — merged all logic here
     wv.addEventListener('did-finish-load', () => {
+      forceIframeSize();
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
       Prefetch.prefetchPageLinks(wv);
       setTimeout(() => captureTab(tabId, wv), 800);
+      // Re-apply zoom if non-default
+      const zoomLevel = _getZoom(tabId);
+      if (zoomLevel !== 1.0) _applyZoom(tabId, zoomLevel);
     });
 
     wv.addEventListener('page-title-updated', (e) => {
@@ -199,7 +208,6 @@ const WebView = (() => {
     container.appendChild(wv);
     webviews[tabId] = wv;
     _attachRegularListeners(wv, tabId);
-    _reapplyZoomOnLoad(wv, tabId);
   }
 
   function switchTo(tabId) {
@@ -260,6 +268,10 @@ const WebView = (() => {
       const p = await window.vortexAPI.invoke('app:downloadsPage');
       if (p) downloadsPageUrl = 'file:///' + p.replace(/\\/g, '/');
     } catch (_) {}
+    try {
+      const p = await window.vortexAPI.invoke('app:settingsPage');
+      if (p) settingsPageUrl = 'file:///' + p.replace(/\\/g, '/');
+    } catch (_) {}
     _preloadAll();
   }
 
@@ -278,6 +290,11 @@ const WebView = (() => {
   function goBack()    { const wv = webviews[activeId]; if (wv && wv.canGoBack()) wv.goBack(); }
   function goForward() { const wv = webviews[activeId]; if (wv && wv.canGoForward()) wv.goForward(); }
   function reload()    { const wv = webviews[activeId]; if (wv) wv.reload(); }
+  function hardReload(){ const wv = webviews[activeId]; if (wv) wv.reloadIgnoringCache(); }
+  function print()     { const wv = webviews[activeId]; if (wv) wv.print(); }
+  function savePage()  { const wv = webviews[activeId]; if (wv) wv.savePage(require('path').join(require('os').homedir(), 'Downloads', 'page.html'), 'HTMLComplete').catch(()=>{}); }
+  function openDevTools() { const wv = webviews[activeId]; if (wv) wv.openDevTools(); }
+  function findInPage()   { const wv = webviews[activeId]; if (wv) wv.findInPage(''); }
 
   // ── Zoom ───────────────────────────────────────────────────────────────────
   const zoomLevels = {};
@@ -315,14 +332,6 @@ const WebView = (() => {
     }
   }
 
-  // Re-apply zoom when a tab's webview finishes loading (survives navigation)
-  function _reapplyZoomOnLoad(wv, tabId) {
-    wv.addEventListener('did-finish-load', () => {
-      const level = _getZoom(tabId);
-      if (level !== 1.0) _applyZoom(tabId, level);
-    });
-  }
-
   // Keyboard shortcuts: Ctrl+= / Ctrl+- / Ctrl+0
   document.addEventListener('keydown', (e) => {
     if (!e.ctrlKey) return;
@@ -331,5 +340,5 @@ const WebView = (() => {
     else if (e.key === '0') { e.preventDefault(); zoomReset(); }
   });
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, zoomIn, zoomOut, zoomReset };
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset };
 })();

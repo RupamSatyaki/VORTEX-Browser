@@ -1,8 +1,14 @@
 const { app } = require('electron');
 
+require('events').EventEmitter.defaultMaxListeners = 30;
+
 // Suppress noisy ERR_ABORTED (-3) from webview navigations (YouTube, SPAs, etc.)
+// Also suppress "Render frame was disposed" which fires on window visibility changes
 process.on('uncaughtException', (err) => {
-  if (err && err.errno === -3) return;
+  if (!err) return;
+  if (err.errno === -3) return;
+  if (err.message && err.message.includes('Render frame was disposed')) return;
+  if (err.message && err.message.includes('dragEvent')) return;
   console.error(err);
 });
 const WindowManager = require('./src/main/windowManager');
