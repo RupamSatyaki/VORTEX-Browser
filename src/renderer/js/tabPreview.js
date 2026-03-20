@@ -1,9 +1,11 @@
 // Tab Preview — shows live thumbnail on tab hover
 const TabPreview = (() => {
-  // Cache: tabId -> base64 image dataURL
   const cache = {};
   let previewEl = null;
   let hideTimer = null;
+  let _enabled = true;
+
+  function setEnabled(val) { _enabled = val; }
 
   function init() {
     previewEl = document.createElement('div');
@@ -11,23 +13,14 @@ const TabPreview = (() => {
     document.body.appendChild(previewEl);
   }
 
-  // Store screenshot for a tab
-  function setCache(tabId, dataURL) {
-    cache[tabId] = dataURL;
-  }
+  function setCache(tabId, dataURL) { cache[tabId] = dataURL; }
+  function getCache(tabId)          { return cache[tabId] || null; }
+  function removeCache(tabId)       { delete cache[tabId]; }
 
-  function getCache(tabId) {
-    return cache[tabId] || null;
-  }
-
-  function removeCache(tabId) {
-    delete cache[tabId];
-  }
-
-  // Show preview popup below a tab element
   function show(tabEl, tabId, title) {
+    if (!_enabled) return;
     clearTimeout(hideTimer);
-    const img = cache[tabId];
+    const img  = cache[tabId];
     const rect = tabEl.getBoundingClientRect();
 
     previewEl.innerHTML = `
@@ -51,5 +44,5 @@ const TabPreview = (() => {
     }, 120);
   }
 
-  return { init, setCache, getCache, removeCache, show, hide };
+  return { init, setCache, getCache, removeCache, show, hide, setEnabled };
 })();
