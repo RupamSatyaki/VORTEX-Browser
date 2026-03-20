@@ -5,9 +5,9 @@ const Tabs = (() => {
 
   function createTabBackground(url) {
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null });
-    WebView.createWebview(id, url);
-    render(); // don't switch — stays in background
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false });
+    // Lazy: don't create webview until tab becomes active
+    render();
     return id;
   }
 
@@ -17,9 +17,11 @@ const Tabs = (() => {
     if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
 
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false });
     activeTabId = id;
+    // Create webview immediately only for the active tab
     WebView.createWebview(id, url);
+    tabs.find(t => t.id === id)._webviewReady = true;
     WebView.switchTo(id);
     render();
     _notifyChanged();
@@ -28,12 +30,18 @@ const Tabs = (() => {
 
   function closeTab(id) {
     if (tabs.length === 1) return;
-    // Save to history — wrapped in try so any error never blocks tab close
     try { if (window.TabHistory) TabHistory.onTabClosed(id); } catch (_) {}
-    WebView.destroyWebview(id);
+    const tab = tabs.find(t => t.id === id);
+    if (tab && tab._webviewReady) WebView.destroyWebview(id);
     tabs = tabs.filter(t => t.id !== id);
     if (activeTabId === id) {
       activeTabId = tabs[tabs.length - 1].id;
+      // Ensure the new active tab has its webview
+      const nextTab = tabs.find(t => t.id === activeTabId);
+      if (nextTab && !nextTab._webviewReady) {
+        WebView.createWebview(activeTabId, nextTab.url);
+        nextTab._webviewReady = true;
+      }
       WebView.switchTo(activeTabId);
     }
     render();
@@ -42,6 +50,12 @@ const Tabs = (() => {
 
   function setActiveTab(id) {
     activeTabId = id;
+    // Lazy: create webview on first activation
+    const tab = tabs.find(t => t.id === id);
+    if (tab && !tab._webviewReady) {
+      WebView.createWebview(id, tab.url);
+      tab._webviewReady = true;
+    }
     WebView.switchTo(id);
     render();
     _notifyChanged();
