@@ -45,6 +45,38 @@ function deleteFile(name) {
   }
 }
 
+// ── Default file initialization ───────────────────────────────────────────────
+
+const DEFAULTS = {
+  settings: {
+    theme: 'dark', fontsize: 'medium', tabpreview: true, bookmarksbar: false,
+    startup: 'session', homepage: 'https://www.google.com',
+    engine: 'google', suggestions: true,
+    trackers: true, https: false, dnt: false,
+    gpu: true, prefetch: true, cache: '512',
+    askdl: false, opendl: false,
+  },
+  profile: {
+    name: 'Vortex User', avatar: null, avatarType: 'emoji',
+    avatarData: null, status: 'online', bio: '',
+  },
+  bookmarks: [],
+  downloads_history: [],
+  tab_history: [],
+};
+
+function ensureDefaults() {
+  ensureDir();
+  Object.entries(DEFAULTS).forEach(([name, defaultVal]) => {
+    const fp = filePath(name);
+    if (!fs.existsSync(fp)) {
+      try {
+        fs.writeFileSync(fp, JSON.stringify(defaultVal, null, 2), 'utf-8');
+      } catch (_) {}
+    }
+  });
+}
+
 // ── IPC Handlers ─────────────────────────────────────────────────────────────
 
 function registerStorageHandlers() {
@@ -67,4 +99,4 @@ function registerStorageHandlers() {
   ipcMain.handle('storage:dir', () => STORAGE_DIR);
 }
 
-module.exports = { registerStorageHandlers, readFile, writeFile, deleteFile, STORAGE_DIR };
+module.exports = { registerStorageHandlers, ensureDefaults, readFile, writeFile, deleteFile, STORAGE_DIR };

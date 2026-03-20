@@ -166,6 +166,24 @@ window._forwardToBookmarksFrame = _forwardToBookmarksFrame;
 window.addEventListener('DOMContentLoaded', () => {
   IPC.on('downloads:badge', (count) => Navigation.setDownloadBadge(count));
 
+  // ── Menu accelerator events (fired from menuManager.js) ──────────────────
+  IPC.on('menu:newTab',    () => Tabs.createTab(Navigation.newTabURL()));
+  IPC.on('menu:newWindow', () => window.vortexAPI.send('window:new'));
+  IPC.on('menu:closeTab',  () => { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); });
+  IPC.on('menu:reload',    () => WebView.reload());
+  IPC.on('menu:hardReload',() => WebView.hardReload());
+  IPC.on('menu:find',      () => WebView.findInPage());
+  IPC.on('menu:zoomIn',    () => WebView.zoomIn());
+  IPC.on('menu:zoomOut',   () => WebView.zoomOut());
+  IPC.on('menu:zoomReset', () => WebView.zoomReset());
+  IPC.on('menu:downloads', () => Panel.open('downloads'));
+  IPC.on('menu:history',   () => Panel.open('history'));
+  IPC.on('menu:bookmarks', () => Panel.open('bookmarks'));
+  IPC.on('menu:settings',  () => Panel.open('settings'));
+  IPC.on('menu:nextTab',   () => Tabs.switchNext());
+  IPC.on('menu:prevTab',   () => Tabs.switchPrev());
+  IPC.on('menu:focusUrl',  () => { const b = document.getElementById('url-bar'); if (b) { b.focus(); b.select(); } });
+
   IPC.on('download:start', (data) => {
     _activeDownloads.set(data.id, { ...data, receivedFormatted: '0 B', percent: 0, speed: '' });
     _forwardToDownloadsFrame('download:start', data);
@@ -220,6 +238,19 @@ window.addEventListener('DOMContentLoaded', () => {
     await _injectBookmarksToFrame(e.detail);
   });
 
+  // When history panel iframe loads — inject tab history data
+  document.addEventListener('vortex-history-ready', (e) => {
+    const frame = e.detail;
+    if (!frame || !frame.contentWindow) return;
+    try {
+      const activeTabs  = window.TabHistory ? TabHistory.getActiveTabs()  : [];
+      const closedTabs  = window.TabHistory ? TabHistory.getClosedTabs()  : [];
+      frame.contentWindow.postMessage(
+        { __vortexIPC: true, channel: 'history:data', data: { activeTabs, closedTabs } }, '*'
+      );
+    } catch (_) {}
+  });
+
   // Handle postMessage actions from downloads.html and settings.html
   window.addEventListener('message', (e) => {
     if (!e.data || !e.data.__vortexAction) return;
@@ -257,6 +288,36 @@ window.addEventListener('DOMContentLoaded', () => {
       // Open URL in active tab
       if (window.WebView) WebView.loadURL(payload);
       else if (window.Tabs) Tabs.createTab(payload);
+      return;
+    }
+    if (channel === 'history:restore') {
+      // Restore a closed tab
+      if (window.TabHistory) {
+        const result = TabHistory.restoreTab(payload);
+        if (result) Tabs.createTab(result.url);
+      }
+      return;
+    }
+    if (channel === 'history:openUrl') {
+      if (window.Tabs) Tabs.createTab(payload);
+      return;
+    }
+    if (channel === 'history:switchTab') {
+      if (window.Tabs) Tabs.setActiveTab(payload);
+      Panel.close();
+      return;
+    }
+    if (channel === 'history:ready') {
+      // History iframe is ready — inject data
+      const frame = document.getElementById('panel-frame');
+      if (!frame || !frame.contentWindow) return;
+      try {
+        const activeTabs = window.TabHistory ? TabHistory.getActiveTabs() : [];
+        const closedTabs = window.TabHistory ? TabHistory.getClosedTabs() : [];
+        frame.contentWindow.postMessage(
+          { __vortexIPC: true, channel: 'history:data', data: { activeTabs, closedTabs } }, '*'
+        );
+      } catch (_) {}
       return;
     }
     IPC.send(channel, payload);

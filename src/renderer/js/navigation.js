@@ -397,7 +397,7 @@ const Navigation = (() => {
       switch (item.dataset.action) {
         case 'new-tab':      Tabs.createTab(_newTabURL()); break;
         case 'new-window':   window.vortexAPI.send('window:new'); break;
-        case 'history':      Tabs.createTab('vortex://history'); break;
+        case 'history':      Panel.open('history'); break;
         case 'downloads':    Panel.open('downloads'); break;
         case 'bookmarks':    Panel.open('bookmarks'); break;
         case 'find':         WebView.findInPage(); break;
@@ -626,7 +626,7 @@ const Navigation = (() => {
       switch (item.dataset.action) {
         case 'profile-settings': Panel.open('settings'); break; // opens settings, user navigates to Profile tab
         case 'bookmarks':   Panel.open('bookmarks'); break;
-        case 'history':     Tabs.createTab('vortex://history'); break;
+        case 'history':     Panel.open('history'); break;
         case 'downloads':   Panel.open('downloads'); break;
         case 'settings':    Panel.open('settings'); break;
         case 'clear-data':
@@ -700,7 +700,7 @@ const Navigation = (() => {
         case 't': e.preventDefault(); Tabs.createTab(_newTabURL()); break;
         case 'n': e.preventDefault(); window.vortexAPI.send('window:new'); break;
         case 'w': e.preventDefault(); { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); } break;
-        case 'h': e.preventDefault(); Tabs.createTab('vortex://history'); break;
+        case 'h': e.preventDefault(); Panel.open('history'); break;
         case 'j': e.preventDefault(); Panel.open('downloads'); break;
         case 'b': e.preventDefault(); Panel.open('bookmarks'); break;
         case 'f': e.preventDefault(); WebView.findInPage(); break;

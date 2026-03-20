@@ -28,6 +28,8 @@ const Tabs = (() => {
 
   function closeTab(id) {
     if (tabs.length === 1) return;
+    // Save to history — wrapped in try so any error never blocks tab close
+    try { if (window.TabHistory) TabHistory.onTabClosed(id); } catch (_) {}
     WebView.destroyWebview(id);
     tabs = tabs.filter(t => t.id !== id);
     if (activeTabId === id) {
@@ -126,6 +128,12 @@ const Tabs = (() => {
     // pointerup on element
     el.addEventListener('pointerup', (e) => {
       clearTimeout(_holdTimer);
+      if (e.target.closest('.tab-close')) {
+        // Let the click event on close button handle it
+        _dragActive = false;
+        _pointerId = null;
+        return;
+      }
       if (_dragActive && _drag && _drag.tabId === tabId) {
         _endDrag();
       } else if (!_dragActive) {
