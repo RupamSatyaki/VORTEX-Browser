@@ -31,6 +31,8 @@ app.commandLine.appendSwitch('num-raster-threads', '4'); // parallel raster thre
 
 app.whenReady().then(() => {
   Storage.registerStorageHandlers();
+  // Ensure default storage files exist on first run
+  Storage.ensureDefaults();
   WindowManager.createMainWindow();
   MenuManager.setupMenu();
   IpcHandler.registerHandlers();
