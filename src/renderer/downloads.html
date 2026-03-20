@@ -301,6 +301,11 @@
       color: #c8a040;
     }
 
+    .sb-deleted {
+      background: rgba(120, 80, 160, 0.15);
+      color: #a070c8;
+    }
+
     .dl-actions {
       display: flex;
       gap: 4px;
@@ -480,6 +485,7 @@
         completed: 'Completed',
         cancelled: 'Cancelled',
         interrupted: 'Failed',
+        deleted: 'File Deleted',
       };
       return map[status] || status;
     }
@@ -550,7 +556,8 @@
     function updateItemEl(el, dl) {
       const { cls, label } = extType(dl.filename);
       const isActive = dl.status === 'progressing' || dl.status === 'waiting';
-      const isDone = dl.status === 'completed';
+      const isDone   = dl.status === 'completed';
+      const isDeleted = dl.status === 'deleted';
 
       const pct = dl.percent || 0;
       const fillClass = isActive
@@ -583,7 +590,7 @@
             <button class="icon-btn danger" title="Cancel" data-action="cancel" data-id="${dl.id}">${ICONS.cancel}</button>
           ` : ''}
           ${!isActive ? `
-            <button class="icon-btn danger" title="Remove" data-action="remove" data-id="${dl.id}">${ICONS.remove}</button>
+            <button class="icon-btn danger" title="Remove from history" data-action="remove" data-id="${dl.id}">${ICONS.remove}</button>
           ` : ''}
         </div>
       </div>
@@ -593,20 +600,42 @@
     `;
     }
 
-    // ── IPC from main process ─────────────────────────────────────────────────
-    // Events arrive via CustomEvent 'vortex-ipc' dispatched by ipc.js through executeJavaScript
+    // Check if completed files still exist on disk
+    async function checkFileExistence() {
+      for (const [id, dl] of downloads) {
+        if (dl.status === 'completed' && dl.savePath) {
+          const exists = await sendInvoke('file:exists', dl.savePath);
+          if (!exists && dl.status !== 'deleted') {
+            dl.status = 'deleted';
+            // Persist the deleted status to history
+            sendAction('download:markDeleted', { id: dl.id });
+            const el = document.querySelector(`.dl-item[data-id="${id}"]`);
+            if (el) updateItemEl(el, dl);
+          }
+        }
+      }
+    }
 
-    window.addEventListener('vortex-ipc', (e) => {
-      let msg;
-      try { msg = JSON.parse(e.detail); } catch { return; }
+    function sendInvoke(channel, ...args) {
+      return window.parent.__vortexInvoke
+        ? window.parent.__vortexInvoke(channel, ...args)
+        : Promise.resolve(false);
+    }
+
+    // ── IPC — receive via postMessage from parent iframe ─────────────────────
+
+    window.addEventListener('message', (e) => {
+      const msg = e.data;
+      if (!msg || !msg.__vortexIPC) return;
       const { channel, data } = msg;
 
       if (channel === 'download:history') {
-        // Populate from saved history (completed/failed/cancelled entries)
         data.forEach(entry => {
           if (!downloads.has(entry.id)) downloads.set(entry.id, entry);
         });
         renderAll();
+        // Check which completed files no longer exist on disk
+        checkFileExistence();
       } else if (channel === 'download:start') {
         downloads.set(data.id, { ...data, receivedFormatted: '0 B', percent: 0, speed: '' });
         renderAll();
@@ -625,15 +654,10 @@
       }
     });
 
-    // ── Actions — send via postMessage to parent renderer ─────────────────────
+    // ── Actions — send via postMessage to parent ──────────────────────────────
 
     function sendAction(channel, payload) {
-      // Try vortexAPI first (if somehow available), else postMessage to parent
-      if (window.vortexAPI) {
-        window.vortexAPI.send(channel, payload);
-      } else {
-        window.parent.postMessage({ __vortexAction: true, channel, payload }, '*');
-      }
+      window.parent.postMessage({ __vortexAction: true, channel, payload }, '*');
     }
 
     // ── Actions ───────────────────────────────────────────────────────────────
@@ -644,7 +668,13 @@
       const { action, id, path: filePath } = btn.dataset;
 
       if (action === 'cancel') sendAction('download:cancel', Number(id));
-      if (action === 'remove') sendAction('download:remove', Number(id));
+      if (action === 'remove') {
+        // Remove from UI immediately
+        downloads.delete(Number(id));
+        renderAll();
+        // Remove from JSON history file
+        sendAction('download:remove', Number(id));
+      }
       if (action === 'openFile') sendAction('download:openFile', filePath);
       if (action === 'openFolder') sendAction('download:openFolder', filePath);
     });

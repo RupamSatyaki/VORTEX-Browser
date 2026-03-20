@@ -24,7 +24,11 @@ let dlIdCounter = 0;
 
 function pushToRenderer(channel, data) {
   BrowserWindow.getAllWindows().forEach(win => {
-    win.webContents.send(channel, data);
+    try {
+      if (!win.isDestroyed() && !win.webContents.isDestroyed()) {
+        win.webContents.send(channel, data);
+      }
+    } catch (_) {}
   });
 }
 
@@ -59,6 +63,35 @@ function registerHandlers() {
     path.join(__dirname, '../renderer/downloads.html')
   );
 
+  ipcMain.handle('app:settingsPage', () =>
+    path.join(__dirname, '../renderer/settings.html')
+  );
+
+  ipcMain.on('shell:openExternal', (_e, url) => { shell.openExternal(url); });
+
+  ipcMain.on('browser:clearData', (_e) => {
+    session.defaultSession.clearCache();
+    session.defaultSession.clearStorageData({ storages: ['cookies','localstorage','indexdb','websql','serviceworkers','cachestorage'] });
+  });
+
+  ipcMain.handle('file:exists', (_e, filePath) => {
+    try {
+      const fs = require('fs');
+      return fs.existsSync(filePath);
+    } catch {
+      return false;
+    }
+  });
+
+  ipcMain.on('settings:pickDownloadFolder', async (e) => {
+    const { dialog } = require('electron');
+    const win = BrowserWindow.fromWebContents(e.sender);
+    const result = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
+    if (!result.canceled && result.filePaths[0]) {
+      e.sender.send('settings:downloadFolder', result.filePaths[0]);
+    }
+  });
+
   ipcMain.on('window:minimize', (e) => {
     BrowserWindow.fromWebContents(e.sender).minimize();
   });
@@ -70,6 +103,16 @@ function registerHandlers() {
 
   ipcMain.on('window:close', (e) => {
     BrowserWindow.fromWebContents(e.sender).close();
+  });
+
+  ipcMain.on('window:fullscreen', (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender);
+    win.setFullScreen(!win.isFullScreen());
+  });
+
+  ipcMain.on('window:new', () => {
+    const { createMainWindow } = require('./windowManager');
+    createMainWindow();
   });
 
   // Cancel a download
