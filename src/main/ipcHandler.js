@@ -67,6 +67,10 @@ function registerHandlers() {
     path.join(__dirname, '../renderer/settings.html')
   );
 
+  ipcMain.handle('app:bookmarksPage', () =>
+    path.join(__dirname, '../renderer/bookmarks.html')
+  );
+
   ipcMain.on('shell:openExternal', (_e, url) => { shell.openExternal(url); });
 
   ipcMain.on('browser:clearData', (_e) => {

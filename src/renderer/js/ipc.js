@@ -45,7 +45,72 @@ const DownloadHistory = {
   },
 };
 
-// ── Forward events to downloads iframe ───────────────────────────────────────
+// ── Bookmark Store ────────────────────────────────────────────────────────────
+const BM_FILE = 'bookmarks';
+
+const BookmarkStore = {
+  _cache: null,
+
+  async load() {
+    if (this._cache) return this._cache;
+    this._cache = (await Storage.read(BM_FILE)) || [];
+    return this._cache;
+  },
+
+  async add(entry) {
+    const list = await this.load();
+    if (list.find(b => b.url === entry.url)) return false; // already exists
+    list.unshift(entry);
+    this._cache = list;
+    await Storage.write(BM_FILE, list);
+    return true;
+  },
+
+  async remove(id) {
+    const list = await this.load();
+    this._cache = list.filter(b => b.id !== id);
+    await Storage.write(BM_FILE, this._cache);
+  },
+
+  async update(id, title, url) {
+    const list = await this.load();
+    const bm = list.find(b => b.id === id);
+    if (bm) { bm.title = title; bm.url = url; }
+    await Storage.write(BM_FILE, list);
+  },
+
+  async clear() {
+    this._cache = [];
+    await Storage.delete(BM_FILE);
+  },
+
+  async has(url) {
+    const list = await this.load();
+    return !!list.find(b => b.url === url);
+  },
+};
+
+// ── Forward events to bookmarks iframe ───────────────────────────────────────
+function _forwardToBookmarksFrame(channel, data) {
+  const frame = document.getElementById('panel-frame');
+  if (!frame || !frame.contentWindow) return;
+  const titleEl = document.getElementById('panel-title');
+  if (!titleEl || titleEl.textContent !== 'Bookmarks') return;
+  try {
+    frame.contentWindow.postMessage({ __vortexIPC: true, channel, data }, '*');
+  } catch (_) {}
+}
+
+async function _injectBookmarksToFrame(frame) {
+  const list = await BookmarkStore.load();
+  try {
+    frame.contentWindow.postMessage(
+      { __vortexIPC: true, channel: 'bookmark:history', data: list }, '*'
+    );
+  } catch (_) {}
+}
+
+
 
 function _forwardToDownloadsFrame(channel, data) {
   const frame = document.getElementById('panel-frame');
@@ -79,6 +144,22 @@ async function _injectHistoryToFrame(frame) {
 
 // ── Active downloads (in-memory for live updates) ────────────────────────────
 const _activeDownloads = new Map();
+
+// Update address bar bookmark icon based on current URL
+async function _updateBookmarkIcon() {
+  const bar = document.getElementById('url-bar');
+  const btn = document.getElementById('btn-bookmark');
+  if (!bar || !btn) return;
+  const url = bar.value;
+  const saved = url && !url.startsWith('vortex://') ? await BookmarkStore.has(url) : false;
+  btn.classList.toggle('bookmarked', saved);
+  btn.title = saved ? 'Remove bookmark' : 'Bookmark this page';
+}
+
+// Expose so navigation.js can call it on URL change
+window._updateBookmarkIcon = _updateBookmarkIcon;
+// Expose forward function for navigation.js bookmark button
+window._forwardToBookmarksFrame = _forwardToBookmarksFrame;
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
@@ -129,7 +210,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // When downloads panel iframe loads — inject history + active downloads
   document.addEventListener('vortex-downloads-ready', async (e) => {
+    DownloadHistory._cache = null; // force fresh read from disk
     await _injectHistoryToFrame(e.detail);
+  });
+
+  // When bookmarks panel iframe loads — inject bookmarks
+  document.addEventListener('vortex-bookmarks-ready', async (e) => {
+    BookmarkStore._cache = null; // force fresh read from disk
+    await _injectBookmarksToFrame(e.detail);
   });
 
   // Handle postMessage actions from downloads.html and settings.html
@@ -137,8 +225,33 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!e.data || !e.data.__vortexAction) return;
     const { channel, payload } = e.data;
     if (channel === 'settings:changed') {
-      // Broadcast to app.js listener
       IPC.send('settings:changed', payload);
+      return;
+    }
+    if (channel === 'bookmark:remove') {
+      BookmarkStore.remove(payload).then(() => {
+        _forwardToBookmarksFrame('bookmark:removed', payload);
+        _updateBookmarkIcon();
+      });
+      return;
+    }
+    if (channel === 'bookmark:update') {
+      BookmarkStore.update(payload.id, payload.title, payload.url).then(() => {
+        _forwardToBookmarksFrame('bookmark:updated', payload);
+      });
+      return;
+    }
+    if (channel === 'bookmark:clearAll') {
+      BookmarkStore.clear().then(() => {
+        _forwardToBookmarksFrame('bookmark:cleared', null);
+        _updateBookmarkIcon();
+      });
+      return;
+    }
+    if (channel === 'bookmark:open') {
+      // Open URL in active tab
+      if (window.WebView) WebView.loadURL(payload);
+      else if (window.Tabs) Tabs.createTab(payload);
       return;
     }
     IPC.send(channel, payload);
