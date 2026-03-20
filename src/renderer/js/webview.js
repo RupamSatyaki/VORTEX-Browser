@@ -117,10 +117,13 @@ const WebView = (() => {
       const fav = _getFavicon(e.url);
       if (fav) Tabs.updateTab(tabId, { favicon: fav });
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
+      // Track navigation
+      if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
     });
 
     wv.addEventListener('did-navigate-in-page', (e) => {
       if (activeId === tabId) Navigation.setURL(e.url);
+      if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
     });
 
     // Single did-finish-load handler — merged all logic here
@@ -137,12 +140,14 @@ const WebView = (() => {
     wv.addEventListener('page-title-updated', (e) => {
       Tabs.updateTab(tabId, { title: e.title });
       if (activeId === tabId) document.title = e.title + ' — Vortex';
+      if (window.TabHistory) TabHistory.onTitleUpdate(tabId, e.title);
     });
 
     // page-favicon-updated — highest priority, overrides Google CDN favicon
     wv.addEventListener('page-favicon-updated', (e) => {
       if (e.favicons && e.favicons.length) {
         Tabs.updateTab(tabId, { favicon: e.favicons[0] });
+        if (window.TabHistory) TabHistory.onFaviconUpdate(tabId, e.favicons[0]);
       }
     });
 
@@ -152,6 +157,14 @@ const WebView = (() => {
 
     wv.addEventListener('ipc-message', (e) => {
       if (e.channel === 'webview:mousedown') ContextMenu.hide();
+      if (e.channel === 'webview:keydown') {
+        const k = e.args[0];
+        // Simulate the keydown on the parent document
+        document.dispatchEvent(new KeyboardEvent('keydown', {
+          key: k.key, ctrlKey: k.ctrlKey, metaKey: k.metaKey,
+          shiftKey: k.shiftKey, altKey: k.altKey, bubbles: true,
+        }));
+      }
     });
 
     wv.addEventListener('did-start-navigation', () => ContextMenu.hide());
@@ -173,6 +186,9 @@ const WebView = (() => {
 
   function createWebview(tabId, url) {
     if (webviews[tabId]) return;
+
+    // Track tab creation
+    if (window.TabHistory) TabHistory.onTabCreated(tabId, url);
 
     const isVortexPage = !!VORTEX_PAGES[url];
 
