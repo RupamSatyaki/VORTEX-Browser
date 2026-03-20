@@ -247,7 +247,7 @@ body {
   margin: 0 6px;
   transition: all 0.2s;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .address-bar:hover {
@@ -648,6 +648,62 @@ webview.vortex-wv.active iframe {
   100% {
     background-position: -200% 0;
   }
+}
+
+/* ── Omnibox Dropdown ── */
+#omnibox-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #0d2020;
+  border: 1px solid #1a4040;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  z-index: 9999;
+  overflow: hidden;
+  padding: 4px 0;
+}
+#omnibox-dropdown.visible { display: block; }
+
+.omni-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.omni-row:hover, .omni-row.active {
+  background: #0f2e2e;
+}
+.omni-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  opacity: 0.8;
+}
+.omni-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+.omni-title {
+  font-size: 13px;
+  color: #d0e8e8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.omni-sub {
+  font-size: 11px;
+  color: #4a8080;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
 }
 
 /* ── Zoom Status Bar ── */
