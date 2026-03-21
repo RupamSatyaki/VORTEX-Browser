@@ -28,6 +28,8 @@ function setupMenu() {
         { label: 'Reload',      accelerator: 'CmdOrCtrl+R',       click: () => send('menu:reload') },
         { label: 'Hard Reload', accelerator: 'CmdOrCtrl+Shift+R', click: () => send('menu:hardReload') },
         { label: 'Find',        accelerator: 'CmdOrCtrl+F',       click: () => send('menu:find') },
+        { label: 'Screenshot',       accelerator: 'CmdOrCtrl+Shift+S', click: () => send('menu:screenshot') },
+        { label: 'Full Page Screenshot', accelerator: 'CmdOrCtrl+Shift+F', click: () => send('menu:screenshotFull') },
         { label: 'Zoom In',     accelerator: 'CmdOrCtrl+=',       click: () => send('menu:zoomIn') },
         { label: 'Zoom Out',    accelerator: 'CmdOrCtrl+-',       click: () => send('menu:zoomOut') },
         { label: 'Reset Zoom',  accelerator: 'CmdOrCtrl+0',       click: () => send('menu:zoomReset') },
