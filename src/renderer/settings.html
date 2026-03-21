@@ -905,6 +905,36 @@
                         <option value="1024">1 GB</option>
                     </select>
                 </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Tab Sleep</div>
+                        <div class="row-desc">Suspend inactive background tabs to save memory</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-tabsleep" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Sleep After</div>
+                        <div class="row-desc">Suspend tab after this many minutes of inactivity</div>
+                    </div>
+                    <select class="setting-select" id="set-tabsleep-minutes">
+                        <option value="5">5 minutes</option>
+                        <option value="10" selected>10 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
+                        <option value="60">1 hour</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -1164,6 +1194,7 @@
             trackers: true, https: false, dnt: false,
             gpu: true, prefetch: true, cache: '512',
             askdl: false, opendl: false,
+            tabsleep: true, tabsleepMinutes: 10,
         };
 
         // Profile stored separately in storage/profile.json
@@ -1246,6 +1277,8 @@
             set('set-trackers', s.trackers); set('set-https', s.https); set('set-dnt', s.dnt);
             set('set-gpu', s.gpu); set('set-prefetch', s.prefetch); set('set-cache', s.cache);
             set('set-askdl', s.askdl); set('set-opendl', s.opendl);
+            set('set-tabsleep', s.tabsleep !== false);
+            set('set-tabsleep-minutes', s.tabsleepMinutes || 10);
         }
 
         let settings = { ...DEFAULTS };

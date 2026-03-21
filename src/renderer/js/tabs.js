@@ -5,7 +5,8 @@ const Tabs = (() => {
 
   function createTabBackground(url) {
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false });
+    _touchTab(id);
     // Lazy: don't create webview until tab becomes active
     render();
     return id;
@@ -17,8 +18,9 @@ const Tabs = (() => {
     if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
 
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false });
     activeTabId = id;
+    _touchTab(id);
     // Create webview immediately only for the active tab
     WebView.createWebview(id, url);
     tabs.find(t => t.id === id)._webviewReady = true;
@@ -50,12 +52,15 @@ const Tabs = (() => {
 
   function setActiveTab(id) {
     activeTabId = id;
-    // Lazy: create webview on first activation
     const tab = tabs.find(t => t.id === id);
+    // Wake sleeping tab
+    if (tab && tab._sleeping) _wakeTab(id);
+    // Lazy: create webview on first activation or after wake
     if (tab && !tab._webviewReady) {
       WebView.createWebview(id, tab.url);
       tab._webviewReady = true;
     }
+    _touchTab(id);
     WebView.switchTo(id);
     render();
     _notifyChanged();
@@ -110,6 +115,69 @@ const Tabs = (() => {
 
   function _notifyChanged() {
     document.dispatchEvent(new CustomEvent('vortex:tab-changed'));
+  }
+
+  // ── Tab Sleep ─────────────────────────────────────────────────────────────
+  let _sleepEnabled  = true;
+  let _sleepTimeout  = 10 * 60 * 1000; // 10 minutes default
+  let _sleepTimer    = null;
+  const _lastActive  = new Map(); // tabId → timestamp
+
+  function _touchTab(id) {
+    _lastActive.set(id, Date.now());
+  }
+
+  function _sleepTab(id) {
+    const tab = tabs.find(t => t.id === id);
+    if (!tab || tab._sleeping || id === activeTabId) return;
+    if (!tab._webviewReady) return;
+
+    // Save current URL before destroying
+    const wv = document.querySelector(`.vortex-wv[data-tab-id="${id}"]`);
+    if (wv && wv.src && wv.src !== 'about:blank') tab.url = wv.src;
+
+    WebView.destroyWebview(id);
+    tab._webviewReady = false;
+    tab._sleeping = true;
+    render();
+    console.log('[TabSleep] suspended tab', id, tab.title);
+  }
+
+  function _wakeTab(id) {
+    const tab = tabs.find(t => t.id === id);
+    if (!tab || !tab._sleeping) return;
+    tab._sleeping = false;
+    _touchTab(id);
+  }
+
+  function _runSleepCheck() {
+    if (!_sleepEnabled) return;
+    const now = Date.now();
+    tabs.forEach(tab => {
+      if (tab.id === activeTabId || tab._sleeping) return;
+      const last = _lastActive.get(tab.id) || 0;
+      if (now - last >= _sleepTimeout) {
+        _sleepTab(tab.id);
+      }
+    });
+  }
+
+  function _startSleepTimer() {
+    clearInterval(_sleepTimer);
+    _sleepTimer = setInterval(_runSleepCheck, 60 * 1000); // check every minute
+  }
+
+  function setSleepEnabled(val) {
+    _sleepEnabled = val;
+    if (!val) {
+      // Wake all sleeping tabs
+      tabs.forEach(t => { if (t._sleeping) t._sleeping = false; });
+      render();
+    }
+  }
+
+  function setSleepTimeout(minutes) {
+    _sleepTimeout = minutes * 60 * 1000;
   }
 
   // ── Drag-and-drop reorder (hold 300ms to activate) ────────────────────────
@@ -255,14 +323,17 @@ const Tabs = (() => {
 
     tabs.forEach(tab => {
       const el = document.createElement('div');
-      el.className = 'tab' + (tab.id === activeTabId ? ' active' : '');
+      el.className = 'tab' + (tab.id === activeTabId ? ' active' : '') + (tab._sleeping ? ' tab-sleeping' : '');
       el.dataset.id = tab.id;
 
-      // favicon
+      // favicon / sleep icon
       const iconEl = document.createElement('div');
       iconEl.className = 'tab-icon';
 
-      if (tab.favicon) {
+      if (tab._sleeping) {
+        // Moon icon for sleeping tabs
+        iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a7a8a" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+      } else if (tab.favicon) {
         const img = document.createElement('img');
         img.width = 14;
         img.height = 14;
@@ -280,6 +351,7 @@ const Tabs = (() => {
       const titleEl = document.createElement('span');
       titleEl.className = 'tab-title';
       titleEl.textContent = tab.title;
+      if (tab._sleeping) titleEl.title = 'Sleeping — click to wake';
 
       const closeBtn = document.createElement('div');
       closeBtn.className = 'tab-close';
@@ -324,5 +396,8 @@ const Tabs = (() => {
     container.appendChild(controls);
   }
 
-  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render };
+  // Start sleep timer on load
+  document.addEventListener('DOMContentLoaded', _startSleepTimer);
+
+  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render, setSleepEnabled, setSleepTimeout, touchTab: _touchTab };
 })();

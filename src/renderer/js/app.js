@@ -4,6 +4,7 @@ const DEFAULT_URL = 'https://www.google.com';
 const SETTINGS_DEFAULTS = {
   startup: 'session', homepage: 'https://www.google.com',
   engine: 'google', suggestions: true, prefetch: true, tabpreview: true,
+  tabsleep: true, tabsleepMinutes: 10,
 };
 
 // Load settings from storage/settings.json
