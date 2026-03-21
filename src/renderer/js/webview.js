@@ -121,6 +121,8 @@ const WebView = (() => {
       if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
       // Reset sleep timer on navigation
       if (Tabs.touchTab) Tabs.touchTab(tabId);
+      // Hide translate bar on new navigation, then detect after page loads
+      _hideTranslateBar();
     });
 
     wv.addEventListener('did-navigate-in-page', (e) => {
@@ -137,6 +139,10 @@ const WebView = (() => {
       // Re-apply zoom if non-default
       const zoomLevel = _getZoom(tabId);
       if (zoomLevel !== 1.0) _applyZoom(tabId, zoomLevel);
+      // Detect language and show translate bar (delay so page text is ready)
+      const currentUrl = wv.src;
+      clearTimeout(_translateDetectTimer);
+      _translateDetectTimer = setTimeout(() => _detectAndShowBar(tabId, currentUrl), 1200);
     });
 
     wv.addEventListener('page-title-updated', (e) => {
@@ -233,6 +239,8 @@ const WebView = (() => {
     activeId = tabId;
     // Close find bar when switching tabs
     _closeFindBar();
+    // Hide translate bar when switching tabs
+    _hideTranslateBar();
     Object.entries(webviews).forEach(([id, wv]) => {
       wv.classList.toggle('active', id === tabId);
     });
@@ -312,6 +320,148 @@ const WebView = (() => {
   function print()     { const wv = webviews[activeId]; if (wv) wv.print(); }
   function savePage()  { const wv = webviews[activeId]; if (wv) wv.savePage(require('path').join(require('os').homedir(), 'Downloads', 'page.html'), 'HTMLComplete').catch(()=>{}); }
   function openDevTools() { const wv = webviews[activeId]; if (wv) wv.openDevTools(); }
+
+  // ── Page Translation ───────────────────────────────────────────────────────
+  const LANG_NAMES = {
+    af:'Afrikaans',ar:'Arabic',bg:'Bulgarian',bn:'Bengali',ca:'Catalan',
+    cs:'Czech',cy:'Welsh',da:'Danish',de:'German',el:'Greek',
+    en:'English',es:'Spanish',et:'Estonian',fa:'Persian',fi:'Finnish',
+    fr:'French',gu:'Gujarati',he:'Hebrew',hi:'Hindi',hr:'Croatian',
+    hu:'Hungarian',id:'Indonesian',it:'Italian',ja:'Japanese',kn:'Kannada',
+    ko:'Korean',lt:'Lithuanian',lv:'Latvian',mk:'Macedonian',ml:'Malayalam',
+    mr:'Marathi',ms:'Malay',mt:'Maltese',nl:'Dutch',no:'Norwegian',
+    pl:'Polish',pt:'Portuguese',ro:'Romanian',ru:'Russian',sk:'Slovak',
+    sl:'Slovenian',sq:'Albanian',sr:'Serbian',sv:'Swedish',sw:'Swahili',
+    ta:'Tamil',te:'Telugu',th:'Thai',tl:'Filipino',tr:'Turkish',
+    uk:'Ukrainian',ur:'Urdu',vi:'Vietnamese','zh-CN':'Chinese (Simplified)',
+    'zh-TW':'Chinese (Traditional)',
+  };
+
+  // Dismissed URLs — don't show bar again for same page
+  const _translateDismissed = new Set();
+  // Currently translated tab URLs
+  const _translatedTabs = new Set();
+
+  let _translateBar = null;
+  let _translateDetectTimer = null;
+
+  function _getTranslateBar() {
+    if (!_translateBar) _translateBar = document.getElementById('translate-bar');
+    return _translateBar;
+  }
+
+  function _hideTranslateBar() {
+    const bar = _getTranslateBar();
+    if (bar) bar.classList.remove('visible');
+  }
+
+  async function _detectAndShowBar(tabId, url) {
+    // Skip vortex pages, translate.google.com itself, and dismissed URLs
+    if (!url || url.startsWith('vortex://') || url.startsWith('file://')) return;
+    if (url.includes('translate.google') || url.includes('translate.goog')) return;
+    if (_translateDismissed.has(url)) return;
+    if (tabId !== activeId) return;
+
+    const wv = webviews[tabId];
+    if (!wv) return;
+
+    // Get page lang attribute + first 200 chars of body text for detection
+    let sample = '';
+    let htmlLang = '';
+    try {
+      const result = await wv.executeJavaScript(`
+        (function() {
+          var lang = document.documentElement.lang || document.querySelector('meta[http-equiv="content-language"]')?.content || '';
+          var text = (document.body && document.body.innerText || '').trim().slice(0, 300);
+          return { lang: lang.toLowerCase().split('-')[0], text: text };
+        })()
+      `);
+      htmlLang = (result.lang || '').trim();
+      sample = (result.text || '').trim();
+    } catch (_) { return; }
+
+    if (!sample && !htmlLang) return;
+
+    // Get user's preferred language from settings
+    let userLang = 'en';
+    try {
+      const s = await window.vortexAPI.invoke('storage:read', 'settings');
+      userLang = (s && s.lang) || 'en';
+    } catch (_) {}
+
+    // Determine detected language
+    let detectedLang = htmlLang;
+
+    // If html lang is missing or 'en' but we want to verify, use Google Translate detect
+    if (!detectedLang && sample.length > 20) {
+      try {
+        const encoded = encodeURIComponent(sample.slice(0, 200));
+        const resp = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encoded}`
+        );
+        if (resp.ok) {
+          const data = await resp.json();
+          // Response format: [[translations], null, detectedLang, ...]
+          detectedLang = (data && data[2]) ? data[2] : '';
+        }
+      } catch (_) {}
+    }
+
+    if (!detectedLang) return;
+
+    // Normalize: zh → zh-CN
+    if (detectedLang === 'zh') detectedLang = 'zh-CN';
+
+    // Don't show bar if page language matches user's preferred language
+    const userLangBase = userLang.split('-')[0];
+    const detectedBase = detectedLang.split('-')[0];
+    if (detectedBase === userLangBase) return;
+
+    // Still active tab?
+    if (tabId !== activeId) return;
+
+    const bar = _getTranslateBar();
+    if (!bar) return;
+
+    const langNameEl = document.getElementById('translate-lang-name');
+    const targetSel  = document.getElementById('translate-target');
+    if (langNameEl) langNameEl.textContent = LANG_NAMES[detectedLang] || detectedLang;
+
+    // Pre-select target to user's preferred language
+    if (targetSel) {
+      const opt = targetSel.querySelector(`option[value="${userLang}"]`) ||
+                  targetSel.querySelector(`option[value="${userLangBase}"]`);
+      if (opt) targetSel.value = opt.value;
+    }
+
+    // Store detected lang on bar for translate button
+    bar.dataset.detectedLang = detectedLang;
+    bar.dataset.pageUrl = url;
+
+    bar.classList.add('visible');
+  }
+
+  // Wire translate bar buttons once DOM ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const bar = document.getElementById('translate-bar');
+    if (!bar) return;
+
+    document.getElementById('translate-btn').addEventListener('click', () => {
+      const url    = bar.dataset.pageUrl;
+      const target = document.getElementById('translate-target').value;
+      if (!url || !target) return;
+      const translateUrl = `https://translate.google.com/translate?sl=auto&tl=${target}&u=${encodeURIComponent(url)}`;
+      WebView.loadURL(translateUrl);
+      _hideTranslateBar();
+      _translateDismissed.add(url);
+    });
+
+    document.getElementById('translate-close').addEventListener('click', () => {
+      const url = bar.dataset.pageUrl;
+      if (url) _translateDismissed.add(url);
+      _hideTranslateBar();
+    });
+  });
 
   // ── Find in Page ───────────────────────────────────────────────────────────
   let _findActive = false;

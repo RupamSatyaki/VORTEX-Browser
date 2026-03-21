@@ -1519,3 +1519,74 @@ webview.vortex-wv.active iframe {
 .tab.tab-sleeping:hover {
   opacity: 0.8;
 }
+
+/* ── Translate Bar ─────────────────────────────────────────────────────────── */
+#translate-bar {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #0f2222;
+  border: 1px solid #1e4a4a;
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #c8e8e5;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  z-index: 9000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  white-space: nowrap;
+  max-width: 90vw;
+}
+
+#translate-bar.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+#translate-bar select {
+  background: #1a3838;
+  border: 1px solid #2e4a4c;
+  border-radius: 6px;
+  color: #c8e8e5;
+  font-size: 12px;
+  padding: 4px 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+#translate-bar select:focus { border-color: #00c8b4; }
+
+#translate-btn {
+  background: #00c8b4;
+  border: none;
+  border-radius: 6px;
+  color: #0a1a1a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#translate-btn:hover { background: #00e0ca; }
+
+#translate-close {
+  background: none;
+  border: none;
+  color: #4a8080;
+  cursor: pointer;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+#translate-close:hover { color: #c8e8e5; }
