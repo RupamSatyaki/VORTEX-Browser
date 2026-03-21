@@ -119,6 +119,8 @@ const WebView = (() => {
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
       // Track navigation
       if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
+      // Reset sleep timer on navigation
+      if (Tabs.touchTab) Tabs.touchTab(tabId);
     });
 
     wv.addEventListener('did-navigate-in-page', (e) => {
