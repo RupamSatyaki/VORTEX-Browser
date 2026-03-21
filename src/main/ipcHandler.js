@@ -319,6 +319,13 @@ function registerHandlers() {
       if (wc) wc.setZoomFactor(factor);
     } catch (_) {}
   });
+
+  // Set spellcheck languages on default session
+  ipcMain.on('spellcheck:setLanguage', (_e, langCode) => {
+    try {
+      session.defaultSession.setSpellCheckerLanguages([langCode]);
+    } catch (_) {}
+  });
 }
 
 module.exports = { registerHandlers };
