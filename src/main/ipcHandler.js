@@ -241,6 +241,77 @@ function registerHandlers() {
     }
   });
 
+  // Full screenshot — returns full-res dataURL (visible area)
+  ipcMain.handle('screenshot:capture', async (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (!wc) return null;
+      const img = await wc.capturePage();
+      return img.toDataURL();
+    } catch {
+      return null;
+    }
+  });
+
+  // Full page screenshot — scrolls and stitches (uses executeJavaScript to get full height)
+  ipcMain.handle('screenshot:captureFull', async (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (!wc) return null;
+
+      // Get full page dimensions
+      const dims = await wc.executeJavaScript(
+        '({ w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight })'
+      );
+
+      // Clamp to reasonable max (16384px) to avoid memory issues
+      const fullW = Math.min(dims.w, 16384);
+      const fullH = Math.min(dims.h, 16384);
+
+      // Temporarily resize webContents to full page height
+      const origSize = wc.getOwnerBrowserWindow()?.getContentSize() || [1280, 800];
+      await wc.enableDeviceEmulation({
+        screenPosition: 'desktop',
+        screenSize: { width: fullW, height: fullH },
+        viewSize: { width: fullW, height: fullH },
+        viewPosition: { x: 0, y: 0 },
+        deviceScaleFactor: 1,
+      });
+
+      // Small delay for reflow
+      await new Promise(r => setTimeout(r, 300));
+
+      const img = await wc.capturePage({ x: 0, y: 0, width: fullW, height: fullH });
+      wc.disableDeviceEmulation();
+
+      return img.toDataURL();
+    } catch (err) {
+      // Fallback to visible area
+      try {
+        const wc = webContents.fromId(wcId);
+        if (!wc) return null;
+        const img = await wc.capturePage();
+        return img.toDataURL();
+      } catch { return null; }
+    }
+  });
+
+  // Save screenshot to disk via save dialog
+  ipcMain.handle('screenshot:save', async (_e, dataURL, defaultName) => {
+    const { dialog } = require('electron');
+    const win = BrowserWindow.getFocusedWindow();
+    const result = await dialog.showSaveDialog(win, {
+      title: 'Save Screenshot',
+      defaultPath: defaultName || `screenshot-${Date.now()}.png`,
+      filters: [{ name: 'PNG Image', extensions: ['png'] }],
+    });
+    if (result.canceled || !result.filePath) return null;
+    const fs = require('fs');
+    const base64 = dataURL.replace(/^data:image\/png;base64,/, '');
+    fs.writeFileSync(result.filePath, Buffer.from(base64, 'base64'));
+    return result.filePath;
+  });
+
   // Set zoom factor on a webview's webContents
   ipcMain.handle('webview:setZoom', (_e, wcId, factor) => {
     try {

@@ -361,6 +361,16 @@ const Navigation = (() => {
         <span class="nd-label">Find in Page</span>
         <span class="nd-shortcut">Ctrl+F</span>
       </div>
+      <div class="nd-item" data-action="screenshot">
+        <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+        <span class="nd-label">Screenshot</span>
+        <span class="nd-shortcut">Ctrl+Shift+S</span>
+      </div>
+      <div class="nd-item" data-action="screenshot-full">
+        <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></span>
+        <span class="nd-label">Full Page Screenshot</span>
+        <span class="nd-shortcut">Ctrl+Shift+F</span>
+      </div>
       <div class="nd-item" data-action="print">
         <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>
         <span class="nd-label">Print</span>
@@ -404,6 +414,8 @@ const Navigation = (() => {
         case 'downloads':    Panel.open('downloads'); break;
         case 'bookmarks':    Panel.open('bookmarks'); break;
         case 'find':         WebView.findInPage(); break;
+        case 'screenshot':      Screenshot.capture(false); break;
+        case 'screenshot-full': Screenshot.capture(true);  break;
         case 'print':        WebView.print(); break;
         case 'save-page':    WebView.savePage(); break;
         case 'devtools':     WebView.openDevTools(); break;

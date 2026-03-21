@@ -444,5 +444,11 @@ const WebView = (() => {
     else if (e.key === '0') { e.preventDefault(); zoomReset(); }
   });
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset };
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset,
+    getActiveWcId() {
+      const wv = webviews[activeId];
+      if (!wv) return null;
+      try { return wv.getWebContentsId(); } catch (_) { return null; }
+    }
+  };
 })();
