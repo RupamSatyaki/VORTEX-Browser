@@ -621,6 +621,30 @@
             Profile
         </div>
         <div class="nav-sep"></div>
+        <div class="nav-item" data-section="sync">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <polyline points="23 20 23 14 17 14"/>
+                <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+            </svg>
+            Sync & Backup
+        </div>
+        <div class="nav-item" data-section="notifications">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            Notifications
+        </div>
+        <div class="nav-item" data-section="languages">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            Languages
+        </div>
+        <div class="nav-sep"></div>
         <div class="nav-item" data-section="shortcuts">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="7" width="20" height="14" rx="2" />
@@ -1133,6 +1157,161 @@
             </div>
         </div>
 
+        <!-- Sync & Backup -->
+        <div class="section" id="sec-sync">
+            <div class="section-title">Sync & Backup</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Export Bookmarks</div>
+                        <div class="row-desc">Download all bookmarks as JSON</div>
+                    </div>
+                    <button class="setting-btn" id="btn-export-bookmarks">Export</button>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Import Bookmarks</div>
+                        <div class="row-desc">Restore bookmarks from JSON file</div>
+                    </div>
+                    <button class="setting-btn" id="btn-import-bookmarks">Import</button>
+                    <input type="file" id="file-import-bookmarks" accept=".json" style="display:none"/>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Export History</div>
+                        <div class="row-desc">Download browsing history as JSON</div>
+                    </div>
+                    <button class="setting-btn" id="btn-export-history">Export</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Export Settings</div>
+                        <div class="row-desc">Backup all settings to JSON file</div>
+                    </div>
+                    <button class="setting-btn" id="btn-export-settings">Export</button>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Import Settings</div>
+                        <div class="row-desc">Restore settings from backup file</div>
+                    </div>
+                    <button class="setting-btn" id="btn-import-settings">Import</button>
+                    <input type="file" id="file-import-settings" accept=".json" style="display:none"/>
+                </div>
+            </div>
+            <div id="sync-status" style="font-size:12px;color:#00c8b4;padding:6px 4px;min-height:20px;"></div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="section" id="sec-notifications">
+            <div class="section-title">Notifications</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Desktop Notifications</div>
+                        <div class="row-desc">Allow websites to send notifications</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-notifications" checked/><div class="toggle-track"></div></label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Notification Sound</div>
+                        <div class="row-desc">Play sound when notification arrives</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-notif-sound" checked/><div class="toggle-track"></div></label>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-row" style="align-items:flex-start;flex-direction:column;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                        <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+                        <div class="row-text">
+                            <div class="row-label">Per-Site Permissions</div>
+                            <div class="row-desc">Manage notification permissions per site</div>
+                        </div>
+                        <button class="setting-btn" id="btn-notif-clear-all">Clear All</button>
+                    </div>
+                    <div id="notif-sites-list" style="width:100%;max-height:200px;overflow-y:auto;"></div>
+                    <div style="display:flex;gap:8px;width:100%;align-items:center;">
+                        <input class="setting-input" id="notif-add-site" placeholder="example.com" style="flex:1;"/>
+                        <button class="setting-btn" id="btn-notif-allow">Allow</button>
+                        <button class="setting-btn danger" id="btn-notif-block">Block</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Languages -->
+        <div class="section" id="sec-languages">
+            <div class="section-title">Languages</div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Browser Language</div>
+                        <div class="row-desc">Language used for browser UI</div>
+                    </div>
+                    <select class="setting-select" id="set-lang">
+                        <option value="en">English</option>
+                        <option value="hi">Hindi (हिन्दी)</option>
+                        <option value="es">Spanish (Español)</option>
+                        <option value="fr">French (Français)</option>
+                        <option value="de">German (Deutsch)</option>
+                        <option value="ja">Japanese (日本語)</option>
+                        <option value="zh">Chinese (中文)</option>
+                        <option value="ar">Arabic (العربية)</option>
+                        <option value="pt">Portuguese (Português)</option>
+                        <option value="ru">Russian (Русский)</option>
+                        <option value="ko">Korean (한국어)</option>
+                        <option value="it">Italian (Italiano)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Spell Check</div>
+                        <div class="row-desc">Check spelling while typing in web forms</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-spellcheck" checked/><div class="toggle-track"></div></label>
+                </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Spell Check Language</div>
+                        <div class="row-desc">Language used for spell checking</div>
+                    </div>
+                    <select class="setting-select" id="set-spellcheck-lang">
+                        <option value="en-US">English (US)</option>
+                        <option value="en-GB">English (UK)</option>
+                        <option value="hi">Hindi</option>
+                        <option value="es">Spanish</option>
+                        <option value="fr">French</option>
+                        <option value="de">German</option>
+                        <option value="ja">Japanese</option>
+                        <option value="zh-CN">Chinese (Simplified)</option>
+                        <option value="pt-BR">Portuguese (Brazil)</option>
+                        <option value="ru">Russian</option>
+                        <option value="ko">Korean</option>
+                        <option value="it">Italian</option>
+                        <option value="ar">Arabic</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
         <!-- About -->
         <div class="section" id="sec-about">
             <div class="section-title">About Vortex</div>
@@ -1195,6 +1374,8 @@
             gpu: true, prefetch: true, cache: '512',
             askdl: false, opendl: false,
             tabsleep: true, tabsleepMinutes: 10,
+            notifications: true, notifSound: true, notifSites: {},
+            lang: 'en', spellcheck: true, spellcheckLang: 'en-US',
         };
 
         // Profile stored separately in storage/profile.json
@@ -1279,6 +1460,12 @@
             set('set-askdl', s.askdl); set('set-opendl', s.opendl);
             set('set-tabsleep', s.tabsleep !== false);
             set('set-tabsleep-minutes', s.tabsleepMinutes || 10);
+            set('set-notifications', s.notifications !== false);
+            set('set-notif-sound', s.notifSound !== false);
+            set('set-lang', s.lang || 'en');
+            set('set-spellcheck', s.spellcheck !== false);
+            set('set-spellcheck-lang', s.spellcheckLang || 'en-US');
+            _renderNotifSites(s.notifSites || {});
         }
 
         let settings = { ...DEFAULTS };
@@ -1419,7 +1606,9 @@
         // Auto-save on any settings change (exclude profile inputs)
         document.querySelectorAll('select[id^="set-"], input[id^="set-"]').forEach(el => {
             el.addEventListener('change', () => {
-                const key = el.id.replace('set-', '');
+                // Convert hyphenated id to camelCase key (e.g. set-tabsleep-minutes → tabsleepMinutes)
+                const raw = el.id.replace('set-', '');
+                const key = raw.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
                 settings[key] = el.type === 'checkbox' ? el.checked : el.value;
                 save(settings);
             });
@@ -1458,6 +1647,132 @@
                 document.getElementById('about-ver').textContent = 'Version ' + v;
             }).catch(() => { });
         }
+
+        // ── Notification Sites ───────────────────────────────────────────────────────
+        function _renderNotifSites(sites) {
+            const list = document.getElementById('notif-sites-list');
+            if (!list) return;
+            const entries = Object.entries(sites || {});
+            if (!entries.length) {
+                list.innerHTML = '<div style="font-size:12px;color:#4a8080;padding:6px 0;">No per-site rules yet.</div>';
+                return;
+            }
+            list.innerHTML = entries.map(([site, perm]) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a3030;">
+                    <span style="flex:1;font-size:12px;color:#c8e8e5;">${site}</span>
+                    <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${perm==='allow'?'rgba(34,197,94,0.15)':'rgba(239,68,68,0.15)'};color:${perm==='allow'?'#22c55e':'#ef4444'};">${perm}</span>
+                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-site="${site}">✕</button>
+                </div>
+            `).join('');
+            list.querySelectorAll('button[data-site]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    delete settings.notifSites[btn.dataset.site];
+                    await save(settings);
+                    _renderNotifSites(settings.notifSites);
+                });
+            });
+        }
+
+        function _addNotifSite(perm) {
+            const input = document.getElementById('notif-add-site');
+            const site = (input.value || '').trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+            if (!site) return;
+            if (!settings.notifSites) settings.notifSites = {};
+            settings.notifSites[site] = perm;
+            save(settings);
+            _renderNotifSites(settings.notifSites);
+            input.value = '';
+        }
+
+        document.getElementById('btn-notif-allow').addEventListener('click', () => _addNotifSite('allow'));
+        document.getElementById('btn-notif-block').addEventListener('click', () => _addNotifSite('block'));
+        document.getElementById('btn-notif-clear-all').addEventListener('click', async () => {
+            if (!confirm('Clear all per-site notification rules?')) return;
+            settings.notifSites = {};
+            await save(settings);
+            _renderNotifSites({});
+        });
+
+        // ── Sync & Backup ────────────────────────────────────────────────────────────
+        function _showSyncStatus(msg, isError) {
+            const el = document.getElementById('sync-status');
+            if (!el) return;
+            el.textContent = msg;
+            el.style.color = isError ? '#c86060' : '#00c8b4';
+            clearTimeout(el._t);
+            el._t = setTimeout(() => { el.textContent = ''; }, 3000);
+        }
+
+        function _downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = filename; a.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        // Export Bookmarks
+        document.getElementById('btn-export-bookmarks').addEventListener('click', async () => {
+            try {
+                const data = await _invoke('storage:read', 'bookmarks') || [];
+                _downloadJSON(data, `vortex-bookmarks-${Date.now()}.json`);
+                _showSyncStatus('Bookmarks exported successfully.');
+            } catch { _showSyncStatus('Export failed.', true); }
+        });
+
+        // Import Bookmarks
+        document.getElementById('btn-import-bookmarks').addEventListener('click', () => {
+            document.getElementById('file-import-bookmarks').click();
+        });
+        document.getElementById('file-import-bookmarks').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) throw new Error('Invalid format');
+                await _invoke('storage:write', 'bookmarks', data);
+                _showSyncStatus(`Imported ${data.length} bookmarks.`);
+            } catch { _showSyncStatus('Import failed — invalid JSON.', true); }
+            e.target.value = '';
+        });
+
+        // Export History
+        document.getElementById('btn-export-history').addEventListener('click', async () => {
+            try {
+                const data = await _invoke('storage:read', 'tab_history') || [];
+                _downloadJSON(data, `vortex-history-${Date.now()}.json`);
+                _showSyncStatus('History exported successfully.');
+            } catch { _showSyncStatus('Export failed.', true); }
+        });
+
+        // Export Settings
+        document.getElementById('btn-export-settings').addEventListener('click', async () => {
+            try {
+                const data = await _invoke('storage:read', 'settings') || settings;
+                _downloadJSON(data, `vortex-settings-${Date.now()}.json`);
+                _showSyncStatus('Settings exported successfully.');
+            } catch { _showSyncStatus('Export failed.', true); }
+        });
+
+        // Import Settings
+        document.getElementById('btn-import-settings').addEventListener('click', () => {
+            document.getElementById('file-import-settings').click();
+        });
+        document.getElementById('file-import-settings').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (typeof data !== 'object' || Array.isArray(data)) throw new Error('Invalid format');
+                settings = Object.assign({}, DEFAULTS, data);
+                await save(settings);
+                applyToUI(settings);
+                _showSyncStatus('Settings restored successfully.');
+            } catch { _showSyncStatus('Import failed — invalid file.', true); }
+            e.target.value = '';
+        });
 
         // ── Hash navigation (vortex://settings#shortcuts etc.) ──────────────────────
         function goToHash() {
