@@ -601,6 +601,11 @@ const WebView = (() => {
       const wv = webviews[activeId];
       if (!wv) return null;
       try { return wv.getWebContentsId(); } catch (_) { return null; }
+    },
+    getWcId(tabId) {
+      const wv = webviews[tabId];
+      if (!wv) return null;
+      try { return wv.getWebContentsId(); } catch (_) { return null; }
     }
   };
 })();

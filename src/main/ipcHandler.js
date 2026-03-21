@@ -326,6 +326,17 @@ function registerHandlers() {
       session.defaultSession.setSpellCheckerLanguages([langCode]);
     } catch (_) {}
   });
+
+  // Get memory usage for a webContents by id
+  ipcMain.handle('tab:memoryUsage', async (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (!wc) return null;
+      const info = await wc.getProcessMemoryInfo();
+      // privateBytes = private memory in KB, convert to MB
+      return info.privateBytes || info.workingSetSize || 0;
+    } catch (_) { return null; }
+  });
 }
 
 module.exports = { registerHandlers };

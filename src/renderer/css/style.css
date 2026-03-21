@@ -488,6 +488,16 @@ webview.vortex-wv.active iframe {
   padding: 0 2px;
 }
 
+.tp-mem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #4a8080;
+  padding: 0 2px;
+}
+
 #link-preview {
   position: fixed;
   /* height: 20px; */
