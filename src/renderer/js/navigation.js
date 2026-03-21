@@ -21,7 +21,7 @@ const Navigation = (() => {
       <path d="m21 21-4.35-4.35"/>
     </svg>`;
 
-  function render() {
+  function render(isIncognito = false) {
     const container = document.getElementById('navbar-container');
     container.className = 'browser-toolbar';
     container.innerHTML = `
@@ -63,6 +63,16 @@ const Navigation = (() => {
         </div>
         <div id="url-progress-bar"><div id="url-progress-fill"></div></div>
       </div>
+
+      ${isIncognito ? `
+      <div id="incognito-badge" title="Incognito Window — browsing not saved">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <line x1="1" y1="1" x2="23" y2="23" stroke="#a855f7"/>
+        </svg>
+        <span>Incognito</span>
+      </div>` : ''}
 
       <button class="toolbar-btn" id="btn-downloads" title="Downloads" style="position:relative">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -230,7 +240,7 @@ const Navigation = (() => {
   };
 
   function _newTabURL() {
-    return ENGINE_HOME[_searchEngine] || 'https://www.google.com';
+    return 'https://www.google.com';
   }
 
   let _searchEngine = 'google';
@@ -331,6 +341,11 @@ const Navigation = (() => {
         <span class="nd-label">New Window</span>
         <span class="nd-shortcut">Ctrl+N</span>
       </div>
+      <div class="nd-item" data-action="new-incognito">
+        <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="1" y1="1" x2="23" y2="23" stroke="#a855f7"/></svg></span>
+        <span class="nd-label" style="color:#a855f7">New Incognito Tab</span>
+        <span class="nd-shortcut">Ctrl+Shift+N</span>
+      </div>
       <div class="nd-sep"></div>
       <div class="nd-item" data-action="history">
         <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
@@ -415,6 +430,7 @@ const Navigation = (() => {
       switch (item.dataset.action) {
         case 'new-tab':      Tabs.createTab(_newTabURL()); break;
         case 'new-window':   window.vortexAPI.send('window:new'); break;
+        case 'new-incognito': _showComingSoon('Incognito Mode'); break;
         case 'history':      Panel.open('history'); break;
         case 'downloads':    Panel.open('downloads'); break;
         case 'bookmarks':    Panel.open('bookmarks'); break;
@@ -470,6 +486,35 @@ const Navigation = (() => {
   function _closeMenu() {
     const menu = document.getElementById('nav-dropdown');
     if (menu) menu.classList.remove('visible');
+  }
+
+  function _showComingSoon(feature) {
+    const existing = document.getElementById('coming-soon-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.id = 'coming-soon-toast';
+    toast.innerHTML = `
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a855f7" stroke-width="2" style="flex-shrink:0">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span><strong>${feature}</strong> — Coming Soon</span>
+    `;
+    toast.style.cssText = `
+      position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+      background:#1a0a2e;border:1px solid #a855f7;border-radius:10px;
+      padding:10px 18px;display:flex;align-items:center;gap:10px;
+      color:#d8b4fe;font-size:13px;z-index:99999;
+      box-shadow:0 4px 20px rgba(168,85,247,0.3);
+      animation:toastIn 0.2s ease;
+    `;
+    if (!document.getElementById('coming-soon-style')) {
+      const s = document.createElement('style');
+      s.id = 'coming-soon-style';
+      s.textContent = '@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}';
+      document.head.appendChild(s);
+    }
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2500);
   }
 
   // ── Profile Dropdown ───────────────────────────────────────────────────────
@@ -718,7 +763,10 @@ const Navigation = (() => {
       if (!e.ctrlKey) return;
       switch (e.key) {
         case 't': e.preventDefault(); Tabs.createTab(_newTabURL()); break;
-        case 'n': e.preventDefault(); window.vortexAPI.send('window:new'); break;
+        case 'n':
+          if (e.shiftKey) { e.preventDefault(); _showComingSoon('Incognito Mode'); }
+          else            { e.preventDefault(); window.vortexAPI.send('window:new'); }
+          break;
         case 'w': e.preventDefault(); { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); } break;
         case 'h': e.preventDefault(); Panel.open('history'); break;
         case 'j': e.preventDefault(); Panel.open('downloads'); break;
