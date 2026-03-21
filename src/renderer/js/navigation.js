@@ -255,6 +255,9 @@ const Navigation = (() => {
     if (typeof s.tabpreview === 'boolean') TabPreview.setEnabled(s.tabpreview);
     if (typeof s.tabsleep === 'boolean') Tabs.setSleepEnabled(s.tabsleep);
     if (typeof s.tabsleepMinutes === 'number') Tabs.setSleepTimeout(s.tabsleepMinutes);
+    if (s.spellcheckLang && window.vortexAPI) {
+      window.vortexAPI.send('spellcheck:setLanguage', s.spellcheckLang);
+    }
   }
 
   function setURL(url) {
