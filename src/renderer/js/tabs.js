@@ -12,17 +12,16 @@ const Tabs = (() => {
     return id;
   }
 
-  function createTab(url = 'https://www.google.com') {
+  function createTab(url = 'https://www.google.com', opts = {}) {
     // Settings and Downloads open as floating panel, not a tab
     if (url === 'vortex://settings')  { Panel.open('settings');  return null; }
     if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
-
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, incognito: !!opts.incognito });
     activeTabId = id;
     _touchTab(id);
     // Create webview immediately only for the active tab
-    WebView.createWebview(id, url);
+    WebView.createWebview(id, url, { incognito: !!opts.incognito });
     tabs.find(t => t.id === id)._webviewReady = true;
     WebView.switchTo(id);
     render();
@@ -323,7 +322,7 @@ const Tabs = (() => {
 
     tabs.forEach(tab => {
       const el = document.createElement('div');
-      el.className = 'tab' + (tab.id === activeTabId ? ' active' : '') + (tab._sleeping ? ' tab-sleeping' : '');
+      el.className = 'tab' + (tab.id === activeTabId ? ' active' : '') + (tab._sleeping ? ' tab-sleeping' : '') + (tab.incognito ? ' tab-incognito' : '');
       el.dataset.id = tab.id;
 
       // favicon / sleep icon
@@ -373,7 +372,7 @@ const Tabs = (() => {
     newBtn.className = 'tab-add';
     newBtn.title = 'New Tab';
     newBtn.innerHTML = `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>`;
-    newBtn.addEventListener('click', () => createTab('https://www.google.com'));
+    newBtn.addEventListener('click', () => createTab(Navigation.newTabURL()));
     container.appendChild(newBtn);
 
     // Window controls — right side of tabbar
@@ -396,8 +395,12 @@ const Tabs = (() => {
     container.appendChild(controls);
   }
 
+  function createIncognitoTab(url = 'https://www.google.com') {
+    return createTab(url, { incognito: true });
+  }
+
   // Start sleep timer on load
   document.addEventListener('DOMContentLoaded', _startSleepTimer);
 
-  return { createTab, createTabBackground, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render, setSleepEnabled, setSleepTimeout, touchTab: _touchTab };
+  return { createTab, createTabBackground, createIncognitoTab, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render, setSleepEnabled, setSleepTimeout, touchTab: _touchTab };
 })();

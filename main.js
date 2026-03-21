@@ -11,6 +11,15 @@ process.on('uncaughtException', (err) => {
   if (err.message && err.message.includes('dragEvent')) return;
   console.error(err);
 });
+
+// Suppress unhandled promise rejections from webview GUEST_VIEW_MANAGER_CALL (ERR_ABORTED)
+process.on('unhandledRejection', (reason) => {
+  if (!reason) return;
+  if (reason.errno === -3 || (reason.code && reason.code === 'ERR_ABORTED')) return;
+  if (reason.message && reason.message.includes('ERR_ABORTED')) return;
+  if (reason.message && reason.message.includes('Render frame was disposed')) return;
+  console.error('Unhandled rejection:', reason);
+});
 const WindowManager = require('./src/main/windowManager');
 const MenuManager = require('./src/main/menuManager');
 const IpcHandler = require('./src/main/ipcHandler');
