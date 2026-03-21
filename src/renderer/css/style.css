@@ -1508,3 +1508,14 @@ webview.vortex-wv.active iframe {
 .tab.tab-dragging {
   cursor: grabbing;
 }
+
+/* ── Tab Sleep ── */
+.tab.tab-sleeping {
+  opacity: 0.55;
+}
+.tab.tab-sleeping .tab-title {
+  color: #4a7a8a;
+}
+.tab.tab-sleeping:hover {
+  opacity: 0.8;
+}
