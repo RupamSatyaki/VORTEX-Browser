@@ -253,6 +253,8 @@ const Navigation = (() => {
     if (typeof s.prefetch === 'boolean') Prefetch.setEnabled(s.prefetch);
     if (typeof s.suggestions === 'boolean') Prefetch.setSuggestionsEnabled(s.suggestions);
     if (typeof s.tabpreview === 'boolean') TabPreview.setEnabled(s.tabpreview);
+    if (typeof s.tabsleep === 'boolean') Tabs.setSleepEnabled(s.tabsleep);
+    if (typeof s.tabsleepMinutes === 'number') Tabs.setSleepTimeout(s.tabsleepMinutes);
   }
 
   function setURL(url) {
