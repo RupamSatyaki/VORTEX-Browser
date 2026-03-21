@@ -22,7 +22,7 @@ function createMainWindow() {
       webviewTag: true,
       webSecurity: false,
       allowRunningInsecureContent: true,
-      backgroundThrottling: false, // keep background webview active
+      backgroundThrottling: false,
     },
   });
 
@@ -46,8 +46,39 @@ function createMainWindow() {
   });
 }
 
+function createIncognitoWindow() {
+  nativeTheme.themeSource = 'dark';
+
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 800,
+    minHeight: 600,
+    title: 'Vortex — Incognito',
+    frame: false,
+    titleBarStyle: 'hidden',
+    webPreferences: {
+      preload: path.join(__dirname, '../../preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      webviewTag: true,
+      webSecurity: false,
+      allowRunningInsecureContent: true,
+      backgroundThrottling: false,
+    },
+  });
+
+  // Pass incognito flag via query param so renderer knows
+  win.loadFile(path.join(__dirname, '../renderer/index.html'), {
+    query: { incognito: '1' },
+  });
+
+  win.on('closed', () => {});
+  return win;
+}
+
 function getMainWindow() {
   return mainWindow;
 }
 
-module.exports = { createMainWindow, getMainWindow };
+module.exports = { createMainWindow, createIncognitoWindow, getMainWindow };

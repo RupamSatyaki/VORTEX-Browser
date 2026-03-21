@@ -5,6 +5,7 @@ const WebView = (() => {
   let webviewPreloadPath = '';
   let downloadsPageUrl = '';
   let settingsPageUrl = '';
+  let newtabPageUrl = '';
 
   // Preloaded hidden webviews for vortex:// internal pages
   const preloaded = {};
@@ -19,6 +20,7 @@ const WebView = (() => {
   const VORTEX_PAGES = {
     'vortex://downloads': { fileUrl: () => downloadsPageUrl, title: 'Downloads' },
     'vortex://settings':  { fileUrl: () => settingsPageUrl,  title: 'Settings'  },
+    'vortex://newtab':    { fileUrl: () => newtabPageUrl,    title: 'New Tab'   },
   };
 
   // Returns favicon URL for any website using Google's favicon CDN
@@ -40,6 +42,10 @@ const WebView = (() => {
     wv.src = fileUrl;
     wv.className = 'vortex-wv'; // hidden — no .active
     wv.dataset.preloadFor = vortexUrl;
+    // Newtab needs preload for sendToHost
+    if (vortexUrl === 'vortex://newtab' && webviewPreloadPath) {
+      wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
+    }
     container.appendChild(wv);
 
     const entry = { wv, ready: false };
@@ -55,6 +61,7 @@ const WebView = (() => {
 
   function _attachVortexListeners(wv, tabId, vortexUrl) {
     const meta = VORTEX_PAGES[vortexUrl];
+    const isNewtab = vortexUrl === 'vortex://newtab';
 
     Tabs.updateTab(tabId, { title: meta.title });
 
@@ -64,31 +71,44 @@ const WebView = (() => {
         Navigation.setURL(vortexUrl);
         document.title = meta.title + ' — Vortex';
       }
-      // Force full height inside the vortex page using actual pixel dimensions
-      wv.executeJavaScript(`
-        (function() {
-          var h = window.innerHeight + 'px';
-          var w = window.innerWidth + 'px';
-          document.documentElement.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;';
-          document.body.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;';
-          var page = document.querySelector('.page');
-          if (page) {
-            page.style.cssText = 'max-width:800px;width:100%;margin:0 auto;padding:40px 28px 20px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;height:' + h + ';';
-          }
-        })();
-      `).catch(() => {});
-      document.dispatchEvent(new CustomEvent('vortex-downloads-ready', { detail: wv }));
+
+      if (!isNewtab) {
+        // Force full height for panel-style vortex pages (settings, downloads, etc.)
+        wv.executeJavaScript(`
+          (function() {
+            var h = window.innerHeight + 'px';
+            var w = window.innerWidth + 'px';
+            document.documentElement.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;';
+            document.body.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;';
+            var page = document.querySelector('.page');
+            if (page) {
+              page.style.cssText = 'max-width:800px;width:100%;margin:0 auto;padding:40px 28px 20px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;height:' + h + ';';
+            }
+          })();
+        `).catch(() => {});
+      }
+
+      // Only dispatch downloads-ready for downloads page
+      if (vortexUrl === 'vortex://downloads') {
+        document.dispatchEvent(new CustomEvent('vortex-downloads-ready', { detail: wv }));
+      }
     });
 
     wv.addEventListener('did-navigate', () => {
       if (activeId === tabId) Navigation.setURL(vortexUrl);
       Tabs.updateTab(tabId, { url: vortexUrl });
     });
+
+    // Newtab quick links — open URL in current tab
+    if (isNewtab) {
+      wv.addEventListener('ipc-message', (e) => {
+        if (e.channel === 'newtab:openUrl') WebView.loadURL(e.args[0]);
+      });
+    }
   }
 
-  // ── Regular webview listeners ───────────────────────────────────────────────
-
-  function _attachRegularListeners(wv, tabId) {
+  function _attachRegularListeners(wv, tabId, opts = {}) {
+    const isIncognito = !!opts.incognito;
     // Prevent MaxListenersExceeded warning
     wv.setMaxListeners && wv.setMaxListeners(30);
 
@@ -117,8 +137,8 @@ const WebView = (() => {
       const fav = _getFavicon(e.url);
       if (fav) Tabs.updateTab(tabId, { favicon: fav });
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
-      // Track navigation
-      if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
+      // Track navigation — skip for incognito
+      if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
       // Reset sleep timer on navigation
       if (Tabs.touchTab) Tabs.touchTab(tabId);
       // Hide translate bar on new navigation, then detect after page loads
@@ -127,7 +147,7 @@ const WebView = (() => {
 
     wv.addEventListener('did-navigate-in-page', (e) => {
       if (activeId === tabId) Navigation.setURL(e.url);
-      if (window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
+      if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
     });
 
     // Single did-finish-load handler — merged all logic here
@@ -148,14 +168,14 @@ const WebView = (() => {
     wv.addEventListener('page-title-updated', (e) => {
       Tabs.updateTab(tabId, { title: e.title });
       if (activeId === tabId) document.title = e.title + ' — Vortex';
-      if (window.TabHistory) TabHistory.onTitleUpdate(tabId, e.title);
+      if (!isIncognito && window.TabHistory) TabHistory.onTitleUpdate(tabId, e.title);
     });
 
     // page-favicon-updated — highest priority, overrides Google CDN favicon
     wv.addEventListener('page-favicon-updated', (e) => {
       if (e.favicons && e.favicons.length) {
         Tabs.updateTab(tabId, { favicon: e.favicons[0] });
-        if (window.TabHistory) TabHistory.onFaviconUpdate(tabId, e.favicons[0]);
+        if (!isIncognito && window.TabHistory) TabHistory.onFaviconUpdate(tabId, e.favicons[0]);
       }
     });
 
@@ -192,11 +212,11 @@ const WebView = (() => {
 
   // ── Public API ──────────────────────────────────────────────────────────────
 
-  function createWebview(tabId, url) {
+  function createWebview(tabId, url, opts = {}) {
     if (webviews[tabId]) return;
 
     // Track tab creation
-    if (window.TabHistory) TabHistory.onTabCreated(tabId, url);
+    if (window.TabHistory && !opts.incognito) TabHistory.onTabCreated(tabId, url);
 
     const isVortexPage = !!VORTEX_PAGES[url];
 
@@ -213,6 +233,10 @@ const WebView = (() => {
         wv.src = VORTEX_PAGES[url].fileUrl();
         wv.className = 'vortex-wv';
         wv.dataset.tabId = tabId;
+        // Newtab needs preload for sendToHost (quick links)
+        if (url === 'vortex://newtab' && webviewPreloadPath) {
+          wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
+        }
         container.appendChild(wv);
       }
       webviews[tabId] = wv;
@@ -227,11 +251,16 @@ const WebView = (() => {
     if (webviewPreloadPath) {
       wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
     }
+    // Incognito: isolated partition, no persist
+    if (opts.incognito) {
+      wv.setAttribute('partition', 'incognito');
+    }
     wv.className = 'vortex-wv';
     wv.dataset.tabId = tabId;
+    if (opts.incognito) wv.dataset.incognito = '1';
     container.appendChild(wv);
     webviews[tabId] = wv;
-    _attachRegularListeners(wv, tabId);
+    _attachRegularListeners(wv, tabId, opts);
     _attachFindListener(wv);
   }
 
@@ -250,8 +279,8 @@ const WebView = (() => {
       const displayUrl = (tab && tab.url && tab.url.startsWith('vortex://')) ? tab.url : wv.src;
       Navigation.setURL(displayUrl);
 
-      // Re-inject height for vortex pages when switching to them
-      if (tab && tab.url && tab.url.startsWith('vortex://')) {
+      // Re-inject height for vortex pages when switching to them (skip newtab — it handles its own layout)
+      if (tab && tab.url && tab.url.startsWith('vortex://') && tab.url !== 'vortex://newtab') {
         wv.executeJavaScript(`
           (function() {
             var h = window.innerHeight + 'px';
@@ -290,14 +319,16 @@ const WebView = (() => {
   }
 
   async function init() {
-    const [preloadPath, downloadsPath, settingsPath] = await Promise.all([
+    const [preloadPath, downloadsPath, settingsPath, newtabPath] = await Promise.all([
       window.vortexAPI.invoke('app:webviewPreload').catch(() => null),
       window.vortexAPI.invoke('app:downloadsPage').catch(() => null),
       window.vortexAPI.invoke('app:settingsPage').catch(() => null),
+      window.vortexAPI.invoke('app:newtabPage').catch(() => null),
     ]);
     if (preloadPath) webviewPreloadPath = preloadPath;
     if (downloadsPath) downloadsPageUrl = 'file:///' + downloadsPath.replace(/\\/g, '/');
     if (settingsPath)  settingsPageUrl  = 'file:///' + settingsPath.replace(/\\/g, '/');
+    if (newtabPath)    newtabPageUrl    = 'file:///' + newtabPath.replace(/\\/g, '/');
     _preloadAll();
   }
 
