@@ -19,34 +19,46 @@ async function loadSettings() {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Check if this is an incognito window (passed via URL query param)
+  const isIncognito = new URLSearchParams(location.search).get('incognito') === '1';
+  if (isIncognito) {
+    document.body.classList.add('incognito-window');
+    document.title = 'Vortex — Incognito';
+  }
+
   // Non-blocking UI init first
   TabPreview.init();
   ContextMenu.init();
-  Navigation.render();
+  Navigation.render(isIncognito);
   Panel.init();
 
-  // Parallel: WebView init + settings load + tab history load
+  // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([
     WebView.init(),
-    loadSettings(),
+    isIncognito ? Promise.resolve({ ...SETTINGS_DEFAULTS }) : loadSettings(),
   ]);
 
   // Apply settings immediately
   Navigation.applySettings(appSettings);
 
-  // Session restore / startup tab — after settings known
-  let restored = false;
-  if (appSettings.startup === 'session') {
-    restored = await Session.restore();
-  } else if (appSettings.startup === 'homepage') {
-    Tabs.createTab(appSettings.homepage || DEFAULT_URL);
-    restored = true;
-  }
-  if (!restored) {
-    Tabs.createTab(Navigation.newTabURL());
+  // Incognito window — always open fresh tab, no session restore
+  if (isIncognito) {
+    Tabs.createIncognitoTab('https://www.google.com');
+  } else {
+    // Session restore / startup tab — after settings known
+    let restored = false;
+    if (appSettings.startup === 'session') {
+      restored = await Session.restore();
+    } else if (appSettings.startup === 'homepage') {
+      Tabs.createTab(appSettings.homepage || DEFAULT_URL);
+      restored = true;
+    }
+    if (!restored) {
+      Tabs.createTab(Navigation.newTabURL());
+    }
+    Session.initAutoSave();
   }
 
-  Session.initAutoSave();
   Navigation.initShortcuts();
   Navigation.initProfile();
 
@@ -54,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   IPC.on('settings:changed', (s) => {
     Navigation.applySettings(s);
   });
-  // Also handle postMessage from settings iframe
   window.addEventListener('message', (e) => {
     if (e.data && e.data.__vortexAction && e.data.channel === 'settings:changed') {
       Navigation.applySettings(e.data.payload);
