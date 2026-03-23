@@ -187,11 +187,19 @@ const WebView = (() => {
       if (e.channel === 'webview:mousedown') ContextMenu.hide();
       if (e.channel === 'webview:keydown') {
         const k = e.args[0];
-        // Simulate the keydown on the parent document
         document.dispatchEvent(new KeyboardEvent('keydown', {
           key: k.key, ctrlKey: k.ctrlKey, metaKey: k.metaKey,
           shiftKey: k.shiftKey, altKey: k.altKey, bubbles: true,
         }));
+      }
+      if (e.channel === 'pip:request') {
+        // Native PiP failed in preload — try via executeJavaScript
+        wv.executeJavaScript(`
+          (function() {
+            var v = document.querySelector('video');
+            if (v) v.requestPictureInPicture().catch(function(){});
+          })();
+        `).catch(() => {});
       }
     });
 
@@ -265,6 +273,48 @@ const WebView = (() => {
   }
 
   function switchTo(tabId) {
+    // Auto-PiP: agar previous tab mein video play ho raha tha toh PiP mein daal do
+    if (activeId && activeId !== tabId) {
+      const prevWv = webviews[activeId];
+      if (prevWv) {
+        prevWv.executeJavaScript(`
+          (function() {
+            var v = Array.from(document.querySelectorAll('video')).find(function(v) {
+              return !v.paused && !v.ended && v.readyState > 2;
+            });
+            if (!v || document.pictureInPictureElement) return;
+
+            // YouTube blocks PiP — bypass it
+            v.removeAttribute('disablePictureInPicture');
+            // Override the disablePictureInPicture property descriptor
+            try {
+              Object.defineProperty(v, 'disablePictureInPicture', {
+                get: function() { return false; },
+                configurable: true,
+              });
+            } catch(_) {}
+
+            v.requestPictureInPicture().catch(function(err) {
+              // YouTube fallback: click their native PiP button if available
+              var ytPip = document.querySelector('.ytp-pip-button');
+              if (ytPip) { ytPip.click(); return; }
+              // Generic fallback: use Presentation API workaround
+              try {
+                var clone = v.cloneNode(true);
+                clone.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
+                clone.src = v.src || (v.querySelector('source') || {}).src || '';
+                clone.currentTime = v.currentTime;
+                document.body.appendChild(clone);
+                clone.requestPictureInPicture().then(function() {
+                  clone.remove();
+                }).catch(function() { clone.remove(); });
+              } catch(_) {}
+            });
+          })();
+        `).catch(() => {});
+      }
+    }
+
     activeId = tabId;
     // Close find bar when switching tabs
     _closeFindBar();
@@ -634,7 +684,24 @@ const WebView = (() => {
     else if (e.key === '0') { e.preventDefault(); zoomReset(); }
   });
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset,
+  function pip() {
+    const wv = webviews[activeId];
+    if (!wv) return;
+    wv.executeJavaScript(`
+      (function() {
+        var v = document.pictureInPictureElement
+          ? null
+          : (document.querySelector('video:not([muted])') || document.querySelector('video'));
+        if (v) {
+          v.requestPictureInPicture().catch(function(){});
+        } else if (document.pictureInPictureElement) {
+          document.exitPictureInPicture().catch(function(){});
+        }
+      })();
+    `).catch(() => {});
+  }
+
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset, pip,
     getActiveWcId() {
       const wv = webviews[activeId];
       if (!wv) return null;
