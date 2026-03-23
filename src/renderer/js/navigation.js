@@ -778,6 +778,9 @@ const Navigation = (() => {
         case 'r':
           if (e.shiftKey) { e.preventDefault(); WebView.hardReload(); }
           break;
+        case 'p':
+          if (e.shiftKey) { e.preventDefault(); WebView.pip(); }
+          break;
         case 'Tab':
           if (e.shiftKey) { e.preventDefault(); Tabs.switchPrev(); }
           else            { e.preventDefault(); Tabs.switchNext(); }
