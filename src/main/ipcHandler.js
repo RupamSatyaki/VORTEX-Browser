@@ -361,6 +361,23 @@ function registerHandlers() {
     } catch (_) {}
   });
 
+  // Mute/unmute a webview's audio by webContentsId
+  ipcMain.handle('tab:setMuted', (_e, wcId, muted) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (wc) wc.setAudioMuted(muted);
+      return true;
+    } catch (_) { return false; }
+  });
+
+  // Check if a webview is currently playing audio
+  ipcMain.handle('tab:isAudible', (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      return wc ? wc.isCurrentlyAudible() : false;
+    } catch (_) { return false; }
+  });
+
   // Trigger PiP via main process with userGesture:true (renderer can't do this)
   ipcMain.handle('pip:trigger', async (_e, wcId) => {
     try {

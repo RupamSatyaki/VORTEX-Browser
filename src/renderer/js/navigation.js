@@ -783,6 +783,7 @@ const Navigation = (() => {
         case 'r':
           if (e.shiftKey) { e.preventDefault(); WebView.hardReload(); }
           break;
+        case 'k': e.preventDefault(); CommandPalette.open(); break;
         case 'Tab':
           if (e.shiftKey) { e.preventDefault(); Tabs.switchPrev(); }
           else            { e.preventDefault(); Tabs.switchNext(); }
@@ -792,4 +793,148 @@ const Navigation = (() => {
   }
 
   return { render, navigate, setURL, startProgress, endProgress, setDownloadBadge, initShortcuts: _initShortcuts, applySettings, newTabURL: _newTabURL, initProfile: _initProfile, _getSearchEngine: () => _searchEngine };
+})();
+
+// ── Command Palette ────────────────────────────────────────────────────────
+const CommandPalette = (() => {
+  let _activeIdx = 0;
+  let _filtered = [];
+
+  const COMMANDS = [
+    // Navigation
+    { label: 'New Tab',            icon: '+',    shortcut: 'Ctrl+T',       section: 'Navigation', action: () => QuickLaunch.open() },
+    { label: 'New Window',         icon: '⊞',    shortcut: 'Ctrl+N',       section: 'Navigation', action: () => window.vortexAPI.send('window:new') },
+    { label: 'Close Tab',          icon: '✕',    shortcut: 'Ctrl+W',       section: 'Navigation', action: () => { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); } },
+    { label: 'Next Tab',           icon: '→',    shortcut: 'Ctrl+Tab',     section: 'Navigation', action: () => Tabs.switchNext() },
+    { label: 'Previous Tab',       icon: '←',    shortcut: 'Ctrl+Shift+Tab', section: 'Navigation', action: () => Tabs.switchPrev() },
+    // Pages
+    { label: 'Open Settings',      icon: '⚙',    shortcut: 'Ctrl+,',       section: 'Pages', action: () => Panel.open('settings') },
+    { label: 'Open Downloads',     icon: '↓',    shortcut: 'Ctrl+J',       section: 'Pages', action: () => Panel.open('downloads') },
+    { label: 'Open Bookmarks',     icon: '★',    shortcut: 'Ctrl+B',       section: 'Pages', action: () => Panel.open('bookmarks') },
+    { label: 'Open History',       icon: '⏱',    shortcut: 'Ctrl+H',       section: 'Pages', action: () => Panel.open('history') },
+    // Tools
+    { label: 'Find in Page',       icon: '🔍',   shortcut: 'Ctrl+F',       section: 'Tools', action: () => WebView.findInPage() },
+    { label: 'Zoom In',            icon: '+',    shortcut: 'Ctrl+=',       section: 'Tools', action: () => WebView.zoomIn() },
+    { label: 'Zoom Out',           icon: '−',    shortcut: 'Ctrl+-',       section: 'Tools', action: () => WebView.zoomOut() },
+    { label: 'Reset Zoom',         icon: '↺',    shortcut: 'Ctrl+0',       section: 'Tools', action: () => WebView.zoomReset() },
+    { label: 'Take Screenshot',    icon: '📷',   shortcut: 'Ctrl+Shift+S', section: 'Tools', action: () => Screenshot.capture(false) },
+    { label: 'Full Page Screenshot', icon: '📄', shortcut: 'Ctrl+Shift+F', section: 'Tools', action: () => Screenshot.capture(true) },
+    { label: 'Picture in Picture', icon: '▶',   shortcut: 'Ctrl+Shift+P', section: 'Tools', action: () => WebView.pip() },
+    { label: 'Mute Active Tab',    icon: '🔇',   shortcut: '',             section: 'Tools', action: () => { const t = Tabs.getActiveTab(); if (t) Tabs.toggleMute(t.id); } },
+    { label: 'Print Page',         icon: '🖨',   shortcut: 'Ctrl+P',       section: 'Tools', action: () => WebView.print() },
+    { label: 'Save Page',          icon: '💾',   shortcut: 'Ctrl+S',       section: 'Tools', action: () => WebView.savePage() },
+    { label: 'Hard Reload',        icon: '↻',    shortcut: 'Ctrl+Shift+R', section: 'Tools', action: () => WebView.hardReload() },
+    { label: 'Developer Tools',    icon: '<>',   shortcut: 'F12',          section: 'Tools', action: () => WebView.openDevTools() },
+    // Data
+    { label: 'Clear Browsing Data', icon: '🗑',  shortcut: '',             section: 'Data', action: () => { if (confirm('Clear all browsing data?')) window.vortexAPI.send('browser:clearData'); } },
+  ];
+
+  function _svgIcon(label) {
+    // Simple text icon fallback — just show first char styled
+    return `<span style="font-size:13px;line-height:1;">${label}</span>`;
+  }
+
+  function _render(query) {
+    const list = document.getElementById('cmd-list');
+    if (!list) return;
+
+    const q = (query || '').toLowerCase().trim();
+    _filtered = q ? COMMANDS.filter(c => c.label.toLowerCase().includes(q) || c.section.toLowerCase().includes(q)) : COMMANDS;
+
+    if (!_filtered.length) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#2a5050;font-size:13px;">No commands found</div>';
+      return;
+    }
+
+    let html = '';
+    let lastSection = '';
+    _filtered.forEach((cmd, i) => {
+      if (!q && cmd.section !== lastSection) {
+        html += `<div class="cmd-section">${cmd.section}</div>`;
+        lastSection = cmd.section;
+      }
+      html += `
+        <div class="cmd-item${i === _activeIdx ? ' active' : ''}" data-idx="${i}">
+          <div class="cmd-icon">${_svgIcon(cmd.icon)}</div>
+          <span class="cmd-label">${cmd.label}</span>
+          ${cmd.shortcut ? `<span class="cmd-shortcut">${cmd.shortcut}</span>` : ''}
+        </div>`;
+    });
+    list.innerHTML = html;
+
+    list.querySelectorAll('.cmd-item').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        _activeIdx = parseInt(el.dataset.idx);
+        _highlightActive();
+      });
+      el.addEventListener('click', () => {
+        _execute(_activeIdx);
+      });
+    });
+  }
+
+  function _highlightActive() {
+    const list = document.getElementById('cmd-list');
+    if (!list) return;
+    list.querySelectorAll('.cmd-item').forEach((el, i) => {
+      el.classList.toggle('active', i === _activeIdx);
+    });
+    // Scroll into view
+    const active = list.querySelector('.cmd-item.active');
+    if (active) active.scrollIntoView({ block: 'nearest' });
+  }
+
+  function _execute(idx) {
+    const cmd = _filtered[idx];
+    if (cmd) { close(); cmd.action(); }
+  }
+
+  function open() {
+    const backdrop = document.getElementById('cmd-backdrop');
+    const palette  = document.getElementById('cmd-palette');
+    const input    = document.getElementById('cmd-input');
+    if (!backdrop || !palette) return;
+    _activeIdx = 0;
+    backdrop.classList.add('visible');
+    palette.classList.add('visible');
+    input.value = '';
+    _render('');
+    input.focus();
+  }
+
+  function close() {
+    document.getElementById('cmd-backdrop')?.classList.remove('visible');
+    document.getElementById('cmd-palette')?.classList.remove('visible');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('cmd-input');
+    const backdrop = document.getElementById('cmd-backdrop');
+    if (!input || !backdrop) return;
+
+    input.addEventListener('input', () => {
+      _activeIdx = 0;
+      _render(input.value);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        _activeIdx = Math.min(_activeIdx + 1, _filtered.length - 1);
+        _highlightActive();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        _activeIdx = Math.max(_activeIdx - 1, 0);
+        _highlightActive();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        _execute(_activeIdx);
+      }
+    });
+
+    backdrop.addEventListener('click', close);
+  });
+
+  return { open, close };
 })();
