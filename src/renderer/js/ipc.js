@@ -167,7 +167,7 @@ window.addEventListener('DOMContentLoaded', () => {
   IPC.on('downloads:badge', (count) => Navigation.setDownloadBadge(count));
 
   // ── Menu accelerator events (fired from menuManager.js) ──────────────────
-  IPC.on('menu:newTab',    () => Tabs.createTab(Navigation.newTabURL()));
+  IPC.on('menu:newTab',    () => QuickLaunch.open());
   IPC.on('menu:newWindow', () => window.vortexAPI.send('window:new'));
   IPC.on('menu:closeTab',  () => { const t = Tabs.getActiveTab(); if (t) Tabs.closeTab(t.id); });
   IPC.on('menu:reload',    () => WebView.reload());
