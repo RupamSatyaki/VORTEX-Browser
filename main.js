@@ -1,4 +1,5 @@
-const { app } = require('electron');
+const { app, protocol, net } = require('electron');
+const path = require('path');
 
 require('events').EventEmitter.defaultMaxListeners = 30;
 
@@ -38,7 +39,31 @@ app.commandLine.appendSwitch('enable-gpu-rasterization'); // GPU rasterization f
 app.commandLine.appendSwitch('enable-zero-copy'); // zero-copy texture uploads
 app.commandLine.appendSwitch('num-raster-threads', '4'); // parallel raster threads
 
+// Register vortex-app:// protocol BEFORE app is ready (required by Electron)
+// This allows panel iframes to load HTML files from inside the asar archive
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'vortex-app',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      bypassCSP: false,
+    },
+  },
+]);
+
 app.whenReady().then(() => {
+  // Handle vortex-app://app/renderer/settings.html → src/renderer/settings.html
+  protocol.handle('vortex-app', (request) => {
+    const url = new URL(request.url);
+    // Strip leading /app/ prefix, map to src/
+    const pathname = url.pathname.replace(/^\/app\//, '');
+    const filePath = path.join(app.getAppPath(), 'src', pathname);
+    return net.fetch('file://' + filePath.replace(/\\/g, '/'));
+  });
+
   Storage.registerStorageHandlers();
   // Ensure default storage files exist on first run
   Storage.ensureDefaults();

@@ -1415,13 +1415,23 @@
             { key: 'focus',   label: 'Focus',          color: '#3b82f6', svg: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>` },
         ];
 
-        // Use parent bridge if available (iframe context), else fallback to vortexAPI directly
-        async function _invoke(channel, ...args) {
-            if (window.parent && window.parent.__vortexInvoke) {
-                return window.parent.__vortexInvoke(channel, ...args);
-            }
-            if (window.vortexAPI) return window.vortexAPI.invoke(channel, ...args);
-            return null;
+        // Use postMessage to parent (cross-origin safe) for both invoke and send
+        function _invoke(channel, ...args) {
+            return new Promise((resolve) => {
+                const reqId = '__inv_' + Date.now() + '_' + Math.random();
+                function handler(ev) {
+                    if (!ev.data || ev.data.__vortexInvokeReply !== reqId) return;
+                    window.removeEventListener('message', handler);
+                    resolve(ev.data.result);
+                }
+                window.addEventListener('message', handler);
+                setTimeout(() => { window.removeEventListener('message', handler); resolve(null); }, 5000);
+                window.parent.postMessage({ __vortexAction: true, channel: '__invoke', payload: { reqId, channel, args } }, '*');
+            });
+        }
+
+        function _send(channel, data) {
+            window.parent.postMessage({ __vortexAction: true, channel, payload: data }, '*');
         }
 
         async function load() {
@@ -1617,7 +1627,7 @@
         // ── Buttons ─────────────────────────────────────────────────────────────────
         document.getElementById('btn-clear-data').addEventListener('click', () => {
             if (confirm('Clear all browsing data? This cannot be undone.')) {
-                if (window.vortexAPI) window.vortexAPI.send('browser:clearData');
+                _send('browser:clearData');
                 localStorage.removeItem('browser_session');
                 localStorage.removeItem('vortex_session_sync');
                 document.getElementById('btn-clear-data').textContent = 'Cleared ✓';
@@ -1626,7 +1636,7 @@
         });
 
         document.getElementById('btn-github').addEventListener('click', () => {
-            if (window.vortexAPI) window.vortexAPI.send('shell:openExternal', 'https://github.com/RupamSatyaki/VORTEX-Browser');
+            _send('shell:openExternal', 'https://github.com/RupamSatyaki/VORTEX-Browser');
         });
 
         document.getElementById('btn-reset').addEventListener('click', async () => {
@@ -1638,15 +1648,13 @@
         });
 
         document.getElementById('btn-dl-path').addEventListener('click', () => {
-            if (window.vortexAPI) window.vortexAPI.send('settings:pickDownloadFolder');
+            _send('settings:pickDownloadFolder');
         });
 
         // ── Version ─────────────────────────────────────────────────────────────────
-        if (window.vortexAPI) {
-            window.vortexAPI.invoke('app:version').then(v => {
-                document.getElementById('about-ver').textContent = 'Version ' + v;
-            }).catch(() => { });
-        }
+        _invoke('app:version').then(v => {
+            if (v) document.getElementById('about-ver').textContent = 'Version ' + v;
+        }).catch(() => { });
 
         // ── Notification Sites ───────────────────────────────────────────────────────
         function _renderNotifSites(sites) {

@@ -325,10 +325,17 @@ const WebView = (() => {
       window.vortexAPI.invoke('app:settingsPage').catch(() => null),
       window.vortexAPI.invoke('app:newtabPage').catch(() => null),
     ]);
+
+    function toFileUrl(p) {
+      if (!p) return null;
+      if (p.startsWith('file://') || p.startsWith('vortex-app://')) return p;
+      return 'file:///' + p.replace(/\\/g, '/').replace(/^\/+/, '');
+    }
+
     if (preloadPath) webviewPreloadPath = preloadPath;
-    if (downloadsPath) downloadsPageUrl = 'file:///' + downloadsPath.replace(/\\/g, '/');
-    if (settingsPath)  settingsPageUrl  = 'file:///' + settingsPath.replace(/\\/g, '/');
-    if (newtabPath)    newtabPageUrl    = 'file:///' + newtabPath.replace(/\\/g, '/');
+    if (downloadsPath) downloadsPageUrl = toFileUrl(downloadsPath);
+    if (settingsPath)  settingsPageUrl  = toFileUrl(settingsPath);
+    if (newtabPath)    newtabPageUrl    = toFileUrl(newtabPath);
     _preloadAll();
   }
 

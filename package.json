@@ -13,6 +13,11 @@
   "build": {
     "appId": "com.vortex.browser",
     "productName": "Vortex",
+    "asar": true,
+    "asarUnpack": [
+      "preload.js",
+      "src/renderer/js/webviewPreload.js"
+    ],
     "directories": {
       "output": "dist"
     },
