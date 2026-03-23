@@ -617,9 +617,22 @@
     }
 
     function sendInvoke(channel, ...args) {
-      return window.parent.__vortexInvoke
-        ? window.parent.__vortexInvoke(channel, ...args)
-        : Promise.resolve(false);
+      // Use postMessage to parent (cross-origin safe) with a promise-based response
+      return new Promise((resolve) => {
+        const reqId = '__inv_' + Date.now() + '_' + Math.random();
+        function handler(e) {
+          if (!e.data || e.data.__vortexInvokeReply !== reqId) return;
+          window.removeEventListener('message', handler);
+          resolve(e.data.result);
+        }
+        window.addEventListener('message', handler);
+        // Timeout fallback — resolve false after 3s if no reply
+        setTimeout(() => {
+          window.removeEventListener('message', handler);
+          resolve(false);
+        }, 3000);
+        window.parent.postMessage({ __vortexAction: true, channel: '__invoke', payload: { reqId, channel, args } }, '*');
+      });
     }
 
     // ── IPC — receive via postMessage from parent iframe ─────────────────────

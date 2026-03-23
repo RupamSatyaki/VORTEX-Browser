@@ -1,49 +1,54 @@
 // Floating panel — replaces vortex:// internal pages with a centered modal
 const Panel = (() => {
-  let _resolvedUrls = {};
+  // Pre-compute URLs at module load time using a known relative path trick
+  // In Electron, index.html is at file:///...resources/app.asar/src/renderer/index.html
+  // Panel files are in the same directory
+  function _getBaseUrl() {
+    // window.location.href = file:///C:/path/to/app.asar/src/renderer/index.html
+    // We want:              file:///C:/path/to/app.asar/src/renderer/settings.html
+    return window.location.href.replace(/\/index\.html.*$/, '/');
+  }
 
-  async function _resolve() {
-    if (_resolvedUrls.settings) return;
-    try {
-      const s = await window.vortexAPI.invoke('app:settingsPage');
-      if (s) _resolvedUrls.settings = 'file:///' + s.replace(/\\/g, '/');
-    } catch (_) {}
-    try {
-      const d = await window.vortexAPI.invoke('app:downloadsPage');
-      if (d) _resolvedUrls.downloads = 'file:///' + d.replace(/\\/g, '/');
-    } catch (_) {}
-    try {
-      const b = await window.vortexAPI.invoke('app:bookmarksPage');
-      if (b) _resolvedUrls.bookmarks = 'file:///' + b.replace(/\\/g, '/');
-    } catch (_) {}
-    try {
-      const h = await window.vortexAPI.invoke('app:historyPage');
-      if (h) _resolvedUrls.history = 'file:///' + h.replace(/\\/g, '/');
-    } catch (_) {}
+  // Build panel URLs directly from current page location — no IPC needed
+  function _buildUrls() {
+    const base = _getBaseUrl();
+    return {
+      settings:  base + 'settings.html',
+      downloads: base + 'downloads.html',
+      bookmarks: base + 'bookmarks.html',
+      history:   base + 'history.html',
+    };
+  }
+
+  let _resolvedUrls = null;
+
+  function _getUrls() {
+    if (!_resolvedUrls) _resolvedUrls = _buildUrls();
+    return _resolvedUrls;
   }
 
   let _currentType = null;
 
   function open(type) {
-    _resolve().then(() => {
-      const url = _resolvedUrls[type];
-      if (!url) return;
-      const frame    = document.getElementById('panel-frame');
-      const title    = document.getElementById('panel-title');
-      const panel    = document.getElementById('floating-panel');
-      const backdrop = document.getElementById('panel-backdrop');
+    const urls = _getUrls();
+    const url = urls[type];
+    if (!url) return;
 
-      const titles = { settings: 'Settings', downloads: 'Downloads', bookmarks: 'Bookmarks', history: 'History' };
-      title.textContent = titles[type] || type;
-      _currentType = type;
+    const frame    = document.getElementById('panel-frame');
+    const title    = document.getElementById('panel-title');
+    const panel    = document.getElementById('floating-panel');
+    const backdrop = document.getElementById('panel-backdrop');
 
-      _setFrameOnload(frame, type);
+    const titles = { settings: 'Settings', downloads: 'Downloads', bookmarks: 'Bookmarks', history: 'History' };
+    title.textContent = titles[type] || type;
+    _currentType = type;
 
-      frame.src = url;
-      backdrop.classList.add('visible');
-      panel.classList.add('visible');
-      document.body.classList.add('panel-open');
-    });
+    _setFrameOnload(frame, type);
+
+    frame.src = url;
+    backdrop.classList.add('visible');
+    panel.classList.add('visible');
+    document.body.classList.add('panel-open');
   }
 
   function _setFrameOnload(frame, type) {
@@ -79,9 +84,11 @@ const Panel = (() => {
   }
 
   function init() {
-    // Expose invoke bridge for iframes (used by downloads.html for file:exists)
+    // Expose invoke + send bridge for iframes (used by settings/downloads/bookmarks)
     window.__vortexInvoke = (channel, ...args) =>
       window.vortexAPI.invoke(channel, ...args);
+    window.__vortexSend = (channel, data) =>
+      window.vortexAPI.send(channel, data);
 
     document.getElementById('panel-close').addEventListener('click', close);
     document.getElementById('panel-backdrop').addEventListener('click', close);

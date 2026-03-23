@@ -42,6 +42,27 @@ function registerHandlers() {
   // ── Session optimizations ──────────────────────────────────────────────────
   const ses = session.defaultSession;
 
+  // Helper: get BrowserWindow from IPC event sender (works in packaged app + Electron 28)
+  function _getWin(e) {
+    // Method 1: getOwnerBrowserWindow (most reliable in Electron 28+)
+    try {
+      const win = e.sender.getOwnerBrowserWindow();
+      if (win && !win.isDestroyed()) return win;
+    } catch (_) {}
+    // Method 2: fromWebContents
+    try {
+      const win = BrowserWindow.fromWebContents(e.sender);
+      if (win && !win.isDestroyed()) return win;
+    } catch (_) {}
+    // Method 3: match by webContents id
+    const win = BrowserWindow.getAllWindows().find(w => {
+      try { return !w.isDestroyed() && w.webContents.id === e.sender.id; } catch { return false; }
+    });
+    if (win) return win;
+    // Fallback: focused window
+    return BrowserWindow.getFocusedWindow();
+  }
+
   // Aggressive cache — serve from cache even if stale, revalidate in background
   ses.webRequest.onBeforeSendHeaders((details, callback) => {
     const headers = details.requestHeaders;
@@ -53,31 +74,32 @@ function registerHandlers() {
   // Pre-warm DNS for top sites immediately on startup
   prewarmDNS();
 
-  ipcMain.handle('app:version', () => require('../../package.json').version);
+  ipcMain.handle('app:version', () => {
+    try {
+      return require('../../package.json').version;
+    } catch {
+      try {
+        const { app } = require('electron');
+        return app.getVersion();
+      } catch { return '1.0.0'; }
+    }
+  });
 
-  ipcMain.handle('app:webviewPreload', () =>
-    path.join(__dirname, '../renderer/js/webviewPreload.js')
-  );
+  ipcMain.handle('app:webviewPreload', () => {
+    const { app } = require('electron');
+    const appPath = app.getAppPath();
+    // In packaged app, try asar.unpacked first (preload must be a real file, not inside asar)
+    const unpackedPath = path.join(appPath.replace('app.asar', 'app.asar.unpacked'), 'src/renderer/js/webviewPreload.js');
+    const normalPath = path.join(__dirname, '../renderer/js/webviewPreload.js');
+    const fs = require('fs');
+    return fs.existsSync(unpackedPath) ? unpackedPath : normalPath;
+  });
 
-  ipcMain.handle('app:downloadsPage', () =>
-    path.join(__dirname, '../renderer/downloads.html')
-  );
-
-  ipcMain.handle('app:settingsPage', () =>
-    path.join(__dirname, '../renderer/settings.html')
-  );
-
-  ipcMain.handle('app:bookmarksPage', () =>
-    path.join(__dirname, '../renderer/bookmarks.html')
-  );
-
-  ipcMain.handle('app:historyPage', () =>
-    path.join(__dirname, '../renderer/history.html')
-  );
-
-  ipcMain.handle('app:newtabPage', () =>
-    path.join(__dirname, '../renderer/newtab.html')
-  );
+  ipcMain.handle('app:downloadsPage', () => path.join(__dirname, '../renderer/downloads.html'));
+  ipcMain.handle('app:settingsPage',  () => path.join(__dirname, '../renderer/settings.html'));
+  ipcMain.handle('app:bookmarksPage', () => path.join(__dirname, '../renderer/bookmarks.html'));
+  ipcMain.handle('app:historyPage',   () => path.join(__dirname, '../renderer/history.html'));
+  ipcMain.handle('app:newtabPage',    () => path.join(__dirname, '../renderer/newtab.html'));
 
   ipcMain.on('shell:openExternal', (_e, url) => { shell.openExternal(url); });
 
@@ -97,7 +119,7 @@ function registerHandlers() {
 
   ipcMain.on('settings:pickDownloadFolder', async (e) => {
     const { dialog } = require('electron');
-    const win = BrowserWindow.fromWebContents(e.sender);
+    const win = _getWin(e);
     const result = await dialog.showOpenDialog(win, { properties: ['openDirectory'] });
     if (!result.canceled && result.filePaths[0]) {
       e.sender.send('settings:downloadFolder', result.filePaths[0]);
@@ -105,21 +127,24 @@ function registerHandlers() {
   });
 
   ipcMain.on('window:minimize', (e) => {
-    BrowserWindow.fromWebContents(e.sender).minimize();
+    const win = _getWin(e);
+    if (win) win.minimize();
   });
 
   ipcMain.on('window:maximize', (e) => {
-    const win = BrowserWindow.fromWebContents(e.sender);
+    const win = _getWin(e);
+    if (!win) return;
     win.isMaximized() ? win.unmaximize() : win.maximize();
   });
 
   ipcMain.on('window:close', (e) => {
-    BrowserWindow.fromWebContents(e.sender).close();
+    const win = _getWin(e);
+    if (win) win.close();
   });
 
   ipcMain.on('window:fullscreen', (e) => {
-    const win = BrowserWindow.fromWebContents(e.sender);
-    win.setFullScreen(!win.isFullScreen());
+    const win = _getWin(e);
+    if (win) win.setFullScreen(!win.isFullScreen());
   });
 
   ipcMain.on('window:new', () => {

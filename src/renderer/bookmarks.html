@@ -366,13 +366,19 @@
         let bookmarks = [];
         let _editId = null;
 
-        // ── IPC bridge (same pattern as downloads.html) ──────────────────────────
+        // ── IPC bridge — postMessage based (cross-origin safe) ──────────────────
         function _invoke(channel, ...args) {
-            if (window.parent && window.parent.__vortexInvoke) {
-                return window.parent.__vortexInvoke(channel, ...args);
-            }
-            if (window.vortexAPI) return window.vortexAPI.invoke(channel, ...args);
-            return Promise.resolve(null);
+            return new Promise((resolve) => {
+                const reqId = '__inv_' + Date.now() + '_' + Math.random();
+                function handler(ev) {
+                    if (!ev.data || ev.data.__vortexInvokeReply !== reqId) return;
+                    window.removeEventListener('message', handler);
+                    resolve(ev.data.result);
+                }
+                window.addEventListener('message', handler);
+                setTimeout(() => { window.removeEventListener('message', handler); resolve(null); }, 5000);
+                window.parent.postMessage({ __vortexAction: true, channel: '__invoke', payload: { reqId, channel, args } }, '*');
+            });
         }
 
         function _send(channel, payload) {
