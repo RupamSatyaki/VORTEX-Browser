@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Apply settings immediately
   Navigation.applySettings(appSettings);
+  if (typeof appSettings.pip === 'boolean') WebView.setPiPEnabled(appSettings.pip);
+  if (appSettings.pipSites) WebView.setPiPSites(appSettings.pipSites);
 
   // Incognito window — always open fresh tab, no session restore
   if (isIncognito) {
@@ -70,6 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('message', (e) => {
     if (e.data && e.data.__vortexAction && e.data.channel === 'settings:changed') {
       Navigation.applySettings(e.data.payload);
+      if (typeof e.data.payload.pip === 'boolean') WebView.setPiPEnabled(e.data.payload.pip);
     }
   });
 });
