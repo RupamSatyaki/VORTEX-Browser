@@ -372,7 +372,7 @@ const Tabs = (() => {
     newBtn.className = 'tab-add';
     newBtn.title = 'New Tab';
     newBtn.innerHTML = `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>`;
-    newBtn.addEventListener('click', () => createTab(Navigation.newTabURL()));
+    newBtn.addEventListener('click', () => QuickLaunch.open());
     container.appendChild(newBtn);
 
     // Window controls — right side of tabbar

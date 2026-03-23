@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   ContextMenu.init();
   Navigation.render(isIncognito);
   Panel.init();
+  QuickLaunch.init();
 
   // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([

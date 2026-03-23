@@ -428,7 +428,7 @@ const Navigation = (() => {
       if (!item) return;
       _closeMenu();
       switch (item.dataset.action) {
-        case 'new-tab':      Tabs.createTab(_newTabURL()); break;
+        case 'new-tab':      QuickLaunch.open(); break;
         case 'new-window':   window.vortexAPI.send('window:new'); break;
         case 'new-incognito': _showComingSoon('Incognito Mode'); break;
         case 'history':      Panel.open('history'); break;
@@ -762,7 +762,7 @@ const Navigation = (() => {
       if (e.key === 'F11') { e.preventDefault(); window.vortexAPI.send('window:fullscreen'); return; }
       if (!e.ctrlKey) return;
       switch (e.key) {
-        case 't': e.preventDefault(); Tabs.createTab(_newTabURL()); break;
+        case 't': e.preventDefault(); QuickLaunch.open(); break;
         case 'n':
           if (e.shiftKey) { e.preventDefault(); _showComingSoon('Incognito Mode'); }
           else            { e.preventDefault(); window.vortexAPI.send('window:new'); }
