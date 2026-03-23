@@ -113,6 +113,42 @@
     </div>
   </div>
 
+  <!-- Summarizer Drawer -->
+  <div id="summarizer-drawer">
+    <div id="sum-header">
+      <div id="sum-title">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00c8b4" stroke-width="2" style="flex-shrink:0">
+          <circle cx="12" cy="12" r="10"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="15" x2="12" y2="15"/>
+        </svg>
+        <span>AI Summary</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button id="sum-copy" title="Copy summary">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button id="sum-refresh" title="Re-summarize">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+        </button>
+        <button id="sum-close" title="Close">
+          <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="sum-page-info"></div>
+    <div id="sum-body">
+      <div id="sum-content"></div>
+    </div>
+    <div id="sum-footer">
+      <select id="sum-provider">
+        <option value="huggingface">HuggingFace (Free)</option>
+        <option value="ollama">Ollama (Local)</option>
+        <option value="openai">OpenAI</option>
+        <option value="extractive">Extractive (Offline)</option>
+      </select>
+      <input id="sum-api-key" type="password" placeholder="API key (if needed)" />
+    </div>
+  </div>
+
   <!-- Floating Panel (Settings / Downloads) -->
   <div id="panel-backdrop"></div>
   <div id="floating-panel">
@@ -159,5 +195,6 @@
   <script src="js/panel.js"></script>
   <script src="js/session.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/summarizer.js"></script>
 </body>
 </html>

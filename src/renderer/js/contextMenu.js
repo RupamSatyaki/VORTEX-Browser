@@ -133,6 +133,7 @@ const ContextMenu = (() => {
     }
 
     // ── Always at bottom ──
+    items.push({ action: 'summarize', label: 'Summarize Page (AI)', icon: aiIcon() });
     items.push({ action: 'inspect', label: 'Inspect Element', icon: inspectIcon(), shortcut: 'Ctrl+Shift+I' });
 
     return items;
@@ -163,6 +164,7 @@ const ContextMenu = (() => {
       case 'print':         wv.print(); break;
       case 'view-src':      Tabs.createTab('view-source:' + wv.getURL()); break;
       case 'inspect':       wv.openDevTools(); break;
+      case 'summarize':     Summarizer.open(); break;
     }
   }
 
@@ -184,6 +186,7 @@ const ContextMenu = (() => {
   const printIcon   = () => s('<rect x="3" y="7" width="10" height="6" rx="1"/><path d="M5 7V3h6v4"/><path d="M5 11h6"/>');
   const srcIcon     = () => s('<polyline points="5 8 2 11 5 14"/><polyline points="11 8 14 11 11 14"/><line x1="8" y1="5" x2="8" y2="17"/>');
   const inspectIcon = () => s('<path d="M2 4h12v8H2z"/><path d="M6 12v2M10 12v2M4 14h8"/><circle cx="5" cy="7" r="1" fill="currentColor" stroke="none"/>');
+  const aiIcon      = () => s('<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="15" x2="12" y2="15"/>');
 
   return { init, show, hide };
 })();
