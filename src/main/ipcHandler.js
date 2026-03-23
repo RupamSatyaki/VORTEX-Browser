@@ -361,6 +361,41 @@ function registerHandlers() {
     } catch (_) {}
   });
 
+  // Trigger PiP via main process with userGesture:true (renderer can't do this)
+  ipcMain.handle('pip:trigger', async (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (!wc) return false;
+      const script = `
+        (function() {
+          // Find playing video
+          var v = Array.from(document.querySelectorAll('video')).find(function(v) {
+            return !v.paused && !v.ended && v.readyState > 2;
+          }) || document.querySelector('video');
+          if (!v) return false;
+          if (document.pictureInPictureElement) {
+            document.exitPictureInPicture().catch(function(){});
+            return true;
+          }
+          // Remove YouTube's PiP block
+          v.removeAttribute('disablePictureInPicture');
+          try {
+            Object.defineProperty(v, 'disablePictureInPicture', {
+              get: function() { return false; }, configurable: true
+            });
+          } catch(_) {}
+          return v.requestPictureInPicture().then(function() { return true; }).catch(function() {
+            // YouTube fallback: click their native PiP button
+            var ytBtn = document.querySelector('.ytp-pip-button');
+            if (ytBtn) { ytBtn.click(); return true; }
+            return false;
+          });
+        })();
+      `;
+      return await wc.executeJavaScript(script, true); // true = userGesture
+    } catch (_) { return false; }
+  });
+
   // Get memory usage for a webContents by id
   ipcMain.handle('tab:memoryUsage', async (_e, wcId) => {
     try {
