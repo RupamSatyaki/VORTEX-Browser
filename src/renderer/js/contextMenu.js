@@ -99,6 +99,7 @@ const ContextMenu = (() => {
 
     // ── Video items ──
     if (hasVideo) {
+      items.push({ action: 'pip',        label: 'Picture in Picture',   icon: pipIcon() });
       items.push({ action: 'open-video', label: 'Open Video in New Tab', icon: videoIcon() });
       items.push({ action: 'copy-video', label: 'Copy Video URL',        icon: copyIcon() });
       items.push({ type: 'separator' });
@@ -145,6 +146,7 @@ const ContextMenu = (() => {
       case 'open-img':      Tabs.createTab(p.srcURL); break;
       case 'copy-img':      wv.copyImageAt(p.x, p.y); break;
       case 'save-img':      wv.downloadURL(p.srcURL); break;
+      case 'pip':           WebView.pip(); break;
       case 'open-video':    Tabs.createTab(p.srcURL); break;
       case 'copy-video':    navigator.clipboard.writeText(p.srcURL); break;
       case 'copy-sel':
@@ -166,6 +168,7 @@ const ContextMenu = (() => {
 
   // ── SVG Icons ──
   const s = (d) => `<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5">${d}</svg>`;
+  const pipIcon     = () => s('<rect x="2" y="3" width="20" height="14" rx="1"/><rect x="11" y="9" width="10" height="7" rx="1" fill="currentColor" stroke="none"/>');
   const tabIcon     = () => s('<rect x="2" y="4" width="12" height="9" rx="1"/><path d="M5 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>');
   const tabBgIcon   = () => s('<rect x="4" y="5" width="10" height="8" rx="1"/><rect x="2" y="3" width="10" height="8" rx="1" stroke-dasharray="2 1"/>');
   const copyIcon    = () => s('<rect x="5" y="5" width="8" height="9" rx="1"/><path d="M3 11V3h8"/>');
