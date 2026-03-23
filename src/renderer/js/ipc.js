@@ -257,6 +257,29 @@ window.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('message', (e) => {
     if (!e.data || !e.data.__vortexAction) return;
     const { channel, payload } = e.data;
+
+    // ── Cross-origin invoke bridge ────────────────────────────────────────────
+    // Panel iframes (vortex-app://) can't access window.parent directly,
+    // so they send __invoke requests via postMessage
+    if (channel === '__invoke') {
+      const { reqId, channel: ipcChannel, args } = payload;
+      window.vortexAPI.invoke(ipcChannel, ...args).then(result => {
+        try {
+          const frame = document.getElementById('panel-frame');
+          if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ __vortexInvokeReply: reqId, result }, '*');
+          }
+        } catch (_) {}
+      }).catch(() => {
+        try {
+          const frame = document.getElementById('panel-frame');
+          if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ __vortexInvokeReply: reqId, result: null }, '*');
+          }
+        } catch (_) {}
+      });
+      return;
+    }
     if (channel === 'settings:changed') {
       IPC.send('settings:changed', payload);
       return;
