@@ -959,6 +959,40 @@
                         <option value="60">1 hour</option>
                     </select>
                 </div>
+                <div class="card-row">
+                    <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <rect x="12" y="11" width="9" height="7" rx="1" fill="currentColor" stroke="none"/>
+                        </svg></div>
+                    <div class="row-text">
+                        <div class="row-label">Picture in Picture</div>
+                        <div class="row-desc">Auto-trigger PiP when switching tabs with a playing video</div>
+                    </div>
+                    <label class="toggle"><input type="checkbox" id="set-pip" checked />
+                        <div class="toggle-track"></div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- PiP Allowed Sites -->
+            <div class="card" id="pip-sites-card">
+                <div class="card-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                        <div class="row-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                        </svg></div>
+                        <div class="row-text">
+                            <div class="row-label">PiP Allowed Sites</div>
+                            <div class="row-desc">Only these sites can trigger auto-PiP. Empty = all sites allowed.</div>
+                        </div>
+                    </div>
+                    <div id="pip-sites-list" style="width:100%;min-height:20px;"></div>
+                    <div style="display:flex;gap:8px;width:100%;align-items:center;">
+                        <input class="setting-input" id="pip-add-site" placeholder="e.g. youtube.com" style="flex:1;" />
+                        <button class="setting-btn" id="btn-pip-add">Add</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -1374,6 +1408,7 @@
             gpu: true, prefetch: true, cache: '512',
             askdl: false, opendl: false,
             tabsleep: true, tabsleepMinutes: 10,
+            pip: true, pipSites: [],
             notifications: true, notifSound: true, notifSites: {},
             lang: 'en', spellcheck: true, spellcheckLang: 'en-US',
         };
@@ -1470,6 +1505,8 @@
             set('set-askdl', s.askdl); set('set-opendl', s.opendl);
             set('set-tabsleep', s.tabsleep !== false);
             set('set-tabsleep-minutes', s.tabsleepMinutes || 10);
+            set('set-pip', s.pip !== false);
+            _renderPipSites(s.pipSites || []);
             set('set-notifications', s.notifications !== false);
             set('set-notif-sound', s.notifSound !== false);
             set('set-lang', s.lang || 'en');
@@ -1699,6 +1736,63 @@
             settings.notifSites = {};
             await save(settings);
             _renderNotifSites({});
+        });
+
+        // ── PiP Allowed Sites ────────────────────────────────────────────────────────
+        function _renderPipSites(sites) {
+            const list = document.getElementById('pip-sites-list');
+            if (!list) return;
+            if (!sites || !sites.length) {
+                list.innerHTML = '<div style="font-size:12px;color:#4a8080;padding:4px 0;">No restrictions — PiP works on all sites.</div>';
+                return;
+            }
+            list.innerHTML = sites.map((site, i) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a3030;" data-idx="${i}">
+                    <img src="https://www.google.com/s2/favicons?domain=${site}&sz=16" width="14" height="14" style="border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'" />
+                    <span class="pip-site-label" style="flex:1;font-size:12px;color:#c8e8e5;" data-idx="${i}">${site}</span>
+                    <button class="setting-btn" style="padding:3px 8px;font-size:11px;" data-edit="${i}" title="Edit">✎</button>
+                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-del="${i}" title="Remove">✕</button>
+                </div>
+            `).join('');
+
+            list.querySelectorAll('button[data-del]').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    settings.pipSites.splice(parseInt(btn.dataset.del), 1);
+                    await save(settings);
+                    _renderPipSites(settings.pipSites);
+                });
+            });
+
+            list.querySelectorAll('button[data-edit]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.dataset.edit);
+                    const input = document.getElementById('pip-add-site');
+                    input.value = settings.pipSites[idx];
+                    input.dataset.editIdx = idx;
+                    input.focus();
+                });
+            });
+        }
+
+        document.getElementById('btn-pip-add').addEventListener('click', async () => {
+            const input = document.getElementById('pip-add-site');
+            const site = (input.value || '').trim().replace(/^https?:\/\//, '').replace(/\/.*$/, '').toLowerCase();
+            if (!site) return;
+            if (!settings.pipSites) settings.pipSites = [];
+            const editIdx = input.dataset.editIdx !== undefined && input.dataset.editIdx !== '' ? parseInt(input.dataset.editIdx) : -1;
+            if (editIdx >= 0) {
+                settings.pipSites[editIdx] = site;
+                delete input.dataset.editIdx;
+            } else {
+                if (!settings.pipSites.includes(site)) settings.pipSites.push(site);
+            }
+            await save(settings);
+            _renderPipSites(settings.pipSites);
+            input.value = '';
+        });
+
+        document.getElementById('pip-add-site').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('btn-pip-add').click();
         });
 
         // ── Sync & Backup ────────────────────────────────────────────────────────────

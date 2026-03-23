@@ -264,7 +264,8 @@ const Navigation = (() => {
     if (typeof s.suggestions === 'boolean') Prefetch.setSuggestionsEnabled(s.suggestions);
     if (typeof s.tabpreview === 'boolean') TabPreview.setEnabled(s.tabpreview);
     if (typeof s.tabsleep === 'boolean') Tabs.setSleepEnabled(s.tabsleep);
-    if (typeof s.tabsleepMinutes === 'number') Tabs.setSleepTimeout(s.tabsleepMinutes);
+    if (s.tabsleepMinutes !== undefined) Tabs.setSleepTimeout(Number(s.tabsleepMinutes));
+    if (typeof s.pip === 'boolean') WebView.setPiPEnabled(s.pip);
     if (s.spellcheckLang && window.vortexAPI) {
       window.vortexAPI.send('spellcheck:setLanguage', s.spellcheckLang);
     }
@@ -772,14 +773,15 @@ const Navigation = (() => {
         case 'j': e.preventDefault(); Panel.open('downloads'); break;
         case 'b': e.preventDefault(); Panel.open('bookmarks'); break;
         case 'f': e.preventDefault(); WebView.findInPage(); break;
-        case 'p': e.preventDefault(); WebView.print(); break;
+        case 'p':
+          e.preventDefault();
+          if (e.shiftKey) WebView.pip();
+          else WebView.print();
+          break;
         case 's': e.preventDefault(); WebView.savePage(); break;
         case ',': e.preventDefault(); Panel.open('settings'); break;
         case 'r':
           if (e.shiftKey) { e.preventDefault(); WebView.hardReload(); }
-          break;
-        case 'p':
-          if (e.shiftKey) { e.preventDefault(); WebView.pip(); }
           break;
         case 'Tab':
           if (e.shiftKey) { e.preventDefault(); Tabs.switchPrev(); }

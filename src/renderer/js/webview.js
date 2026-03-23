@@ -6,6 +6,20 @@ const WebView = (() => {
   let downloadsPageUrl = '';
   let settingsPageUrl = '';
   let newtabPageUrl = '';
+  let _pipEnabled = true;
+  let _pipSites = []; // empty = all sites allowed
+  function setPiPEnabled(val) { _pipEnabled = val; }
+  function setPiPSites(sites) { _pipSites = Array.isArray(sites) ? sites : []; }
+
+  function _isPipAllowed(wv) {
+    if (!_pipEnabled) return false;
+    if (!_pipSites.length) return true; // no restriction
+    try {
+      const url = wv.src || '';
+      const hostname = new URL(url).hostname.replace(/^www\./, '');
+      return _pipSites.some(s => hostname === s || hostname.endsWith('.' + s));
+    } catch (_) { return true; }
+  }
 
   // Preloaded hidden webviews for vortex:// internal pages
   const preloaded = {};
@@ -193,13 +207,11 @@ const WebView = (() => {
         }));
       }
       if (e.channel === 'pip:request') {
-        // Native PiP failed in preload — try via executeJavaScript
-        wv.executeJavaScript(`
-          (function() {
-            var v = document.querySelector('video');
-            if (v) v.requestPictureInPicture().catch(function(){});
-          })();
-        `).catch(() => {});
+        // Native PiP failed in preload — try via main process with userGesture:true
+        try {
+          const wcId = wv.getWebContentsId();
+          window.vortexAPI.invoke('pip:trigger', wcId).catch(() => {});
+        } catch (_) {}
       }
     });
 
@@ -274,44 +286,13 @@ const WebView = (() => {
 
   function switchTo(tabId) {
     // Auto-PiP: agar previous tab mein video play ho raha tha toh PiP mein daal do
-    if (activeId && activeId !== tabId) {
+    if (_pipEnabled && activeId && activeId !== tabId) {
       const prevWv = webviews[activeId];
-      if (prevWv) {
-        prevWv.executeJavaScript(`
-          (function() {
-            var v = Array.from(document.querySelectorAll('video')).find(function(v) {
-              return !v.paused && !v.ended && v.readyState > 2;
-            });
-            if (!v || document.pictureInPictureElement) return;
-
-            // YouTube blocks PiP — bypass it
-            v.removeAttribute('disablePictureInPicture');
-            // Override the disablePictureInPicture property descriptor
-            try {
-              Object.defineProperty(v, 'disablePictureInPicture', {
-                get: function() { return false; },
-                configurable: true,
-              });
-            } catch(_) {}
-
-            v.requestPictureInPicture().catch(function(err) {
-              // YouTube fallback: click their native PiP button if available
-              var ytPip = document.querySelector('.ytp-pip-button');
-              if (ytPip) { ytPip.click(); return; }
-              // Generic fallback: use Presentation API workaround
-              try {
-                var clone = v.cloneNode(true);
-                clone.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
-                clone.src = v.src || (v.querySelector('source') || {}).src || '';
-                clone.currentTime = v.currentTime;
-                document.body.appendChild(clone);
-                clone.requestPictureInPicture().then(function() {
-                  clone.remove();
-                }).catch(function() { clone.remove(); });
-              } catch(_) {}
-            });
-          })();
-        `).catch(() => {});
+      if (prevWv && _isPipAllowed(prevWv)) {
+        try {
+          const wcId = prevWv.getWebContentsId();
+          window.vortexAPI.invoke('pip:trigger', wcId).catch(() => {});
+        } catch (_) {}
       }
     }
 
@@ -685,23 +666,18 @@ const WebView = (() => {
   });
 
   function pip() {
+    if (!_pipEnabled) return;
     const wv = webviews[activeId];
-    if (!wv) return;
-    wv.executeJavaScript(`
-      (function() {
-        var v = document.pictureInPictureElement
-          ? null
-          : (document.querySelector('video:not([muted])') || document.querySelector('video'));
-        if (v) {
-          v.requestPictureInPicture().catch(function(){});
-        } else if (document.pictureInPictureElement) {
-          document.exitPictureInPicture().catch(function(){});
-        }
-      })();
-    `).catch(() => {});
+    if (!wv || !_isPipAllowed(wv)) return;
+    try {
+      const wcId = wv.getWebContentsId();
+      window.vortexAPI.invoke('pip:trigger', wcId).catch(() => {});
+    } catch (_) {}
   }
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset, pip,
+  function setPiPEnabled(val) { _pipEnabled = val; }
+
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset, pip, setPiPEnabled, setPiPSites,
     getActiveWcId() {
       const wv = webviews[activeId];
       if (!wv) return null;

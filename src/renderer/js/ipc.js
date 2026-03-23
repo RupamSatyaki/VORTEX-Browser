@@ -281,6 +281,10 @@ window.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (channel === 'settings:changed') {
+      // Live apply immediately — no roundtrip needed
+      if (window.Navigation) Navigation.applySettings(payload);
+      if (typeof payload.pip === 'boolean' && window.WebView) WebView.setPiPEnabled(payload.pip);
+      if (payload.pipSites && window.WebView) WebView.setPiPSites(payload.pipSites);
       IPC.send('settings:changed', payload);
       return;
     }
