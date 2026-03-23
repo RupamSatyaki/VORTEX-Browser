@@ -92,6 +92,13 @@ const Navigation = (() => {
       </button>
 
       <div class="toolbar-right">
+        <button class="toolbar-btn" id="nav-summarize" title="Summarize Page (AI)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>
+            <path d="M12 6v6l4 2"/>
+            <path d="M8 14h8M8 17h5"/>
+          </svg>
+        </button>
         <button class="toolbar-btn" id="nav-sound" title="Sound">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
@@ -112,6 +119,7 @@ const Navigation = (() => {
     document.getElementById('nav-forward').addEventListener('click', () => WebView.goForward());
     document.getElementById('nav-reload').addEventListener('click', () => WebView.reload());
     document.getElementById('btn-downloads').addEventListener('click', () => Panel.open('downloads'));
+    document.getElementById('nav-summarize').addEventListener('click', () => Summarizer.open());
 
     // Zoom buttons
     document.getElementById('zoom-in-btn').addEventListener('click', () => WebView.zoomIn());
