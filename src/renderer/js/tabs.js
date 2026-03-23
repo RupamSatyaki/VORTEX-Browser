@@ -5,7 +5,7 @@ const Tabs = (() => {
 
   function createTabBackground(url) {
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, _muted: false, _audible: false });
     _touchTab(id);
     // Lazy: don't create webview until tab becomes active
     render();
@@ -17,7 +17,7 @@ const Tabs = (() => {
     if (url === 'vortex://settings')  { Panel.open('settings');  return null; }
     if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
     const id = Date.now().toString();
-    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, incognito: !!opts.incognito });
+    tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, _muted: false, _audible: false, incognito: !!opts.incognito });
     activeTabId = id;
     _touchTab(id);
     // Create webview immediately only for the active tab
@@ -179,7 +179,105 @@ const Tabs = (() => {
     _sleepTimeout = minutes * 60 * 1000;
   }
 
-  // ── Drag-and-drop reorder (hold 300ms to activate) ────────────────────────
+  // ── Tab Mute ──────────────────────────────────────────────────────────────
+  async function toggleMute(id) {
+    const tab = tabs.find(t => t.id === id);
+    if (!tab || !tab._webviewReady) return;
+    const wv = document.querySelector(`.vortex-wv[data-tab-id="${id}"]`);
+    if (!wv) return;
+    try {
+      const wcId = wv.getWebContentsId();
+      tab._muted = !tab._muted;
+      await window.vortexAPI.invoke('tab:setMuted', wcId, tab._muted);
+      render();
+    } catch (_) {}
+  }
+
+  // Poll audible state every 2s to show speaker icon
+  function _startAudiblePoll() {
+    setInterval(async () => {
+      let changed = false;
+      for (const tab of tabs) {
+        if (!tab._webviewReady) continue;
+        const wv = document.querySelector(`.vortex-wv[data-tab-id="${tab.id}"]`);
+        if (!wv) continue;
+        try {
+          const wcId = wv.getWebContentsId();
+          const audible = await window.vortexAPI.invoke('tab:isAudible', wcId);
+          if (tab._audible !== audible) { tab._audible = audible; changed = true; }
+        } catch (_) {}
+      }
+      if (changed) render();
+    }, 2000);
+  }
+
+  // ── Tab Context Menu ──────────────────────────────────────────────────────
+  let _tabCtxMenu = null;
+
+  function _showTabContextMenu(x, y, tabId) {
+    _removeTabCtxMenu();
+    const tab = tabs.find(t => t.id === tabId);
+    if (!tab) return;
+
+    const menu = document.createElement('div');
+    menu.id = 'tab-ctx-menu';
+    menu.style.cssText = `position:fixed;z-index:99999;background:#122222;border:1px solid #1e3838;border-radius:10px;padding:4px;min-width:180px;box-shadow:0 8px 28px rgba(0,0,0,0.5);`;
+    menu.innerHTML = `
+      <div class="tctx-item" data-action="mute">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">${tab._muted ? '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>' : '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>'}</svg>
+        ${tab._muted ? 'Unmute Tab' : 'Mute Tab'}
+      </div>
+      <div class="tctx-item" data-action="reload">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+        Reload Tab
+      </div>
+      <div class="tctx-item" data-action="duplicate">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Duplicate Tab
+      </div>
+      <div style="height:1px;background:#1e3838;margin:4px 0;"></div>
+      <div class="tctx-item tctx-danger" data-action="close">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Close Tab
+      </div>
+    `;
+
+    // Style items
+    const style = document.createElement('style');
+    style.textContent = `.tctx-item{display:flex;align-items:center;gap:8px;padding:7px 12px;font-size:12px;color:#c8e8e5;cursor:pointer;border-radius:6px;transition:background 0.1s;}.tctx-item:hover{background:#1a3838;}.tctx-danger{color:#c86060;}.tctx-danger:hover{background:rgba(200,60,60,0.12);}`;
+    menu.appendChild(style);
+
+    // Position
+    menu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+    menu.style.top  = Math.min(y, window.innerHeight - 160) + 'px';
+    document.body.appendChild(menu);
+    _tabCtxMenu = menu;
+
+    menu.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-action]');
+      if (!item) return;
+      _removeTabCtxMenu();
+      switch (item.dataset.action) {
+        case 'mute':      toggleMute(tabId); break;
+        case 'reload':    { const wv = document.querySelector(`.vortex-wv[data-tab-id="${tabId}"]`); if (wv) wv.reload(); } break;
+        case 'duplicate': createTab(tab.url); break;
+        case 'close':     closeTab(tabId); break;
+      }
+    });
+
+    menu.addEventListener('mouseenter', () => clearTimeout(menu._autoClose));
+    menu.addEventListener('mouseleave', () => {
+      menu._autoClose = setTimeout(_removeTabCtxMenu, 1500);
+    });
+
+    // Auto-close after 1.5s if no interaction
+    menu._autoClose = setTimeout(_removeTabCtxMenu, 1500);
+    setTimeout(() => document.addEventListener('click', _removeTabCtxMenu, { once: true }), 0);
+  }
+
+  function _removeTabCtxMenu() {
+    if (_tabCtxMenu) { clearTimeout(_tabCtxMenu._autoClose); _tabCtxMenu.remove(); _tabCtxMenu = null; }
+  }
   let _drag = null;
 
   function _initDrag(el, tabId) {
@@ -352,17 +450,40 @@ const Tabs = (() => {
       titleEl.textContent = tab.title;
       if (tab._sleeping) titleEl.title = 'Sleeping — click to wake';
 
+      // Speaker / mute icon — show if audible or muted
+      if (tab._audible || tab._muted) {
+        const audioBtn = document.createElement('div');
+        audioBtn.className = 'tab-audio' + (tab._muted ? ' tab-muted' : '');
+        audioBtn.title = tab._muted ? 'Unmute tab' : 'Mute tab';
+        audioBtn.innerHTML = tab._muted
+          ? `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>`
+          : `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>`;
+        audioBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMute(tab.id); });
+        el.appendChild(iconEl);
+        el.appendChild(titleEl);
+        el.appendChild(audioBtn);
+      } else {
+        el.appendChild(iconEl);
+        el.appendChild(titleEl);
+      }
+
       const closeBtn = document.createElement('div');
       closeBtn.className = 'tab-close';
       closeBtn.title = 'Close tab';
       closeBtn.innerHTML = `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>`;
       closeBtn.addEventListener('click', (e) => { e.stopPropagation(); closeTab(tab.id); });
 
-      el.appendChild(iconEl);
-      el.appendChild(titleEl);
       el.appendChild(closeBtn);
       el.addEventListener('mouseenter', () => TabPreview.show(el, tab.id, tab.title));
       el.addEventListener('mouseleave', () => TabPreview.hide());
+
+      // Right-click context menu for tab
+      el.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        _showTabContextMenu(e.clientX, e.clientY, tab.id);
+      });
+
       _initDrag(el, tab.id);
       container.appendChild(el);
     });
@@ -399,8 +520,8 @@ const Tabs = (() => {
     return createTab(url, { incognito: true });
   }
 
-  // Start sleep timer on load
-  document.addEventListener('DOMContentLoaded', _startSleepTimer);
+  // Start sleep timer and audible poll on load
+  document.addEventListener('DOMContentLoaded', () => { _startSleepTimer(); _startAudiblePoll(); });
 
-  return { createTab, createTabBackground, createIncognitoTab, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render, setSleepEnabled, setSleepTimeout, touchTab: _touchTab };
+  return { createTab, createTabBackground, createIncognitoTab, closeTab, setActiveTab, updateTab, getActiveTab, getAllTabs, getActiveId, switchNext, switchPrev, render, setSleepEnabled, setSleepTimeout, toggleMute, touchTab: _touchTab };
 })();
