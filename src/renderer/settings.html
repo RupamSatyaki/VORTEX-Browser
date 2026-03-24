@@ -1439,6 +1439,10 @@
                     <div class="about-logo">V</div>
                     <div class="about-name">Vortex Browser</div>
                     <div class="about-ver" id="about-ver">Version —</div>
+                    <div id="about-commit" style="font-size:12px;color:#2e6060;font-family:monospace;display:none;">
+                        <span id="about-commit-sha" style="background:#0d2a2a;padding:2px 8px;border-radius:4px;color:#00c8b4;"></span>
+                        <span id="about-commit-source" style="color:#4a8080;margin-left:6px;font-family:sans-serif;font-size:11px;"></span>
+                    </div>
                     <div class="about-desc">A fast, minimal Electron-based browser built for speed and simplicity. Open
                         source and privacy-focused.</div>
                 </div>
@@ -1774,10 +1778,37 @@
             _send('settings:pickDownloadFolder');
         });
 
-        // ── Version ─────────────────────────────────────────────────────────────────
-        _invoke('app:version').then(v => {
+        // ── Version & Commit ─────────────────────────────────────────────────────────
+        Promise.all([
+            _invoke('app:version'),
+            _invoke('updater:localSha'),
+        ]).then(([v, shaObj]) => {
             if (v) document.getElementById('about-ver').textContent = 'Version ' + v;
-        }).catch(() => { });
+            if (shaObj) {
+                const sha = typeof shaObj === 'object' ? shaObj.sha : shaObj;
+                const source = typeof shaObj === 'object' ? shaObj.source : 'unknown';
+                const commitEl = document.getElementById('about-commit');
+                const shaEl = document.getElementById('about-commit-sha');
+                const srcEl = document.getElementById('about-commit-source');
+                if (commitEl && shaEl && sha) {
+                    shaEl.textContent = sha.slice(0, 7);
+                    if (srcEl) {
+                        srcEl.textContent = source === 'update' ? '· updated build'
+                                          : source === 'build'  ? '· original build'
+                                          : '· dev';
+                    }
+                    commitEl.style.display = 'flex';
+                    commitEl.style.alignItems = 'center';
+                    commitEl.style.justifyContent = 'center';
+                    commitEl.style.gap = '4px';
+                    commitEl.style.marginTop = '2px';
+                }
+            }
+        }).catch(() => {
+            _invoke('app:version').then(v => {
+                if (v) document.getElementById('about-ver').textContent = 'Version ' + v;
+            });
+        });
 
         // ── Notification Sites ───────────────────────────────────────────────────────
         function _renderNotifSites(sites) {
@@ -2035,6 +2066,8 @@
             try {
                 // Get local sha
                 _localSha = await _invoke('updater:localSha');
+                // localSha is now { sha, source } or null
+                if (_localSha && typeof _localSha === 'object') _localSha = _localSha.sha;
                 const shaEl = document.getElementById('upd-local-sha');
                 if (shaEl) shaEl.textContent = _localSha ? 'Local: ' + _localSha.slice(0, 7) : '';
 
