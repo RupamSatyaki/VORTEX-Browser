@@ -55,11 +55,65 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 app.whenReady().then(() => {
+  // ── Apply pending updates from userData/vortex-update/ ──────────────────
+  // For JS files that are require()'d directly (main.js, preload.js, src/main/*.js),
+  // we copy them from the override folder into the app's resources directory.
+  // renderer files (src/renderer/**) are served via vortex-app:// which checks override first.
+  try {
+    const fs = require('fs');
+    const overrideRoot = path.join(app.getPath('userData'), 'vortex-update');
+    if (fs.existsSync(overrideRoot)) {
+      const appRoot = app.getAppPath(); // e.g. C:\...\resources\app.asar (or app/ in dev)
+      // In packaged app, appRoot ends with app.asar — we need the resources dir
+      const resourcesDir = app.isPackaged
+        ? path.dirname(appRoot) // ..\resources\
+        : appRoot;
+
+      // Walk override folder and copy main-process files
+      const MAIN_PATTERNS = ['main.js', 'preload.js', 'src/main/'];
+      function walkAndCopy(dir, relBase) {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.name === '.applied-sha') continue;
+          const relPath = relBase ? relBase + '/' + entry.name : entry.name;
+          const srcPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            walkAndCopy(srcPath, relPath);
+          } else {
+            // Only copy main-process files here; renderer files served via protocol override
+            const isMainFile = MAIN_PATTERNS.some(p => relPath === p || relPath.startsWith(p));
+            if (!isMainFile) continue;
+            let destPath;
+            if (app.isPackaged) {
+              // In packaged app, main files live in resources/ next to app.asar
+              destPath = path.join(resourcesDir, relPath);
+            } else {
+              destPath = path.join(appRoot, relPath);
+            }
+            const destDir = path.dirname(destPath);
+            if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+            try { fs.copyFileSync(srcPath, destPath); } catch (_) {}
+          }
+        }
+      }
+      walkAndCopy(overrideRoot, '');
+    }
+  } catch (_) {}
+
   // Handle vortex-app://app/renderer/settings.html → src/renderer/settings.html
+  // Also checks userData/vortex-update/ for overridden files first
   protocol.handle('vortex-app', (request) => {
     const url = new URL(request.url);
     // Strip leading /app/ prefix, map to src/
     const pathname = url.pathname.replace(/^\/app\//, '');
+
+    // Check override folder first (applied updates)
+    const fs = require('fs');
+    const overridePath = path.join(app.getPath('userData'), 'vortex-update', 'src', pathname);
+    if (fs.existsSync(overridePath)) {
+      return net.fetch('file://' + overridePath.replace(/\\/g, '/'));
+    }
+
     const filePath = path.join(app.getAppPath(), 'src', pathname);
     return net.fetch('file://' + filePath.replace(/\\/g, '/'));
   });

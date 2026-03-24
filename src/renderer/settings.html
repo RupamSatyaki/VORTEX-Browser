@@ -2059,7 +2059,7 @@
         async function applyCommit(btn) {
             const sha = btn.dataset.sha;
             const msg = btn.dataset.msg;
-            if (!confirm(`Apply commit "${msg}"?\n\nThis will overwrite local files. App will need to be restarted.`)) return;
+            if (!confirm(`Apply commit "${msg}"?\n\nThis will download ALL source files from this commit snapshot and restart the app.\nThis may take 30-60 seconds.`)) return;
 
             // Show progress
             const progress = document.getElementById('upd-progress');
@@ -2068,7 +2068,7 @@
             const progressDesc = document.getElementById('upd-progress-desc');
             if (progress) progress.style.display = 'block';
             if (progressTitle) progressTitle.textContent = 'Applying commit ' + sha.slice(0, 7) + '...';
-            if (progressDesc) progressDesc.textContent = 'Downloading files...';
+            if (progressDesc) progressDesc.textContent = 'Downloading all source files from GitHub...';
             if (progressBar) progressBar.style.width = '30%';
 
             // Disable all apply buttons
