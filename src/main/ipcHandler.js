@@ -507,13 +507,12 @@ function registerHandlers() {
 
       if (!treeData.tree) return { success: false, error: treeData.message || 'Could not get file tree' };
 
-      // Filter only vortex/ source files (exclude node_modules, dist, .git)
+      // Filter only source files (exclude node_modules, dist, package-lock)
       const filesToDownload = treeData.tree.filter(item =>
         item.type === 'blob' &&
-        item.path.startsWith('vortex/') &&
         !item.path.includes('node_modules/') &&
-        !item.path.includes('/dist/') &&
-        !item.path.includes('.git/')
+        !item.path.includes('dist/') &&
+        item.path !== 'package-lock.json'
       );
 
       const updated = [];
@@ -524,8 +523,8 @@ function registerHandlers() {
           `/${GITHUB_REPO}/${sha}/${item.path}`
         );
 
-        // Strip "vortex/" prefix
-        const relPath = item.path.replace(/^vortex\//, '');
+        // Repo root = app root (no vortex/ prefix in repo)
+        const relPath = item.path;
         const destPath = path.join(overrideRoot, relPath);
         const destDir = path.dirname(destPath);
         if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
