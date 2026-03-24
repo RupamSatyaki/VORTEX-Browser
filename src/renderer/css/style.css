@@ -874,6 +874,42 @@ webview.vortex-wv.active iframe {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* ── Network Status Bar ── */
+#net-status-bar {
+  position: fixed;
+  bottom: 10px;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #0f1e1e;
+  border: 1px solid #1e3838;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 11.5px;
+  font-family: 'Consolas', 'Fira Code', monospace;
+  color: #4a8080;
+  z-index: 10000;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  min-height: 28px;
+}
+#net-status-bar.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+  cursor: pointer;
+}
+#net-status-bar .net-stat { color: #7aadad; font-weight: 500; }
+#net-status-bar .net-stat.fast   { color: #22c55e; }
+#net-status-bar .net-stat.medium { color: #eab308; }
+#net-status-bar .net-stat.slow   { color: #ef4444; }
+#net-status-bar .net-sep { color: #1e3838; font-size: 10px; }
+
 #zoom-status-bar.visible {
   opacity: 1;
   transform: translateY(0);

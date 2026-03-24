@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   Navigation.applySettings(appSettings);
   if (typeof appSettings.pip === 'boolean') WebView.setPiPEnabled(appSettings.pip);
   if (appSettings.pipSites) WebView.setPiPSites(appSettings.pipSites);
+  WebView.setYTAdblock(appSettings.ytAdblock !== false, appSettings.ytAdSpeed || 16);
 
   // Incognito window — always open fresh tab, no session restore
   if (isIncognito) {
@@ -68,11 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Listen for settings changes from the settings panel
   IPC.on('settings:changed', (s) => {
     Navigation.applySettings(s);
+    WebView.setYTAdblock(s.ytAdblock !== false, s.ytAdSpeed || 16);
   });
   window.addEventListener('message', (e) => {
     if (e.data && e.data.__vortexAction && e.data.channel === 'settings:changed') {
       Navigation.applySettings(e.data.payload);
       if (typeof e.data.payload.pip === 'boolean') WebView.setPiPEnabled(e.data.payload.pip);
+      WebView.setYTAdblock(e.data.payload.ytAdblock !== false, e.data.payload.ytAdSpeed || 16);
     }
   });
 });
