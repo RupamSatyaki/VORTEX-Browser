@@ -134,3 +134,96 @@ window.addEventListener('keydown', (e) => {
   const _observer = new MutationObserver(() => _scanVideos());
   _observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
+
+
+// ── YouTube Ad Blocker + Auto-Skipper ────────────────────────────────────────
+(function ytAdBlock() {
+  // Check hostname — works in preload context
+  function _isYT() {
+    try { return location.hostname.includes('youtube.com'); } catch(_) { return false; }
+  }
+
+  // CSS to inject — hide all known ad containers instantly
+  const AD_CSS = `
+    #masthead-ad, #player-ads, ytd-ad-slot-renderer,
+    ytd-banner-promo-renderer, ytd-statement-banner-renderer,
+    ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer,
+    ytd-promoted-video-renderer, ytd-display-ad-renderer,
+    ytd-compact-promoted-video-renderer, ytd-action-companion-ad-renderer,
+    ytd-video-masthead-ad-v3-renderer, ytd-promoted-sparkles-text-search-renderer,
+    .ytp-ad-overlay-container, .ytp-ad-text-overlay, .ytp-ad-image-overlay,
+    .ytp-ad-player-overlay-instream-info, .ytp-ad-player-overlay-layout,
+    #google-container-id, #companion-ad-container,
+    tp-yt-paper-dialog[aria-label*="ad" i],
+    ytd-popup-container ytd-ad-slot-renderer
+    { display: none !important; }
+  `;
+
+  function _injectCSS() {
+    if (document.getElementById('__vortex_adblock_css')) return;
+    const s = document.createElement('style');
+    s.id = '__vortex_adblock_css';
+    s.textContent = AD_CSS;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  function _trySkipAndBlock() {
+    if (!_isYT()) return;
+
+    // 1. Click skip button immediately
+    const skipBtn = document.querySelector(
+      '.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, ' +
+      'button.ytp-skip-ad-button, .videoAdUiSkipButton, [class*="skip-ad"]'
+    );
+    if (skipBtn && skipBtn.offsetParent !== null) {
+      skipBtn.click();
+    }
+
+    // 2. Ad playing — speed to 16x and jump to end
+    const video = document.querySelector('video');
+    const adShowing = document.querySelector('.ad-showing');
+    if (adShowing && video && !video.paused) {
+      if (video.playbackRate !== 16) video.playbackRate = 16;
+      if (isFinite(video.duration) && video.duration > 0) {
+        video.currentTime = video.duration - 0.01;
+      }
+    } else if (video && video.playbackRate === 16) {
+      video.playbackRate = 1;
+    }
+
+    // 3. Remove ad DOM nodes
+    document.querySelectorAll(
+      '#masthead-ad, #player-ads, ytd-ad-slot-renderer, ' +
+      'ytd-in-feed-ad-layout-renderer, ytd-promoted-video-renderer, ' +
+      'ytd-display-ad-renderer, ytd-banner-promo-renderer, ' +
+      'ytd-statement-banner-renderer, ytd-action-companion-ad-renderer'
+    ).forEach(el => { try { el.remove(); } catch(_) {} });
+  }
+
+  // Inject CSS as early as possible
+  if (document.documentElement) {
+    _injectCSS();
+  }
+  document.addEventListener('DOMContentLoaded', _injectCSS);
+
+  // Poll every 300ms for skip button + ad elements
+  setInterval(_trySkipAndBlock, 300);
+
+  // MutationObserver for instant reaction when ad elements appear
+  const _obs = new MutationObserver(() => {
+    if (_isYT()) {
+      _injectCSS();
+      _trySkipAndBlock();
+    }
+  });
+
+  function _startObs() {
+    _obs.observe(document.documentElement, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _startObs);
+  } else {
+    _startObs();
+  }
+})();
