@@ -103,6 +103,12 @@ function registerHandlers() {
 
   ipcMain.on('shell:openExternal', (_e, url) => { shell.openExternal(url); });
 
+  ipcMain.on('app:relaunch', () => {
+    const { app } = require('electron');
+    app.relaunch();
+    app.exit(0);
+  });
+
   ipcMain.on('browser:clearData', (_e) => {
     session.defaultSession.clearCache();
     session.defaultSession.clearStorageData({ storages: ['cookies','localstorage','indexdb','websql','serviceworkers','cachestorage'] });
@@ -422,6 +428,134 @@ function registerHandlers() {
       // privateBytes = private memory in KB, convert to MB
       return info.privateBytes || info.workingSetSize || 0;
     } catch (_) { return null; }
+  });
+
+  // ── GitHub Updater ────────────────────────────────────────────────────────
+  const GITHUB_REPO = 'RupamSatyaki/VORTEX-Browser';
+  const GITHUB_BRANCH = 'main';
+
+  // Fetch commits list from GitHub API
+  ipcMain.handle('updater:fetchCommits', async () => {
+    try {
+      const https = require('https');
+      const data = await new Promise((resolve, reject) => {
+        const options = {
+          hostname: 'api.github.com',
+          path: `/repos/${GITHUB_REPO}/commits?per_page=30&sha=${GITHUB_BRANCH}`,
+          headers: { 'User-Agent': 'Vortex-Browser-Updater' },
+        };
+        const req = https.get(options, (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => {
+            try { resolve(JSON.parse(body)); }
+            catch (e) { reject(e); }
+          });
+        });
+        req.on('error', reject);
+        req.setTimeout(10000, () => { req.destroy(); reject(new Error('timeout')); });
+      });
+      if (!Array.isArray(data)) return { error: data.message || 'API error' };
+      return data.map(c => ({
+        sha: c.sha,
+        shortSha: c.sha.slice(0, 7),
+        message: c.commit.message.split('\n')[0],
+        author: c.commit.author.name,
+        date: c.commit.author.date,
+      }));
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
+
+  // Apply a specific commit — download changed files and replace them
+  ipcMain.handle('updater:applyCommit', async (_e, sha) => {
+    try {
+      const https = require('https');
+      const fs = require('fs');
+      const path = require('path');
+      const { app } = require('electron');
+
+      // Get list of files changed in this commit
+      const commitData = await new Promise((resolve, reject) => {
+        const options = {
+          hostname: 'api.github.com',
+          path: `/repos/${GITHUB_REPO}/commits/${sha}`,
+          headers: { 'User-Agent': 'Vortex-Browser-Updater' },
+        };
+        const req = https.get(options, (res) => {
+          let body = '';
+          res.on('data', chunk => body += chunk);
+          res.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
+        });
+        req.on('error', reject);
+        req.setTimeout(15000, () => { req.destroy(); reject(new Error('timeout')); });
+      });
+
+      if (!commitData.files || !commitData.files.length) {
+        return { success: false, error: 'No files in this commit' };
+      }
+
+      const appRoot = app.getAppPath();
+      const updated = [];
+      const skipped = [];
+
+      for (const file of commitData.files) {
+        if (file.status === 'removed') { skipped.push(file.filename + ' (deleted)'); continue; }
+
+        // Download raw file content
+        const rawContent = await new Promise((resolve, reject) => {
+          const options = {
+            hostname: 'raw.githubusercontent.com',
+            path: `/${GITHUB_REPO}/${sha}/${file.filename}`,
+            headers: { 'User-Agent': 'Vortex-Browser-Updater' },
+          };
+          const req = https.get(options, (res) => {
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
+            res.on('end', () => resolve(Buffer.concat(chunks)));
+          });
+          req.on('error', reject);
+          req.setTimeout(15000, () => { req.destroy(); reject(new Error('timeout')); });
+        });
+
+        // Write to local file (relative to app root, inside vortex/ folder)
+        // file.filename is like "vortex/src/renderer/js/tabs.js"
+        // We strip the leading "vortex/" since appRoot already points there
+        const relPath = file.filename.replace(/^vortex\//, '');
+        const localPath = path.join(appRoot, relPath);
+
+        // Ensure directory exists
+        const dir = path.dirname(localPath);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+        fs.writeFileSync(localPath, rawContent);
+        updated.push(file.filename);
+      }
+
+      return { success: true, updated, skipped };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  });
+
+  // Get current local HEAD sha (from .git/HEAD + refs)
+  ipcMain.handle('updater:localSha', async () => {
+    try {
+      const fs = require('fs');
+      const path = require('path');
+      const { app } = require('electron');
+      const appRoot = app.getAppPath();
+      // Try .git folder (dev mode)
+      const gitHead = path.join(appRoot, '.git', 'HEAD');
+      if (!fs.existsSync(gitHead)) return null;
+      const head = fs.readFileSync(gitHead, 'utf8').trim();
+      if (head.startsWith('ref: ')) {
+        const refPath = path.join(appRoot, '.git', head.replace('ref: ', ''));
+        if (fs.existsSync(refPath)) return fs.readFileSync(refPath, 'utf8').trim();
+      }
+      return head; // detached HEAD
+    } catch { return null; }
   });
 }
 
