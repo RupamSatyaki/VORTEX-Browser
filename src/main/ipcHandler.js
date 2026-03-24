@@ -551,13 +551,13 @@ function registerHandlers() {
       // 1. Check userData override folder for applied sha
       const appliedShaPath = path.join(app.getPath('userData'), 'vortex-update', '.applied-sha');
       if (fs.existsSync(appliedShaPath)) {
-        return fs.readFileSync(appliedShaPath, 'utf8').trim();
+        return { sha: fs.readFileSync(appliedShaPath, 'utf8').trim(), source: 'update' };
       }
 
       // 2. Check package.json buildSha (set at build time)
       try {
         const pkg = require('../../package.json');
-        if (pkg.buildSha) return pkg.buildSha;
+        if (pkg.buildSha) return { sha: pkg.buildSha, source: 'build' };
       } catch (_) {}
 
       // 3. Dev mode — read from .git
@@ -567,9 +567,9 @@ function registerHandlers() {
       const head = fs.readFileSync(gitHead, 'utf8').trim();
       if (head.startsWith('ref: ')) {
         const refPath = path.join(appRoot, '.git', head.replace('ref: ', ''));
-        if (fs.existsSync(refPath)) return fs.readFileSync(refPath, 'utf8').trim();
+        if (fs.existsSync(refPath)) return { sha: fs.readFileSync(refPath, 'utf8').trim(), source: 'git' };
       }
-      return head;
+      return { sha: head, source: 'git' };
     } catch { return null; }
   });
 }
