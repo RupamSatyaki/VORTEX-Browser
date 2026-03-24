@@ -20,7 +20,8 @@ const Tabs = (() => {
     tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, _muted: false, _audible: false, incognito: !!opts.incognito });
     activeTabId = id;
     _touchTab(id);
-    // Create webview immediately only for the active tab
+    // Set activeId in WebView BEFORE creating webview so did-start-loading fires correctly
+    WebView.setActiveId(id);
     WebView.createWebview(id, url, { incognito: !!opts.incognito });
     tabs.find(t => t.id === id)._webviewReady = true;
     WebView.switchTo(id);

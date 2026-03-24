@@ -31,6 +31,93 @@ const WebView = (() => {
     ::-webkit-scrollbar-thumb:hover { background: #00c8b4; }
   `;
 
+  const YT_AD_CSS = `
+    #masthead-ad, #player-ads, ytd-ad-slot-renderer,
+    ytd-banner-promo-renderer, ytd-statement-banner-renderer,
+    ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer,
+    ytd-promoted-video-renderer, ytd-display-ad-renderer,
+    ytd-compact-promoted-video-renderer, ytd-action-companion-ad-renderer,
+    ytd-video-masthead-ad-v3-renderer, ytd-promoted-sparkles-text-search-renderer,
+    .ytp-ad-overlay-container, .ytp-ad-text-overlay, .ytp-ad-image-overlay,
+    .ytp-ad-player-overlay-instream-info, .ytp-ad-player-overlay-layout,
+    #google-container-id, #companion-ad-container,
+    ytd-popup-container ytd-ad-slot-renderer
+    { display: none !important; }
+  `;
+
+  const YT_AD_JS = `
+    (function() {
+      if (window.__vortexAdBlock) return;
+      window.__vortexAdBlock = true;
+
+      var _wasAd = false;
+
+      function trySkip() {
+        // 1. Click skip button if visible
+        var btn = document.querySelector(
+          '.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, .videoAdUiSkipButton'
+        );
+        if (btn && btn.offsetParent !== null) {
+          btn.click();
+          return;
+        }
+
+        // 2. Ad playing — mute + speed up
+        var video = document.querySelector('video');
+        var adShowing = document.querySelector('.ad-showing');
+        if (adShowing && video) {
+          _wasAd = true;
+          if (!video.muted) video.muted = true;
+          if (video.playbackRate !== __AD_SPEED__) video.playbackRate = __AD_SPEED__;
+        } else if (video && _wasAd) {
+          // Ad just ended — restore gently
+          _wasAd = false;
+          video.muted = false;
+          video.playbackRate = 1;
+          // If video is paused after ad, play it
+          if (video.paused) {
+            setTimeout(function() {
+              try { video.play(); } catch(e) {}
+            }, 200);
+          }
+        }
+      }
+
+      function removeAds() {
+        document.querySelectorAll(
+          '#masthead-ad, #player-ads, ytd-ad-slot-renderer, ' +
+          'ytd-in-feed-ad-layout-renderer, ytd-promoted-video-renderer, ' +
+          'ytd-display-ad-renderer, ytd-banner-promo-renderer, ' +
+          'ytd-statement-banner-renderer, ytd-action-companion-ad-renderer'
+        ).forEach(function(el) { try { el.remove(); } catch(e) {} });
+      }
+
+      setInterval(function() { trySkip(); removeAds(); }, 300);
+
+      new MutationObserver(function() { removeAds(); })
+        .observe(document.documentElement, { childList: true, subtree: true });
+    })();
+  `;
+
+  let _ytAdblockEnabled = true;
+  let _ytAdSpeed = 16;
+
+  function setYTAdblock(enabled, speed) {
+    _ytAdblockEnabled = enabled !== false;
+    _ytAdSpeed = parseInt(speed) || 16;
+  }
+
+  function _injectYTAdBlock(wv) {
+    try {
+      const url = wv.src || '';
+      if (!url.includes('youtube.com')) return;
+      if (!_ytAdblockEnabled) return;
+      wv.insertCSS(YT_AD_CSS).catch(() => {});
+      const js = YT_AD_JS.replaceAll('__AD_SPEED__', _ytAdSpeed);
+      wv.executeJavaScript(js).catch(() => {});
+    } catch (_) {}
+  }
+
   const VORTEX_PAGES = {
     'vortex://downloads': { fileUrl: () => downloadsPageUrl, title: 'Downloads' },
     'vortex://settings':  { fileUrl: () => settingsPageUrl,  title: 'Settings'  },
@@ -136,13 +223,20 @@ const WebView = (() => {
     }
 
     wv.addEventListener('dom-ready', forceIframeSize);
+    wv.addEventListener('dom-ready', () => _injectYTAdBlock(wv));
 
     wv.addEventListener('did-start-loading', () => {
-      if (activeId === tabId) Navigation.startProgress();
+      if (activeId === tabId) {
+        Navigation.startProgress();
+        NetStatus.onLoadStart(wv);
+      }
     });
 
     wv.addEventListener('did-stop-loading', () => {
-      if (activeId === tabId) Navigation.endProgress();
+      if (activeId === tabId) {
+        Navigation.endProgress();
+        NetStatus.onLoadFinish(wv);
+      }
     });
 
     wv.addEventListener('did-navigate', (e) => {
@@ -151,6 +245,7 @@ const WebView = (() => {
       const fav = _getFavicon(e.url);
       if (fav) Tabs.updateTab(tabId, { favicon: fav });
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
+      _injectYTAdBlock(wv);
       // Track navigation — skip for incognito
       if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, fav);
       // Reset sleep timer on navigation
@@ -168,6 +263,8 @@ const WebView = (() => {
     wv.addEventListener('did-finish-load', () => {
       forceIframeSize();
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
+      // YouTube ad blocker — inject CSS + JS directly
+      _injectYTAdBlock(wv);
       Prefetch.prefetchPageLinks(wv);
       setTimeout(() => captureTab(tabId, wv), 800);
       // Re-apply zoom if non-default
@@ -177,6 +274,8 @@ const WebView = (() => {
       const currentUrl = wv.src;
       clearTimeout(_translateDetectTimer);
       _translateDetectTimer = setTimeout(() => _detectAndShowBar(tabId, currentUrl), 1200);
+      // Network stats — only for active tab
+      // (did-stop-loading already handles this; skip duplicate call)
     });
 
     wv.addEventListener('page-title-updated', (e) => {
@@ -363,7 +462,20 @@ const WebView = (() => {
       return 'file:///' + p.replace(/\\/g, '/').replace(/^\/+/, '');
     }
 
-    if (preloadPath) webviewPreloadPath = preloadPath;
+    if (preloadPath) {
+      // Normalize to proper file path (strip file:// if present, keep as OS path)
+      webviewPreloadPath = preloadPath.replace(/^file:\/\/\/?/, '').replace(/\//g, '\\');
+    }
+    // Fallback: derive preload path from current script location
+    if (!webviewPreloadPath) {
+      const scripts = document.querySelectorAll('script[src]');
+      for (const s of scripts) {
+        if (s.src.includes('webview.js')) {
+          webviewPreloadPath = s.src.replace('webview.js', 'webviewPreload.js').replace('file:///', '').replace(/\//g, '\\');
+          break;
+        }
+      }
+    }
     if (downloadsPath) downloadsPageUrl = toFileUrl(downloadsPath);
     if (settingsPath)  settingsPageUrl  = toFileUrl(settingsPath);
     if (newtabPath)    newtabPageUrl    = toFileUrl(newtabPath);
@@ -677,7 +789,8 @@ const WebView = (() => {
 
   function setPiPEnabled(val) { _pipEnabled = val; }
 
-  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset, pip, setPiPEnabled, setPiPSites,
+  return { init, createWebview, switchTo, destroyWebview, loadURL, goBack, goForward, reload, hardReload, print, savePage, openDevTools, findInPage, zoomIn, zoomOut, zoomReset, pip, setPiPEnabled, setPiPSites, setYTAdblock,
+    setActiveId(id) { activeId = id; },
     getActiveWcId() {
       const wv = webviews[activeId];
       if (!wv) return null;
