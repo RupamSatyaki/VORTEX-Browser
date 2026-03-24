@@ -1443,6 +1443,12 @@
 
             <div id="upd-status" style="font-size:12px;color:#00c8b4;padding:6px 4px;min-height:20px;"></div>
 
+            <!-- Retry note -->
+            <div style="margin:0 0 10px;padding:8px 12px;background:#0a1a1a;border-radius:8px;border-left:3px solid #2e4a4c;display:flex;align-items:flex-start;gap:8px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a8080" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span style="font-size:11.5px;color:#4a8080;line-height:1.5;">If commits fail to load or update gets stuck, try <strong style="color:#7aadad;">2–3 more times</strong> — it's usually a network hiccup. If it keeps failing, wait a few minutes and try again.</span>
+            </div>
+
             <!-- Commits list -->
             <div class="card" id="upd-commits-card" style="display:none;">
                 <div id="upd-commits-list"></div>
@@ -1838,7 +1844,8 @@
             _invoke('app:version'),
             _invoke('updater:localSha'),
         ]).then(([v, shaObj]) => {
-            if (v) document.getElementById('about-ver').textContent = 'Version ' + v;
+            const verEl = document.getElementById('about-ver');
+            if (verEl) verEl.textContent = 'Version ' + (v || '1.0.1');
             if (shaObj) {
                 const sha = typeof shaObj === 'object' ? shaObj.sha : shaObj;
                 const source = typeof shaObj === 'object' ? shaObj.source : 'unknown';
@@ -1860,9 +1867,8 @@
                 }
             }
         }).catch(() => {
-            _invoke('app:version').then(v => {
-                if (v) document.getElementById('about-ver').textContent = 'Version ' + v;
-            });
+            const verEl = document.getElementById('about-ver');
+            if (verEl) verEl.textContent = 'Version 1.0.1';
         });
 
         // ── Notification Sites ───────────────────────────────────────────────────────
