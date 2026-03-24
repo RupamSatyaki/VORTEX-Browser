@@ -10,13 +10,39 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v110',
-    version: 'v1.1.0',
+    id: 'v120',
+    version: 'v1.2.0',
     badge: 'latest',
-    name: 'Changelog Refactor Update',
+    name: 'Help & FAQ Update',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 1 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+            label: 'Help & FAQ Section',
+            desc: 'New dedicated Help & FAQ section in Settings with 35+ questions covering navigation, tabs, features, issues, shortcuts, privacy and updates. Full-text search, category filters, and expandable answers. Data-driven via faq.js — easy to update.',
+            howto: 'Settings → Help & FAQ · Search any keyword or browse by category',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v110',
+    version: 'v1.1.0',
+    badge: 'stable',
+    name: 'Changelog Refactor Update',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 1, improve: 1 },
     categories: [
       {
