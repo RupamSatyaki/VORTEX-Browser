@@ -10,13 +10,39 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v120',
-    version: 'v1.2.0',
+    id: 'v121',
+    version: 'v1.2.1',
     badge: 'latest',
-    name: 'Help & FAQ Update',
+    name: 'Settings Sidebar Redesign',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { improve: 1 },
+    categories: [
+      {
+        label: 'Improvements',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+        features: [
+          {
+            type: 'improve',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`,
+            label: 'Settings Sidebar Grouped Sections',
+            desc: 'Sidebar nav items reorganized into 5 labeled groups: General, Privacy & Performance, Account, System, and Info. Replaces plain separators with uppercase section headers for better scannability.',
+            howto: 'Open Settings — sidebar now shows group labels on the left',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v120',
+    version: 'v1.2.0',
+    badge: 'stable',
+    name: 'Help & FAQ Update',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 1 },
     categories: [
       {
