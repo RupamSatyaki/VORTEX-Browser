@@ -2411,3 +2411,73 @@ body.incognito-window #webview-container {
   color: #00c8b4;
   background: rgba(0,200,180,0.1);
 }
+
+
+/* ── WhatsApp Panel ── */
+#wa-panel {
+  position: fixed;
+  top: 80px;
+  right: -420px;
+  width: 400px;
+  bottom: 20px;
+  background: #0f2222;
+  border: 1px solid #1e3838;
+  border-radius: 14px 0 0 14px;
+  z-index: 9989;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.5);
+  transition: right 0.28s cubic-bezier(0.4,0,0.2,1);
+  -webkit-app-region: no-drag;
+  overflow: hidden;
+}
+#wa-panel.visible { right: 0; }
+#wa-panel.fullscreen {
+  top: 40px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  border-radius: 0;
+}
+
+#wa-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #1a3030;
+  flex-shrink: 0;
+  background: #0d1f1f;
+}
+#wa-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e0f4f4;
+}
+#wa-header button {
+  background: transparent;
+  border: none;
+  color: #4a8080;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+#wa-header button:hover { color: #25D366; background: rgba(37,211,102,0.1); }
+
+#wa-webview {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+/* WhatsApp toolbar button active state */
+#nav-whatsapp.active { color: #25D366; }
+#nav-whatsapp { color: #25D366; opacity: 0.75; }
+#nav-whatsapp:hover { opacity: 1; }

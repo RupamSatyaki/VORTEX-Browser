@@ -285,6 +285,7 @@ window.addEventListener('DOMContentLoaded', () => {
       if (window.Navigation) Navigation.applySettings(payload);
       if (typeof payload.pip === 'boolean' && window.WebView) WebView.setPiPEnabled(payload.pip);
       if (payload.pipSites && window.WebView) WebView.setPiPSites(payload.pipSites);
+      if (window.Navigation) Navigation.applySettings(payload);
       IPC.send('settings:changed', payload);
       return;
     }
