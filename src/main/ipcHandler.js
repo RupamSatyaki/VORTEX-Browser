@@ -468,7 +468,7 @@ function registerHandlers() {
     }
   });
 
-  // Apply a specific commit — download changed files and replace them
+  // Apply a specific commit — download ALL renderer+main files from that commit snapshot
   ipcMain.handle('updater:applyCommit', async (_e, sha) => {
     try {
       const https = require('https');
@@ -476,77 +476,93 @@ function registerHandlers() {
       const path = require('path');
       const { app } = require('electron');
 
-      // Get list of files changed in this commit
-      const commitData = await new Promise((resolve, reject) => {
-        const options = {
-          hostname: 'api.github.com',
-          path: `/repos/${GITHUB_REPO}/commits/${sha}`,
-          headers: { 'User-Agent': 'Vortex-Browser-Updater' },
-        };
-        const req = https.get(options, (res) => {
-          let body = '';
-          res.on('data', chunk => body += chunk);
-          res.on('end', () => { try { resolve(JSON.parse(body)); } catch (e) { reject(e); } });
-        });
-        req.on('error', reject);
-        req.setTimeout(15000, () => { req.destroy(); reject(new Error('timeout')); });
-      });
+      // Override folder: userData/vortex-update/
+      const overrideRoot = path.join(app.getPath('userData'), 'vortex-update');
+      if (!fs.existsSync(overrideRoot)) fs.mkdirSync(overrideRoot, { recursive: true });
 
-      if (!commitData.files || !commitData.files.length) {
-        return { success: false, error: 'No files in this commit' };
-      }
-
-      const appRoot = app.getAppPath();
-      const updated = [];
-      const skipped = [];
-
-      for (const file of commitData.files) {
-        if (file.status === 'removed') { skipped.push(file.filename + ' (deleted)'); continue; }
-
-        // Download raw file content
-        const rawContent = await new Promise((resolve, reject) => {
-          const options = {
-            hostname: 'raw.githubusercontent.com',
-            path: `/${GITHUB_REPO}/${sha}/${file.filename}`,
-            headers: { 'User-Agent': 'Vortex-Browser-Updater' },
-          };
+      // Helper: fetch a URL and return Buffer
+      function fetchUrl(hostname, urlPath) {
+        return new Promise((resolve, reject) => {
+          const options = { hostname, path: urlPath, headers: { 'User-Agent': 'Vortex-Browser-Updater' } };
           const req = https.get(options, (res) => {
+            // Follow redirects
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+              const loc = new URL(res.headers.location);
+              return resolve(fetchUrl(loc.hostname, loc.pathname + (loc.search || '')));
+            }
             const chunks = [];
             res.on('data', chunk => chunks.push(chunk));
             res.on('end', () => resolve(Buffer.concat(chunks)));
           });
           req.on('error', reject);
-          req.setTimeout(15000, () => { req.destroy(); reject(new Error('timeout')); });
+          req.setTimeout(20000, () => { req.destroy(); reject(new Error('timeout')); });
         });
-
-        // Write to local file (relative to app root, inside vortex/ folder)
-        // file.filename is like "vortex/src/renderer/js/tabs.js"
-        // We strip the leading "vortex/" since appRoot already points there
-        const relPath = file.filename.replace(/^vortex\//, '');
-        const localPath = path.join(appRoot, relPath);
-
-        // Ensure directory exists
-        const dir = path.dirname(localPath);
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-
-        fs.writeFileSync(localPath, rawContent);
-        updated.push(file.filename);
       }
 
-      return { success: true, updated, skipped };
+      // Get tree of all files at this commit
+      const treeData = JSON.parse((await fetchUrl(
+        'api.github.com',
+        `/repos/${GITHUB_REPO}/git/trees/${sha}?recursive=1`
+      )).toString());
+
+      if (!treeData.tree) return { success: false, error: treeData.message || 'Could not get file tree' };
+
+      // Filter only vortex/ source files (exclude node_modules, dist, .git)
+      const filesToDownload = treeData.tree.filter(item =>
+        item.type === 'blob' &&
+        item.path.startsWith('vortex/') &&
+        !item.path.includes('node_modules/') &&
+        !item.path.includes('/dist/') &&
+        !item.path.includes('.git/')
+      );
+
+      const updated = [];
+
+      for (const item of filesToDownload) {
+        const rawContent = await fetchUrl(
+          'raw.githubusercontent.com',
+          `/${GITHUB_REPO}/${sha}/${item.path}`
+        );
+
+        // Strip "vortex/" prefix
+        const relPath = item.path.replace(/^vortex\//, '');
+        const destPath = path.join(overrideRoot, relPath);
+        const destDir = path.dirname(destPath);
+        if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+        fs.writeFileSync(destPath, rawContent);
+        updated.push(item.path);
+      }
+
+      // Save applied sha
+      fs.writeFileSync(path.join(overrideRoot, '.applied-sha'), sha);
+
+      return { success: true, updated, skipped: [] };
     } catch (err) {
       return { success: false, error: err.message };
     }
   });
 
-  // Get current local HEAD sha (from .git/HEAD + refs)
+  // Get current sha — check override folder first, then .git (dev mode)
   ipcMain.handle('updater:localSha', async () => {
     try {
       const fs = require('fs');
       const path = require('path');
       const { app } = require('electron');
+
+      // 1. Check userData override folder for applied sha
+      const appliedShaPath = path.join(app.getPath('userData'), 'vortex-update', '.applied-sha');
+      if (fs.existsSync(appliedShaPath)) {
+        return fs.readFileSync(appliedShaPath, 'utf8').trim();
+      }
+
+      // 2. Check package.json buildSha (set at build time)
+      try {
+        const pkg = require('../../package.json');
+        if (pkg.buildSha) return pkg.buildSha;
+      } catch (_) {}
+
+      // 3. Dev mode — read from .git
       const appRoot = app.getAppPath();
-      // Try .git folder (dev mode)
       const gitHead = path.join(appRoot, '.git', 'HEAD');
       if (!fs.existsSync(gitHead)) return null;
       const head = fs.readFileSync(gitHead, 'utf8').trim();
@@ -554,7 +570,7 @@ function registerHandlers() {
         const refPath = path.join(appRoot, '.git', head.replace('ref: ', ''));
         if (fs.existsSync(refPath)) return fs.readFileSync(refPath, 'utf8').trim();
       }
-      return head; // detached HEAD
+      return head;
     } catch { return null; }
   });
 }

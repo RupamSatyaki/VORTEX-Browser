@@ -17,6 +17,14 @@ function _preloadPath() {
   return path.join(base, 'preload.js');
 }
 
+function _indexHtmlPath() {
+  // Check userData override first
+  const fs = require('fs');
+  const overridePath = path.join(app.getPath('userData'), 'vortex-update', 'src', 'renderer', 'index.html');
+  if (fs.existsSync(overridePath)) return overridePath;
+  return path.join(__dirname, '../renderer/index.html');
+}
+
 function createMainWindow() {
   // Force dark mode — all webviews will receive prefers-color-scheme: dark
   nativeTheme.themeSource = 'dark';
@@ -41,7 +49,7 @@ function createMainWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  mainWindow.loadFile(_indexHtmlPath());
 
   // Dev mode only: open DevTools + auto-reload
   if (!app.isPackaged) {
@@ -85,7 +93,7 @@ function createIncognitoWindow() {
   });
 
   // Pass incognito flag via query param so renderer knows
-  win.loadFile(path.join(__dirname, '../renderer/index.html'), {
+  win.loadFile(_indexHtmlPath(), {
     query: { incognito: '1' },
   });
 
