@@ -75,13 +75,16 @@ function registerHandlers() {
   prewarmDNS();
 
   ipcMain.handle('app:version', () => {
+    const { app } = require('electron');
+    try {
+      // app.getVersion() always works — reads from package.json at build time
+      const v = app.getVersion();
+      if (v && v !== '0.0.0') return v;
+    } catch (_) {}
     try {
       return require('../../package.json').version;
     } catch {
-      try {
-        const { app } = require('electron');
-        return app.getVersion();
-      } catch { return '1.0.0'; }
+      return '1.0.1';
     }
   });
 
