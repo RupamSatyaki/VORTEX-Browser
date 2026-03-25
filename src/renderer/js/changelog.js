@@ -10,13 +10,45 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v212',
-    version: 'v2.1.2',
+    id: 'v220',
+    version: 'v2.2.0',
     badge: 'latest',
-    name: 'JSON Viewer — 13 Features',
+    name: 'Color Picker — Full Upgrade',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 13 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Palette Generator', desc:'Auto-generates Shades, Tints and Tones from any color — 7 swatches each. Click any swatch to load it.', howto:'Color Picker → Palette tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Color Harmony', desc:'Complementary, Split-Complementary, Triadic, Analogous, Tetradic — all with swatches. Click to load any.', howto:'Color Picker → Harmony tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>`, label:'Gradient Generator', desc:'Pick two colors, angle and type (linear/radial/conic). Live preview + copy CSS.', howto:'Color Picker → Gradient tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>`, label:'Color History', desc:'Last 12 picked colors shown as swatches. Click any to reload.', howto:'Appears below actions automatically' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'CMYK + HWB Support', desc:'Full CMYK and HWB format support with copy buttons. All 6 formats: HEX, RGB, HSL, RGBA, CMYK, HWB.', howto:'Copy buttons in action bar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/></svg>`, label:'CSS Variables Output', desc:'One-click CSS custom properties: --color, --color-rgb, --color-hsl, --color-rgba, --color-cmyk, --color-hwb.', howto:'Color Picker → CSS/TW tab → Copy CSS Vars' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/></svg>`, label:'Tailwind CSS Match', desc:'Finds the closest Tailwind color class with color distance (Δ). Copy class name directly.', howto:'Color Picker → CSS/TW tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`, label:'Color Blindness Simulator', desc:'Simulates Protanopia, Deuteranopia, Tritanopia and Achromatopsia. Click simulated swatch to load it.', howto:'Color Picker → Blindness tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87"/></svg>`, label:'Eyedropper API', desc:'Pick any color from the screen using the native browser Eyedropper API.', howto:'💉 Pick button in action bar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5"/></svg>`, label:'Export Palette JSON', desc:'Export current color + history as a JSON file for use in design tools.', howto:'Color Picker → CSS/TW tab → Export Palette JSON' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/></svg>`, label:'Alpha / Opacity Slider', desc:'Visual alpha slider with checkerboard background. RGBA output with full opacity control.', howto:'Opacity slider below color fields' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Large Preview Hero', desc:'Big color swatch at top shows current color with HEX overlay and nearest Tailwind name. Auto-contrast text.', howto:'Top of Color Picker' },
+          { type:'improve', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`, label:'WCAG Contrast Checker Upgraded', desc:'Now shows AA Normal, AA Large, AAA Normal, AAA Large — all four levels vs both white and black.', howto:'Color Picker → Contrast tab' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v212',
+    version: 'v2.1.2',
+    badge: 'stable',
+    name: 'JSON Viewer — 13 Features',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 13 },
     categories: [
       {
