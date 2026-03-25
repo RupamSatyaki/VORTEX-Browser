@@ -10,13 +10,74 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v121',
-    version: 'v1.2.1',
+    id: 'v200',
+    version: 'v2.0.0',
     badge: 'latest',
-    name: 'Settings Sidebar Redesign',
+    name: 'DevHub — Developer Tools Panel',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 6 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
+            label: 'DevHub Panel',
+            desc: 'New toolbar button opens a slide-out DevHub panel. Home screen shows all tools in a grid. Click any tool to open it, back button returns to home. Toggle button visibility in Settings → Appearance.',
+            howto: 'Click the wrench icon in toolbar · Settings → Appearance → Show DevHub Button to hide',
+          },
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            label: 'JSON Viewer',
+            desc: 'Paste JSON to pretty-print with syntax-highlighted collapsible tree. Validate, minify, and copy. Color-coded: keys teal, strings green, numbers orange, booleans purple.',
+            howto: 'DevHub → JSON Viewer',
+          },
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+            label: 'Color Picker',
+            desc: 'HEX ↔ RGB ↔ HSL converter with live preview swatch. WCAG contrast checker vs white and black. Copy in any format.',
+            howto: 'DevHub → Color Picker',
+          },
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`,
+            label: 'Regex Tester',
+            desc: 'Live regex match highlighter. Supports g/i/m/s flags. Shows match count, highlights all matches inline, and lists capture groups from the first match.',
+            howto: 'DevHub → Regex Tester',
+          },
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+            label: 'Base64 Encoder/Decoder',
+            desc: 'Encode/decode text to Base64. Image tab: drag-drop or upload any image to get its Base64 data URI instantly.',
+            howto: 'DevHub → Base64',
+          },
+          {
+            type: 'new',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+            label: 'URL Encoder / Parser',
+            desc: 'Encode/decode URL components (encodeURIComponent or encodeURI). Parse tab breaks any URL into protocol, host, pathname, query params and hash.',
+            howto: 'DevHub → URL Encoder',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v121',
+    version: 'v1.2.1',
+    badge: 'stable',
+    name: 'Settings Sidebar Redesign',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { improve: 1 },
     categories: [
       {
