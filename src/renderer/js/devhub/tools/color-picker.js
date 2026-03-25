@@ -81,16 +81,31 @@ const ColorPickerTool = {
 
       <!-- Tabs -->
       <div class="cp-tabs">
-        <button class="cp-tab active" data-tab="contrast">Contrast</button>
+        <button class="cp-tab active" data-tab="canvas">Canvas</button>
+        <button class="cp-tab" data-tab="contrast">Contrast</button>
         <button class="cp-tab" data-tab="palette">Palette</button>
         <button class="cp-tab" data-tab="harmony">Harmony</button>
         <button class="cp-tab" data-tab="gradient">Gradient</button>
+        <button class="cp-tab" data-tab="mixer">Mixer</button>
+        <button class="cp-tab" data-tab="named">Named</button>
+        <button class="cp-tab" data-tab="image">Image</button>
+        <button class="cp-tab" data-tab="saved">Saved</button>
         <button class="cp-tab" data-tab="blindness">Blindness</button>
-        <button class="cp-tab" data-tab="css">CSS / TW</button>
+        <button class="cp-tab" data-tab="css">CSS/TW</button>
+      </div>
+
+      <!-- Canvas tab -->
+      <div class="cp-tab-content" id="cp-tab-canvas">
+        <div class="cp-canvas-wrap">
+          <canvas id="cp-canvas" width="300" height="160" class="cp-canvas"></canvas>
+          <div class="cp-hue-wrap">
+            <canvas id="cp-hue-bar" width="300" height="16" class="cp-hue-bar"></canvas>
+          </div>
+        </div>
       </div>
 
       <!-- Contrast tab -->
-      <div class="cp-tab-content" id="cp-tab-contrast">
+      <div class="cp-tab-content" id="cp-tab-contrast" style="display:none">
         <div class="cp-contrast-row">
           <div class="cp-contrast-box" id="cp-vs-white"><span>Aa</span><span class="cp-cr-badge" id="cp-cw-badge"></span></div>
           <div class="cp-contrast-box" id="cp-vs-black"><span>Aa</span><span class="cp-cr-badge" id="cp-cb-badge"></span></div>
@@ -140,6 +155,52 @@ const ColorPickerTool = {
         <div class="cp-tw-match" id="cp-tw-match"></div>
         <button class="dh-btn" id="cp-css-copy" style="margin-top:6px">Copy CSS Vars</button>
         <button class="dh-btn" id="cp-export-btn" style="margin-top:6px">Export Palette JSON</button>
+      </div>
+
+      <!-- Mixer tab -->
+      <div class="cp-tab-content" id="cp-tab-mixer" style="display:none">
+        <div class="cp-mixer-row">
+          <div class="cp-mixer-col">
+            <div class="cp-palette-label">Color A</div>
+            <input type="color" id="cp-mix-a" value="#00c8b4" class="cp-native-input" style="width:48px;height:48px;"/>
+          </div>
+          <div class="cp-mixer-col">
+            <div class="cp-palette-label">Color B</div>
+            <input type="color" id="cp-mix-b" value="#1a3838" class="cp-native-input" style="width:48px;height:48px;"/>
+          </div>
+        </div>
+        <div class="cp-palette-label" style="margin-top:8px">Ratio (A → B)</div>
+        <input type="range" id="cp-mix-ratio" min="0" max="100" value="50" class="cp-mix-slider"/>
+        <div class="cp-mix-preview-row" id="cp-mix-preview-row"></div>
+        <div class="cp-mix-steps-row" id="cp-mix-steps"></div>
+      </div>
+
+      <!-- Named Colors tab -->
+      <div class="cp-tab-content" id="cp-tab-named" style="display:none">
+        <input class="dh-input" id="cp-named-search" type="text" placeholder="Search CSS named colors…" style="width:100%;margin-bottom:8px;" spellcheck="false"/>
+        <div class="cp-named-grid" id="cp-named-grid"></div>
+      </div>
+
+      <!-- Image Colors tab -->
+      <div class="cp-tab-content" id="cp-tab-image" style="display:none">
+        <div class="cp-img-drop" id="cp-img-drop">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#2e6060" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <div>Drop image or <label style="color:#00c8b4;cursor:pointer"><input type="file" id="cp-img-file" accept="image/*" style="display:none"/>click to upload</label></div>
+        </div>
+        <div id="cp-img-result" style="display:none">
+          <img id="cp-img-preview" style="max-width:100%;max-height:80px;border-radius:8px;border:1px solid #1e3838;margin-bottom:8px;"/>
+          <div class="cp-palette-label">Dominant Colors</div>
+          <div class="cp-swatch-row" id="cp-img-colors"></div>
+        </div>
+      </div>
+
+      <!-- Saved Palettes tab -->
+      <div class="cp-tab-content" id="cp-tab-saved" style="display:none">
+        <div class="cp-saved-add-row">
+          <input class="dh-input" id="cp-saved-name" type="text" placeholder="Palette name…" style="flex:1;" maxlength="30"/>
+          <button class="dh-btn primary" id="cp-saved-add">+ Save Current</button>
+        </div>
+        <div id="cp-saved-list"></div>
       </div>
 
       <!-- Actions -->
@@ -290,10 +351,12 @@ const ColorPickerTool = {
 
       // Active tab refresh
       const activeTab = container.querySelector('.cp-tab.active')?.dataset.tab;
+      if(activeTab==='canvas')    renderCanvas(h,s,l);
       if(activeTab==='contrast')  renderContrast(r,g,b);
       if(activeTab==='palette')   renderPalette(h,s,l);
       if(activeTab==='harmony')   renderHarmony(h,s,l);
       if(activeTab==='gradient')  renderGradient();
+      if(activeTab==='mixer')     renderMixer();
       if(activeTab==='blindness') renderBlindness(r,g,b);
       if(activeTab==='css')       renderCSS(r,g,b,h,s,l);
     }
@@ -415,6 +478,169 @@ const ColorPickerTool = {
       self._history.forEach(h=>row.appendChild(makeSwatch(h)));
     }
 
+    // ── Canvas (2D SL picker + Hue bar) ───────────────────────────────────────
+    function renderCanvas(h,s,l) {
+      const cv=$('cp-canvas'), ctx=cv.getContext('2d');
+      const W=cv.width, H=cv.height;
+      // SL gradient: white→hue horizontal, white→black vertical
+      const gradH=ctx.createLinearGradient(0,0,W,0);
+      gradH.addColorStop(0,'#fff');
+      gradH.addColorStop(1,`hsl(${h},100%,50%)`);
+      ctx.fillStyle=gradH; ctx.fillRect(0,0,W,H);
+      const gradV=ctx.createLinearGradient(0,0,0,H);
+      gradV.addColorStop(0,'rgba(0,0,0,0)');
+      gradV.addColorStop(1,'#000');
+      ctx.fillStyle=gradV; ctx.fillRect(0,0,W,H);
+      // Draw cursor
+      const cx=Math.round(s/100*W), cy=Math.round((1-l/100)*H);
+      ctx.beginPath(); ctx.arc(cx,cy,7,0,Math.PI*2);
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1; ctx.stroke();
+
+      // Hue bar
+      const hcv=$('cp-hue-bar'), hctx=hcv.getContext('2d');
+      const hg=hctx.createLinearGradient(0,0,hcv.width,0);
+      for(let i=0;i<=360;i+=30) hg.addColorStop(i/360,`hsl(${i},100%,50%)`);
+      hctx.fillStyle=hg; hctx.fillRect(0,0,hcv.width,hcv.height);
+      // Hue cursor
+      const hx=Math.round(h/360*hcv.width);
+      hctx.beginPath(); hctx.arc(hx,hcv.height/2,6,0,Math.PI*2);
+      hctx.strokeStyle='#fff'; hctx.lineWidth=2; hctx.stroke();
+    }
+
+    function _canvasClick(e) {
+      const cv=$('cp-canvas'), rect=cv.getBoundingClientRect();
+      const x=e.clientX-rect.left, y=e.clientY-rect.top;
+      const s=Math.round(Math.max(0,Math.min(1,x/cv.offsetWidth))*100);
+      const l=Math.round(Math.max(0,Math.min(1,1-y/cv.offsetHeight))*100);
+      const {h}=rgbToHsl(...Object.values(hexToRgb(self._currentHex)));
+      const {r,g,b}=hslToRgb(h,s,l);
+      update(rgbToHex(r,g,b));
+    }
+    function _hueClick(e) {
+      const hcv=$('cp-hue-bar'), rect=hcv.getBoundingClientRect();
+      const x=e.clientX-rect.left;
+      const h=Math.round(Math.max(0,Math.min(1,x/hcv.offsetWidth))*360);
+      const {r:cr,g:cg,b:cb}=hexToRgb(self._currentHex);
+      const {s,l}=rgbToHsl(cr,cg,cb);
+      const {r,g,b}=hslToRgb(h,s,l);
+      update(rgbToHex(r,g,b));
+    }
+
+    // ── Mixer ──────────────────────────────────────────────────────────────────
+    function renderMixer() {
+      const aHex=$('cp-mix-a').value, bHex=$('cp-mix-b').value;
+      const ratio=+$('cp-mix-ratio').value/100;
+      const a=hexToRgb(aHex), b=hexToRgb(bHex);
+      const mix=(t)=>rgbToHex(
+        Math.round(a.r+(b.r-a.r)*t),
+        Math.round(a.g+(b.g-a.g)*t),
+        Math.round(a.b+(b.b-a.b)*t)
+      );
+      const mixedHex=mix(ratio);
+      const prev=$('cp-mix-preview-row');
+      prev.innerHTML=`
+        <div class="cp-mix-result" style="background:${mixedHex}" title="${mixedHex}">
+          <span style="color:${luminance(...Object.values(hexToRgb(mixedHex)))>0.4?'#000':'#fff'};font-size:11px;font-family:monospace">${mixedHex}</span>
+        </div>`;
+      prev.querySelector('.cp-mix-result').addEventListener('click',()=>update(mixedHex));
+      // 7-step gradient
+      const steps=$('cp-mix-steps'); steps.innerHTML='';
+      for(let i=0;i<=6;i++) steps.appendChild(makeSwatch(mix(i/6),`${Math.round(i/6*100)}%`));
+    }
+
+    // ── Named Colors ───────────────────────────────────────────────────────────
+    const CSS_NAMED = {
+      aliceblue:'#f0f8ff',antiquewhite:'#faebd7',aqua:'#00ffff',aquamarine:'#7fffd4',azure:'#f0ffff',
+      beige:'#f5f5dc',bisque:'#ffe4c4',black:'#000000',blanchedalmond:'#ffebcd',blue:'#0000ff',
+      blueviolet:'#8a2be2',brown:'#a52a2a',burlywood:'#deb887',cadetblue:'#5f9ea0',chartreuse:'#7fff00',
+      chocolate:'#d2691e',coral:'#ff7f50',cornflowerblue:'#6495ed',cornsilk:'#fff8dc',crimson:'#dc143c',
+      cyan:'#00ffff',darkblue:'#00008b',darkcyan:'#008b8b',darkgoldenrod:'#b8860b',darkgray:'#a9a9a9',
+      darkgreen:'#006400',darkkhaki:'#bdb76b',darkmagenta:'#8b008b',darkolivegreen:'#556b2f',
+      darkorange:'#ff8c00',darkorchid:'#9932cc',darkred:'#8b0000',darksalmon:'#e9967a',
+      darkseagreen:'#8fbc8f',darkslateblue:'#483d8b',darkslategray:'#2f4f4f',darkturquoise:'#00ced1',
+      darkviolet:'#9400d3',deeppink:'#ff1493',deepskyblue:'#00bfff',dimgray:'#696969',
+      dodgerblue:'#1e90ff',firebrick:'#b22222',floralwhite:'#fffaf0',forestgreen:'#228b22',
+      fuchsia:'#ff00ff',gainsboro:'#dcdcdc',ghostwhite:'#f8f8ff',gold:'#ffd700',goldenrod:'#daa520',
+      gray:'#808080',green:'#008000',greenyellow:'#adff2f',honeydew:'#f0fff0',hotpink:'#ff69b4',
+      indianred:'#cd5c5c',indigo:'#4b0082',ivory:'#fffff0',khaki:'#f0e68c',lavender:'#e6e6fa',
+      lavenderblush:'#fff0f5',lawngreen:'#7cfc00',lemonchiffon:'#fffacd',lightblue:'#add8e6',
+      lightcoral:'#f08080',lightcyan:'#e0ffff',lightgoldenrodyellow:'#fafad2',lightgray:'#d3d3d3',
+      lightgreen:'#90ee90',lightpink:'#ffb6c1',lightsalmon:'#ffa07a',lightseagreen:'#20b2aa',
+      lightskyblue:'#87cefa',lightslategray:'#778899',lightsteelblue:'#b0c4de',lightyellow:'#ffffe0',
+      lime:'#00ff00',limegreen:'#32cd32',linen:'#faf0e6',magenta:'#ff00ff',maroon:'#800000',
+      mediumaquamarine:'#66cdaa',mediumblue:'#0000cd',mediumorchid:'#ba55d3',mediumpurple:'#9370db',
+      mediumseagreen:'#3cb371',mediumslateblue:'#7b68ee',mediumspringgreen:'#00fa9a',
+      mediumturquoise:'#48d1cc',mediumvioletred:'#c71585',midnightblue:'#191970',mintcream:'#f5fffa',
+      mistyrose:'#ffe4e1',moccasin:'#ffe4b5',navajowhite:'#ffdead',navy:'#000080',oldlace:'#fdf5e6',
+      olive:'#808000',olivedrab:'#6b8e23',orange:'#ffa500',orangered:'#ff4500',orchid:'#da70d6',
+      palegoldenrod:'#eee8aa',palegreen:'#98fb98',paleturquoise:'#afeeee',palevioletred:'#db7093',
+      papayawhip:'#ffefd5',peachpuff:'#ffdab9',peru:'#cd853f',pink:'#ffc0cb',plum:'#dda0dd',
+      powderblue:'#b0e0e6',purple:'#800080',red:'#ff0000',rosybrown:'#bc8f8f',royalblue:'#4169e1',
+      saddlebrown:'#8b4513',salmon:'#fa8072',sandybrown:'#f4a460',seagreen:'#2e8b57',seashell:'#fff5ee',
+      sienna:'#a0522d',silver:'#c0c0c0',skyblue:'#87ceeb',slateblue:'#6a5acd',slategray:'#708090',
+      snow:'#fffafa',springgreen:'#00ff7f',steelblue:'#4682b4',tan:'#d2b48c',teal:'#008080',
+      thistle:'#d8bfd8',tomato:'#ff6347',turquoise:'#40e0d0',violet:'#ee82ee',wheat:'#f5deb3',
+      white:'#ffffff',whitesmoke:'#f5f5f5',yellow:'#ffff00',yellowgreen:'#9acd32',
+    };
+
+    function renderNamed(q) {
+      const grid=$('cp-named-grid'); grid.innerHTML='';
+      const entries=Object.entries(CSS_NAMED).filter(([n])=>!q||n.includes(q.toLowerCase()));
+      entries.forEach(([name,hex])=>{
+        const item=document.createElement('div'); item.className='cp-named-item';
+        item.title=`${name} · ${hex}`;
+        item.innerHTML=`<div class="cp-named-swatch" style="background:${hex}"></div><div class="cp-named-label">${name}</div>`;
+        item.addEventListener('click',()=>update(hex));
+        grid.appendChild(item);
+      });
+    }
+
+    // ── Image Color Extraction ─────────────────────────────────────────────────
+    function extractColors(img, n=8) {
+      const cv=document.createElement('canvas');
+      const scale=Math.min(1,80/Math.max(img.width,img.height));
+      cv.width=Math.round(img.width*scale); cv.height=Math.round(img.height*scale);
+      const ctx=cv.getContext('2d'); ctx.drawImage(img,0,0,cv.width,cv.height);
+      const data=ctx.getImageData(0,0,cv.width,cv.height).data;
+      // Simple quantize: bucket by 32
+      const buckets={};
+      for(let i=0;i<data.length;i+=4) {
+        if(data[i+3]<128) continue;
+        const r=Math.round(data[i]/32)*32, g=Math.round(data[i+1]/32)*32, b=Math.round(data[i+2]/32)*32;
+        const k=`${r},${g},${b}`; buckets[k]=(buckets[k]||0)+1;
+      }
+      return Object.entries(buckets).sort((a,b)=>b[1]-a[1]).slice(0,n)
+        .map(([k])=>{ const [r,g,b]=k.split(',').map(Number); return rgbToHex(r,g,b); });
+    }
+
+    // ── Saved Palettes ─────────────────────────────────────────────────────────
+    function loadSaved() { try { return JSON.parse(localStorage.getItem('vx_cp_palettes')||'[]'); } catch{return[];} }
+    function saveSaved(d) { localStorage.setItem('vx_cp_palettes',JSON.stringify(d)); }
+
+    function renderSaved() {
+      const list=$('cp-saved-list'); list.innerHTML='';
+      const palettes=loadSaved();
+      if(!palettes.length){list.innerHTML='<div style="font-size:11px;color:#4a8080;padding:8px 0">No saved palettes yet</div>';return;}
+      palettes.forEach((p,idx)=>{
+        const row=document.createElement('div'); row.className='cp-saved-row';
+        const swatches=p.colors.map(c=>`<div class="cp-swatch-item" style="background:${c};width:22px;height:22px;" title="${c}"></div>`).join('');
+        row.innerHTML=`
+          <div class="cp-saved-name">${p.name}</div>
+          <div class="cp-swatch-row" style="flex:1">${swatches}</div>
+          <button class="dh-btn jv-sm-btn cp-saved-del" data-idx="${idx}">✕</button>`;
+        row.querySelectorAll('.cp-swatch-item').forEach((s,i)=>{
+          s.style.cursor='pointer';
+          s.addEventListener('click',()=>update(p.colors[i]));
+        });
+        row.querySelector('.cp-saved-del').addEventListener('click',e=>{
+          const d=loadSaved(); d.splice(+e.target.dataset.idx,1); saveSaved(d); renderSaved();
+        });
+        list.appendChild(row);
+      });
+    }
+
     // ── Tab switching ──────────────────────────────────────────────────────────
     container.querySelectorAll('.cp-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -424,10 +650,15 @@ const ColorPickerTool = {
         $('cp-tab-'+tab.dataset.tab).style.display='';
         const {r,g,b}=hexToRgb(self._currentHex);
         const {h,s,l}=rgbToHsl(r,g,b);
+        if(tab.dataset.tab==='canvas')    renderCanvas(h,s,l);
         if(tab.dataset.tab==='contrast')  renderContrast(r,g,b);
         if(tab.dataset.tab==='palette')   renderPalette(h,s,l);
         if(tab.dataset.tab==='harmony')   renderHarmony(h,s,l);
         if(tab.dataset.tab==='gradient')  renderGradient();
+        if(tab.dataset.tab==='mixer')     renderMixer();
+        if(tab.dataset.tab==='named')     renderNamed('');
+        if(tab.dataset.tab==='image')     { /* user uploads */ }
+        if(tab.dataset.tab==='saved')     renderSaved();
         if(tab.dataset.tab==='blindness') renderBlindness(r,g,b);
         if(tab.dataset.tab==='css')       renderCSS(r,g,b,h,s,l);
       });
@@ -460,6 +691,53 @@ const ColorPickerTool = {
     $('cp-grad-type').addEventListener('change',renderGradient);
     $('cp-grad-copy').addEventListener('click',()=>copied($('cp-grad-code').textContent.replace('background: ','')));
 
+    // Canvas events
+    let _canvasDragging=false, _hueDragging=false;
+    $('cp-canvas').addEventListener('mousedown',e=>{_canvasDragging=true;_canvasClick(e);});
+    $('cp-hue-bar').addEventListener('mousedown',e=>{_hueDragging=true;_hueClick(e);});
+    document.addEventListener('mousemove',e=>{if(_canvasDragging)_canvasClick(e);if(_hueDragging)_hueClick(e);});
+    document.addEventListener('mouseup',()=>{_canvasDragging=false;_hueDragging=false;});
+
+    // Mixer events
+    $('cp-mix-a').addEventListener('input',renderMixer);
+    $('cp-mix-b').addEventListener('input',renderMixer);
+    $('cp-mix-ratio').addEventListener('input',renderMixer);
+
+    // Named search
+    $('cp-named-search').addEventListener('input',e=>renderNamed(e.target.value));
+
+    // Image upload
+    function handleImgFile(file) {
+      if(!file||!file.type.startsWith('image/')) return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        const img=new Image();
+        img.onload=()=>{
+          $('cp-img-preview').src=ev.target.result;
+          $('cp-img-result').style.display='';
+          $('cp-img-drop').style.display='none';
+          const colors=extractColors(img);
+          const row=$('cp-img-colors'); row.innerHTML='';
+          colors.forEach(c=>row.appendChild(makeSwatch(c)));
+        };
+        img.src=ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+    $('cp-img-file').addEventListener('change',e=>handleImgFile(e.target.files[0]));
+    const drop=$('cp-img-drop');
+    drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='#00c8b4';});
+    drop.addEventListener('dragleave',()=>drop.style.borderColor='');
+    drop.addEventListener('drop',e=>{e.preventDefault();drop.style.borderColor='';handleImgFile(e.dataTransfer.files[0]);});
+
+    // Saved palettes
+    $('cp-saved-add').addEventListener('click',()=>{
+      const name=$('cp-saved-name').value.trim()||'Palette '+(loadSaved().length+1);
+      const d=loadSaved();
+      d.unshift({name, colors:self._history.slice(0,8).length?self._history.slice(0,8):[self._currentHex]});
+      saveSaved(d); $('cp-saved-name').value=''; renderSaved(); setStatus('Saved!',true);
+    });
+
     // Copy buttons
     $('cp-copy-hex').addEventListener('click',()=>copied(self._currentHex));
     $('cp-copy-rgb').addEventListener('click',()=>{const{r,g,b}=hexToRgb(self._currentHex);copied(`rgb(${r},${g},${b})`);});
@@ -484,5 +762,8 @@ const ColorPickerTool = {
     // Init
     update('#00c8b4', true);
     renderContrast(...Object.values(hexToRgb('#00c8b4')));
+    // Canvas is default tab — render it
+    const {h:ih,s:is,l:il}=rgbToHsl(0,200,180);
+    renderCanvas(ih,is,il);
   }
 };
