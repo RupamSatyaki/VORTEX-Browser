@@ -10,13 +10,45 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v211',
-    version: 'v2.1.1',
+    id: 'v212',
+    version: 'v2.1.2',
     badge: 'latest',
-    name: 'JSON Viewer UI Polish',
+    name: 'JSON Viewer — 13 Features',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 13 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`, label:'Search / Filter', desc:'Search any key or value in the tree. Matching nodes highlight, non-matching fade. Live match count shown.', howto:'Type in search box in Tree tab toolbar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/></svg>`, label:'JSONPath Copy', desc:'Click any key in the tree to copy its full JSONPath (e.g. $.user.address.city) to clipboard.', howto:'Click any key name in tree' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`, label:'JSON Schema Generator', desc:'Auto-generates a JSON Schema (draft-07) from parsed JSON. Infers types, required fields, nested structure. Copy with one click.', howto:'DevHub → JSON Viewer → Schema tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>`, label:'Diff Mode', desc:'Paste two JSONs side by side. Differences shown as ADDED/REMOVED/CHANGED with path and values. Color-coded.', howto:'DevHub → JSON Viewer → Diff tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, label:'Edit Mode', desc:'Toggle edit mode to modify values directly in the tree. Changes update the JSON textarea in real time.', howto:'✎ button in tree toolbar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>`, label:'JSON → CSV', desc:'Converts array of objects to CSV and downloads it. Handles commas, quotes and newlines in values.', howto:'→ CSV button in action bar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>`, label:'Sort Keys', desc:'Recursively sorts all object keys alphabetically. Useful for comparing JSONs or normalizing output.', howto:'Sort Keys button' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`, label:'Flatten / Unflatten', desc:'Flatten nested JSON to dot-notation keys (user.address.city). Unflatten converts back to nested structure.', howto:'Flatten / Unflatten buttons' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`, label:'Size Info', desc:'Shows file size (KB), node count, and validation status in real time as you type.', howto:'Appears below textarea automatically' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/></svg>`, label:'Line Numbers', desc:'Textarea now shows line numbers that sync with scroll position.', howto:'Visible in textarea automatically' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`, label:'Real-time Validation', desc:'Green border = valid JSON, red border = invalid. Updates as you type without needing to click Parse.', howto:'Just type in the textarea' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>`, label:'Syntax Theme Toggle', desc:'Switch between dark and light syntax color themes for the tree view.', howto:'◑ button in tree toolbar' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`, label:'Bookmark Nodes', desc:'Star any node in the tree to bookmark it. Bookmarked nodes show a gold left border for quick identification.', howto:'Hover any row → click ★ icon' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v211',
+    version: 'v2.1.1',
+    badge: 'stable',
+    name: 'JSON Viewer UI Polish',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { fix: 1, improve: 1 },
     categories: [
       {
