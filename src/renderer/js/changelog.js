@@ -10,13 +10,37 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v220',
-    version: 'v2.2.0',
+    id: 'v221',
+    version: 'v2.2.1',
     badge: 'latest',
-    name: 'Color Picker — Full Upgrade',
+    name: 'Color Picker — Canvas, Mixer, Named, Image, Saved',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 5 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Visual Color Canvas', desc:'2D saturation/lightness picker canvas + hue bar slider. Drag to pick color visually — like Figma/Photoshop. Now the default tab.', howto:'Color Picker → Canvas tab (default)' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Color Mixer', desc:'Pick two colors + ratio slider → mixed color preview. Also shows 7-step gradient between the two colors. Click any step to load it.', howto:'Color Picker → Mixer tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg>`, label:'CSS Named Colors', desc:'140+ CSS named colors (tomato, steelblue, coral…) in a searchable grid. Click any to load.', howto:'Color Picker → Named tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>`, label:'Color from Image', desc:'Upload or drag-drop any image → extracts top 8 dominant colors using pixel quantization. Click any color to load it.', howto:'Color Picker → Image tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`, label:'Saved Palettes', desc:'Save named palettes from your color history. Persists in localStorage. Click any swatch to reload, delete palettes individually.', howto:'Color Picker → Saved tab → name + Save Current' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v220',
+    version: 'v2.2.0',
+    badge: 'stable',
+    name: 'Color Picker — Full Upgrade',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 13 },
     categories: [
       {
