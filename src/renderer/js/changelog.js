@@ -10,13 +10,50 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v210',
-    version: 'v2.1.0',
+    id: 'v211',
+    version: 'v2.1.1',
     badge: 'latest',
-    name: 'JSON Viewer Upgrade',
+    name: 'JSON Viewer UI Polish',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { fix: 1, improve: 1 },
+    categories: [
+      {
+        label: 'Bug Fixes',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+        features: [
+          {
+            type: 'fix',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+            label: 'JSON Tree Text Blur Fixed',
+            desc: 'Tree text was blurry due to translate(-50%,-50%) causing subpixel rendering. Fixed by using margin-based centering + transform:translateZ(0) on tree container. Text is now crisp at all zoom levels.',
+          },
+        ],
+      },
+      {
+        label: 'Improvements',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+        features: [
+          {
+            type: 'improve',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            label: 'JSON Viewer UI Redesign',
+            desc: 'Pill-style tab switcher, animated expand/collapse with slide-in, shimmer effect on stat bars, animated depth histogram (bars grow from 0), staggered stat card entrance. Tooltip has no backdrop-filter to prevent blur.',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v210',
+    version: 'v2.1.0',
+    badge: 'stable',
+    name: 'JSON Viewer Upgrade',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { improve: 1 },
     categories: [
       {

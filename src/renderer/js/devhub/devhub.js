@@ -34,9 +34,8 @@ const DevHub = (() => {
     #devhub-panel {
       position: fixed;
       top: 50%; left: 50%;
-      transform: translate(-50%, -50%) scale(0.92);
       width: min(680px, 92vw);
-      max-height: min(580px, 88vh);
+      max-height: min(600px, 88vh);
       background: #0d1f1f;
       border: 1px solid #1e3838;
       border-radius: 18px;
@@ -44,19 +43,27 @@ const DevHub = (() => {
       display: flex;
       flex-direction: column;
       opacity: 0; pointer-events: none;
+      /* Use margin instead of translate to avoid subpixel blur */
+      margin-left: calc(min(680px, 92vw) / -2);
+      margin-top: -300px;
+      transform: scale(0.93);
+      transform-origin: center center;
       transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1),
-                  transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+                  transform 0.28s cubic-bezier(0.34,1.4,0.64,1);
       box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,200,180,0.06);
       overflow: hidden;
+      /* Force integer pixel rendering */
+      will-change: transform, opacity;
+      -webkit-font-smoothing: antialiased;
     }
     #devhub-panel.open {
       opacity: 1; pointer-events: all;
-      transform: translate(-50%, -50%) scale(1);
+      transform: scale(1);
     }
     #devhub-panel.closing {
       opacity: 0;
-      transform: translate(-50%, -50%) scale(0.94);
-      transition: opacity 0.18s ease, transform 0.18s ease;
+      transform: scale(0.95);
+      transition: opacity 0.16s ease, transform 0.16s ease;
     }
 
     /* ── Header ── */
@@ -318,107 +325,243 @@ const DevHub = (() => {
     .ue-parse-key { color: #4a8080; width: 82px; flex-shrink: 0; font-size: 11px; }
     .ue-parse-val { color: #c8e8e5; font-family: monospace; word-break: break-all; }
 
-    /* ── JSON Viewer v2 ── */
+    /* ── JSON Viewer v2.1 ── */
     .jv-wrap { display: flex; flex-direction: column; gap: 10px; }
-    .jv-textarea { min-height: 90px; font-size: 11.5px; }
+    .jv-textarea { min-height: 80px !important; font-size: 11.5px !important; resize: vertical; }
     .jv-input-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-    .jv-upload-label {
-      display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
-    }
+    .jv-upload-label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+
+    /* Tabs bar */
     .jv-tabs {
-      display: flex; align-items: center; gap: 4px;
-      border-bottom: 1px solid #1a3030; padding-bottom: 8px;
+      display: flex; align-items: center; gap: 2px;
+      background: #0a1616; border: 1px solid #1a3030; border-radius: 10px;
+      padding: 4px;
     }
     .jv-tab {
       display: inline-flex; align-items: center; gap: 5px;
       background: none; border: none; border-radius: 7px;
-      color: #4a8080; font-size: 12px; padding: 5px 12px; cursor: pointer;
-      transition: all 0.15s;
+      color: #4a8080; font-size: 12px; padding: 6px 14px; cursor: pointer;
+      transition: all 0.18s; flex: 1; justify-content: center;
+      font-weight: 500;
     }
-    .jv-tab:hover { background: #162e2e; color: #c8e8e5; }
-    .jv-tab.active { background: rgba(0,200,180,0.12); color: #00c8b4; }
-    .jv-tab-actions { display: flex; gap: 4px; margin-left: auto; }
-    .jv-sm-btn { padding: 4px 9px !important; font-size: 11px !important; }
+    .jv-tab:hover { color: #c8e8e5; background: rgba(255,255,255,0.04); }
+    .jv-tab.active {
+      background: #122222; color: #00c8b4;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .jv-tab-actions { display: flex; gap: 4px; margin-left: auto; padding-left: 6px; }
+    .jv-sm-btn { padding: 4px 9px !important; font-size: 10.5px !important; }
 
-    /* Tree */
+    /* ── Tree ── */
     .jv-tree-wrap {
-      background: #080f0f; border: 1px solid #1e3838; border-radius: 10px;
-      padding: 10px 12px; max-height: 280px; overflow-y: auto;
-      font-family: 'Consolas','Fira Code',monospace; font-size: 12px;
-      line-height: 1.7;
+      background: #060e0e;
+      border: 1px solid #1a3030;
+      border-radius: 12px;
+      padding: 12px 14px;
+      max-height: 260px;
+      overflow-y: auto;
+      overflow-x: auto;
+      /* Critical: no transform, no filter on this element */
+      transform: none;
+      filter: none;
+      -webkit-font-smoothing: subpixel-antialiased;
+      text-rendering: optimizeLegibility;
     }
-    .jv-tree-wrap::-webkit-scrollbar { width: 4px; }
+    .jv-tree-wrap::-webkit-scrollbar { width: 4px; height: 4px; }
     .jv-tree-wrap::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+    .jv-tree {
+      font-family: 'Consolas', 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+      font-size: 12.5px;
+      line-height: 1.75;
+      color: #c8e8e5;
+      /* Prevent subpixel issues */
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
     .jv-node { position: relative; }
     .jv-row {
-      display: flex; align-items: baseline; gap: 3px;
-      padding: 1px 4px; border-radius: 5px; cursor: default;
+      display: flex; align-items: center; gap: 2px;
+      padding: 1px 6px 1px 2px;
+      border-radius: 5px;
       transition: background 0.1s;
+      min-height: 22px;
+      cursor: default;
+      white-space: nowrap;
     }
-    .jv-row:hover { background: rgba(0,200,180,0.06); }
+    .jv-row:hover { background: rgba(0,200,180,0.07); }
     .jv-toggle {
-      width: 14px; flex-shrink: 0; display: flex; align-items: center;
-      color: #2e6060; transition: color 0.15s;
+      width: 16px; height: 16px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #2e6060; border-radius: 3px;
+      transition: color 0.15s, background 0.15s;
+      cursor: pointer;
     }
-    .jv-toggle:hover { color: #00c8b4; }
-    .jv-key { color: #00c8b4; }
-    .jv-colon { color: #4a8080; }
-    .jv-bracket { color: #7aadad; }
+    .jv-toggle:hover { color: #00c8b4; background: rgba(0,200,180,0.1); }
+    .jv-toggle-empty { width: 16px; flex-shrink: 0; }
+    .jv-key { color: #00c8b4; font-weight: 500; }
+    .jv-colon { color: #2e6060; margin: 0 2px; }
+    .jv-bracket { color: #5a9090; }
     .jv-count {
-      font-size: 10px; color: #2e6060; margin-left: 5px;
-      background: rgba(0,200,180,0.06); border-radius: 4px; padding: 0 5px;
+      font-size: 10px; color: #2a5050; margin-left: 6px;
+      background: rgba(0,200,180,0.07);
+      border: 1px solid rgba(0,200,180,0.1);
+      border-radius: 4px; padding: 0 6px;
+      font-family: -apple-system, sans-serif;
     }
-    .jv-preview { cursor: pointer; }
-    .jv-preview:hover { opacity: 0.8; }
-    .jv-children { border-left: 1px solid #1a3030; margin-left: 6px; }
-    .jv-close-row { padding-left: 0 !important; }
+    .jv-preview { cursor: pointer; opacity: 0.85; }
+    .jv-preview:hover { opacity: 1; }
+    .jv-children {
+      border-left: 1px solid #1a3030;
+      margin-left: 7px;
+      padding-left: 2px;
+      animation: jv-expand 0.18s ease both;
+    }
+    @keyframes jv-expand {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .jv-str  { color: #86efac; }
+    .jv-num  { color: #fdba74; }
+    .jv-bool { color: #a5b4fc; }
+    .jv-null { color: #6b7280; font-style: italic; }
 
-    /* Tooltip */
+    /* Tooltip — no blur, sharp */
     .jv-tooltip {
       position: fixed; z-index: 99999;
-      background: #0d1f1f; border: 1px solid #1e3838; border-radius: 8px;
-      padding: 8px 12px; font-size: 11.5px; line-height: 1.7;
-      font-family: 'Consolas','Fira Code',monospace;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      background: #0f2020;
+      border: 1px solid #2a4a4a;
+      border-radius: 9px;
+      padding: 9px 13px;
+      font-size: 11.5px; line-height: 1.8;
+      font-family: 'Consolas', monospace;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.6);
       pointer-events: none; display: none;
-      min-width: 120px;
+      min-width: 130px;
+      /* No backdrop-filter here — causes blur */
+      transform: translateZ(0);
     }
 
-    /* Stats */
-    .jv-stats-wrap { display: flex; flex-direction: column; gap: 14px; max-height: 300px; overflow-y: auto; }
+    /* ── Stats ── */
+    .jv-stats-wrap {
+      display: flex; flex-direction: column; gap: 12px;
+      max-height: 300px; overflow-y: auto;
+      padding-right: 2px;
+    }
     .jv-stats-wrap::-webkit-scrollbar { width: 4px; }
     .jv-stats-wrap::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+
     .jv-stats-grid {
       display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
     }
     .jv-stat-card {
-      background: #0d1a1a; border: 1px solid #1e3838; border-radius: 10px;
-      padding: 12px; text-align: center;
-      transition: border-color 0.15s, transform 0.15s;
+      background: linear-gradient(135deg, #0f2020, #0a1616);
+      border: 1px solid #1e3838; border-radius: 11px;
+      padding: 13px 10px; text-align: center;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: default;
     }
-    .jv-stat-card:hover { border-color: rgba(0,200,180,0.3); transform: translateY(-2px); }
-    .jv-stat-num { font-size: 22px; font-weight: 800; color: #00c8b4; line-height: 1; }
-    .jv-stat-label { font-size: 10px; color: #4a8080; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .jv-graph-section { background: #0d1a1a; border: 1px solid #1e3838; border-radius: 10px; padding: 12px 14px; }
-    .jv-graph-title { font-size: 11px; font-weight: 700; color: #4a8080; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
-    .jv-bars { display: flex; flex-direction: column; gap: 7px; }
-    .jv-bar-row { display: flex; align-items: center; gap: 8px; }
-    .jv-bar-label { width: 60px; font-size: 11px; flex-shrink: 0; font-family: monospace; }
-    .jv-bar-track { flex: 1; height: 18px; background: #0a1616; border-radius: 5px; overflow: hidden; position: relative; }
-    .jv-bar-inner { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); opacity: 0.7; }
-    .jv-bar-count { width: 32px; text-align: right; font-size: 11px; color: #c8e8e5; flex-shrink: 0; }
-    .jv-bar-pct { width: 38px; text-align: right; font-size: 10px; color: #4a8080; flex-shrink: 0; }
-    .jv-depth-bars { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-top: 10px; }
-    .jv-depth-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
-    .jv-depth-fill { width: 100%; background: linear-gradient(to top, #00c8b4, rgba(0,200,180,0.3)); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .jv-stat-card:hover {
+      border-color: rgba(0,200,180,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+    }
+    .jv-stat-num {
+      font-size: 24px; font-weight: 800; color: #00c8b4;
+      line-height: 1; font-family: -apple-system, sans-serif;
+      animation: jv-count-in 0.5s cubic-bezier(0.34,1.4,0.64,1) both;
+    }
+    @keyframes jv-count-in {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .jv-stat-label {
+      font-size: 9.5px; color: #4a8080; margin-top: 5px;
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+
+    .jv-graph-section {
+      background: #0a1616; border: 1px solid #1a3030;
+      border-radius: 11px; padding: 13px 15px;
+    }
+    .jv-graph-title {
+      font-size: 10.5px; font-weight: 700; color: #2e6060;
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .jv-graph-title::after {
+      content: ''; flex: 1; height: 1px; background: #1a3030;
+    }
+
+    /* Animated bar chart */
+    .jv-bars { display: flex; flex-direction: column; gap: 8px; }
+    .jv-bar-row { display: flex; align-items: center; gap: 10px; }
+    .jv-bar-label {
+      width: 56px; font-size: 11px; flex-shrink: 0;
+      font-family: 'Consolas', monospace; font-weight: 500;
+    }
+    .jv-bar-track {
+      flex: 1; height: 20px; background: #060e0e;
+      border-radius: 6px; overflow: hidden;
+      border: 1px solid #1a3030; position: relative;
+    }
+    .jv-bar-inner {
+      height: 100%; border-radius: 5px;
+      width: 0; /* starts at 0, animated via JS */
+      transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+      position: relative; overflow: hidden;
+    }
+    .jv-bar-inner::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+      animation: jv-shimmer 2s infinite;
+    }
+    @keyframes jv-shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(100%); }
+    }
+    .jv-bar-count { width: 30px; text-align: right; font-size: 11px; color: #c8e8e5; flex-shrink: 0; }
+    .jv-bar-pct { width: 36px; text-align: right; font-size: 10px; color: #4a8080; flex-shrink: 0; }
+
+    /* Depth histogram */
+    .jv-depth-bars {
+      display: flex; align-items: flex-end; gap: 5px;
+      height: 90px; padding-top: 8px;
+    }
+    .jv-depth-col {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; flex: 1; cursor: default;
+    }
+    .jv-depth-fill {
+      width: 100%;
+      background: linear-gradient(to top, #00c8b4, rgba(0,200,180,0.25));
+      border-radius: 4px 4px 0 0; min-height: 3px;
+      height: 0; /* animated via JS */
+      transition: height 0.6s cubic-bezier(0.34,1.2,0.64,1);
+      box-shadow: 0 0 8px rgba(0,200,180,0.2);
+    }
+    .jv-depth-col:hover .jv-depth-fill { filter: brightness(1.3); }
     .jv-depth-num { font-size: 9px; color: #4a8080; }
     .jv-depth-label { font-size: 9px; color: #2e6060; }
-    .jv-key-list { display: flex; flex-direction: column; gap: 5px; }
+
+    /* Top keys */
+    .jv-key-list { display: flex; flex-direction: column; gap: 6px; }
     .jv-key-row { display: flex; align-items: center; gap: 8px; }
-    .jv-key-name { font-family: monospace; font-size: 11px; color: #00c8b4; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .jv-key-bar-wrap { flex: 1; height: 8px; background: #0a1616; border-radius: 4px; overflow: hidden; }
-    .jv-key-bar { height: 100%; background: linear-gradient(to right, rgba(0,200,180,0.6), rgba(0,200,180,0.2)); border-radius: 4px; transition: width 0.5s ease; }
-    .jv-key-count { font-size: 10px; color: #4a8080; width: 24px; text-align: right; flex-shrink: 0; }
+    .jv-key-name {
+      font-family: 'Consolas', monospace; font-size: 11px; color: #00c8b4;
+      width: 110px; flex-shrink: 0; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .jv-key-bar-wrap {
+      flex: 1; height: 10px; background: #060e0e;
+      border-radius: 5px; overflow: hidden; border: 1px solid #1a3030;
+    }
+    .jv-key-bar {
+      height: 100%;
+      background: linear-gradient(to right, rgba(0,200,180,0.7), rgba(0,200,180,0.2));
+      border-radius: 5px;
+      width: 0; transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    .jv-key-count { font-size: 10px; color: #4a8080; width: 26px; text-align: right; flex-shrink: 0; }
   `;
 
   function _injectCSS() {
