@@ -371,6 +371,68 @@ const DevHub = (() => {
     .cp-contrast-label { font-size: 10.5px; color: #4a8080; margin-bottom: 6px; }
     .cp-contrast-ratio { font-size: 11px; color: #4a8080; }
 
+    /* ── Canvas picker ── */
+    .cp-canvas-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .cp-canvas {
+      width: 100%; height: 150px; border-radius: 10px; cursor: crosshair;
+      border: 1px solid #1a3030; display: block;
+    }
+    .cp-hue-wrap { }
+    .cp-hue-bar {
+      width: 100%; height: 14px; border-radius: 7px; cursor: pointer;
+      border: 1px solid #1a3030; display: block;
+    }
+
+    /* ── Mixer ── */
+    .cp-mixer-row { display: flex; gap: 16px; align-items: flex-end; }
+    .cp-mixer-col { display: flex; flex-direction: column; gap: 4px; align-items: center; }
+    .cp-mix-slider { width: 100%; accent-color: #00c8b4; margin: 6px 0; cursor: pointer; }
+    .cp-mix-preview-row { margin: 4px 0; }
+    .cp-mix-result {
+      height: 36px; border-radius: 9px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.15s;
+    }
+    .cp-mix-result:hover { transform: scale(1.02); }
+    .cp-mix-steps-row { display: flex; gap: 4px; margin-top: 6px; }
+
+    /* ── Named Colors ── */
+    .cp-named-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 5px; max-height: 180px; overflow-y: auto;
+    }
+    .cp-named-grid::-webkit-scrollbar { width: 4px; }
+    .cp-named-grid::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+    .cp-named-item {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      cursor: pointer; padding: 4px; border-radius: 7px;
+      transition: background 0.12s;
+    }
+    .cp-named-item:hover { background: rgba(0,200,180,0.07); }
+    .cp-named-swatch { width: 100%; height: 28px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.08); }
+    .cp-named-label { font-size: 9px; color: #4a8080; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; width: 100%; }
+
+    /* ── Image Colors ── */
+    .cp-img-drop {
+      border: 2px dashed #1e3838; border-radius: 10px; padding: 20px;
+      text-align: center; color: #4a8080; font-size: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      transition: border-color 0.2s; cursor: pointer;
+    }
+    .cp-img-drop:hover { border-color: rgba(0,200,180,0.3); }
+
+    /* ── Saved Palettes ── */
+    .cp-saved-add-row { display: flex; gap: 6px; margin-bottom: 10px; }
+    .cp-saved-list { display: flex; flex-direction: column; gap: 6px; max-height: 160px; overflow-y: auto; }
+    .cp-saved-list::-webkit-scrollbar { width: 4px; }
+    .cp-saved-list::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+    .cp-saved-row {
+      display: flex; align-items: center; gap: 8px;
+      background: #0a1616; border-radius: 8px; padding: 7px 10px;
+      border: 1px solid #1a3030;
+    }
+    .cp-saved-name { font-size: 11px; color: #c8e8e5; font-weight: 500; width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     /* Regex Tester */
     .rx-pattern-row { display: flex; align-items: center; gap: 5px; }
     .rx-slash { color: #00c8b4; font-size: 20px; font-family: monospace; line-height: 1; }
