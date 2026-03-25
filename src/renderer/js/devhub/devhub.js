@@ -317,6 +317,108 @@ const DevHub = (() => {
     .ue-parse-row { display: flex; gap: 10px; font-size: 12px; padding: 5px 9px; background: #080f0f; border-radius: 6px; }
     .ue-parse-key { color: #4a8080; width: 82px; flex-shrink: 0; font-size: 11px; }
     .ue-parse-val { color: #c8e8e5; font-family: monospace; word-break: break-all; }
+
+    /* ── JSON Viewer v2 ── */
+    .jv-wrap { display: flex; flex-direction: column; gap: 10px; }
+    .jv-textarea { min-height: 90px; font-size: 11.5px; }
+    .jv-input-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .jv-upload-label {
+      display: inline-flex; align-items: center; gap: 5px; cursor: pointer;
+    }
+    .jv-tabs {
+      display: flex; align-items: center; gap: 4px;
+      border-bottom: 1px solid #1a3030; padding-bottom: 8px;
+    }
+    .jv-tab {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: none; border: none; border-radius: 7px;
+      color: #4a8080; font-size: 12px; padding: 5px 12px; cursor: pointer;
+      transition: all 0.15s;
+    }
+    .jv-tab:hover { background: #162e2e; color: #c8e8e5; }
+    .jv-tab.active { background: rgba(0,200,180,0.12); color: #00c8b4; }
+    .jv-tab-actions { display: flex; gap: 4px; margin-left: auto; }
+    .jv-sm-btn { padding: 4px 9px !important; font-size: 11px !important; }
+
+    /* Tree */
+    .jv-tree-wrap {
+      background: #080f0f; border: 1px solid #1e3838; border-radius: 10px;
+      padding: 10px 12px; max-height: 280px; overflow-y: auto;
+      font-family: 'Consolas','Fira Code',monospace; font-size: 12px;
+      line-height: 1.7;
+    }
+    .jv-tree-wrap::-webkit-scrollbar { width: 4px; }
+    .jv-tree-wrap::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+    .jv-node { position: relative; }
+    .jv-row {
+      display: flex; align-items: baseline; gap: 3px;
+      padding: 1px 4px; border-radius: 5px; cursor: default;
+      transition: background 0.1s;
+    }
+    .jv-row:hover { background: rgba(0,200,180,0.06); }
+    .jv-toggle {
+      width: 14px; flex-shrink: 0; display: flex; align-items: center;
+      color: #2e6060; transition: color 0.15s;
+    }
+    .jv-toggle:hover { color: #00c8b4; }
+    .jv-key { color: #00c8b4; }
+    .jv-colon { color: #4a8080; }
+    .jv-bracket { color: #7aadad; }
+    .jv-count {
+      font-size: 10px; color: #2e6060; margin-left: 5px;
+      background: rgba(0,200,180,0.06); border-radius: 4px; padding: 0 5px;
+    }
+    .jv-preview { cursor: pointer; }
+    .jv-preview:hover { opacity: 0.8; }
+    .jv-children { border-left: 1px solid #1a3030; margin-left: 6px; }
+    .jv-close-row { padding-left: 0 !important; }
+
+    /* Tooltip */
+    .jv-tooltip {
+      position: fixed; z-index: 99999;
+      background: #0d1f1f; border: 1px solid #1e3838; border-radius: 8px;
+      padding: 8px 12px; font-size: 11.5px; line-height: 1.7;
+      font-family: 'Consolas','Fira Code',monospace;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      pointer-events: none; display: none;
+      min-width: 120px;
+    }
+
+    /* Stats */
+    .jv-stats-wrap { display: flex; flex-direction: column; gap: 14px; max-height: 300px; overflow-y: auto; }
+    .jv-stats-wrap::-webkit-scrollbar { width: 4px; }
+    .jv-stats-wrap::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+    .jv-stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .jv-stat-card {
+      background: #0d1a1a; border: 1px solid #1e3838; border-radius: 10px;
+      padding: 12px; text-align: center;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .jv-stat-card:hover { border-color: rgba(0,200,180,0.3); transform: translateY(-2px); }
+    .jv-stat-num { font-size: 22px; font-weight: 800; color: #00c8b4; line-height: 1; }
+    .jv-stat-label { font-size: 10px; color: #4a8080; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .jv-graph-section { background: #0d1a1a; border: 1px solid #1e3838; border-radius: 10px; padding: 12px 14px; }
+    .jv-graph-title { font-size: 11px; font-weight: 700; color: #4a8080; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
+    .jv-bars { display: flex; flex-direction: column; gap: 7px; }
+    .jv-bar-row { display: flex; align-items: center; gap: 8px; }
+    .jv-bar-label { width: 60px; font-size: 11px; flex-shrink: 0; font-family: monospace; }
+    .jv-bar-track { flex: 1; height: 18px; background: #0a1616; border-radius: 5px; overflow: hidden; position: relative; }
+    .jv-bar-inner { height: 100%; border-radius: 5px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); opacity: 0.7; }
+    .jv-bar-count { width: 32px; text-align: right; font-size: 11px; color: #c8e8e5; flex-shrink: 0; }
+    .jv-bar-pct { width: 38px; text-align: right; font-size: 10px; color: #4a8080; flex-shrink: 0; }
+    .jv-depth-bars { display: flex; align-items: flex-end; gap: 6px; height: 100px; padding-top: 10px; }
+    .jv-depth-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; }
+    .jv-depth-fill { width: 100%; background: linear-gradient(to top, #00c8b4, rgba(0,200,180,0.3)); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+    .jv-depth-num { font-size: 9px; color: #4a8080; }
+    .jv-depth-label { font-size: 9px; color: #2e6060; }
+    .jv-key-list { display: flex; flex-direction: column; gap: 5px; }
+    .jv-key-row { display: flex; align-items: center; gap: 8px; }
+    .jv-key-name { font-family: monospace; font-size: 11px; color: #00c8b4; width: 100px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .jv-key-bar-wrap { flex: 1; height: 8px; background: #0a1616; border-radius: 4px; overflow: hidden; }
+    .jv-key-bar { height: 100%; background: linear-gradient(to right, rgba(0,200,180,0.6), rgba(0,200,180,0.2)); border-radius: 4px; transition: width 0.5s ease; }
+    .jv-key-count { font-size: 10px; color: #4a8080; width: 24px; text-align: right; flex-shrink: 0; }
   `;
 
   function _injectCSS() {
