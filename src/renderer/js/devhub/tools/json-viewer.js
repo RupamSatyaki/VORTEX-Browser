@@ -273,33 +273,23 @@ const JsonViewerTool = {
       const typeEntries = Object.entries(stats.types).sort((a,b) => b[1]-a[1]);
       const total = typeEntries.reduce((s,[,v])=>s+v, 0);
       const maxVal = Math.max(...typeEntries.map(([,v])=>v));
+      const depthEntries = Object.entries(stats.depthCounts).sort((a,b)=>+a[0]-+b[0]);
+      const maxD = Math.max(...Object.values(stats.depthCounts));
 
       wrap.innerHTML = `
         <div class="jv-stats-grid">
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${stats.totalNodes}</div>
-            <div class="jv-stat-label">Total Nodes</div>
-          </div>
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${stats.maxDepth}</div>
-            <div class="jv-stat-label">Max Depth</div>
-          </div>
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${stats.types.string||0}</div>
-            <div class="jv-stat-label">Strings</div>
-          </div>
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${stats.types.number||0}</div>
-            <div class="jv-stat-label">Numbers</div>
-          </div>
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${(stats.types.object||0)+(stats.types.array||0)}</div>
-            <div class="jv-stat-label">Objects/Arrays</div>
-          </div>
-          <div class="jv-stat-card">
-            <div class="jv-stat-num">${stats.nullCount}</div>
-            <div class="jv-stat-label">Nulls</div>
-          </div>
+          ${[
+            [stats.totalNodes, 'Total Nodes'],
+            [stats.maxDepth,   'Max Depth'],
+            [stats.types.string||0, 'Strings'],
+            [stats.types.number||0, 'Numbers'],
+            [(stats.types.object||0)+(stats.types.array||0), 'Objects/Arrays'],
+            [stats.nullCount, 'Nulls'],
+          ].map(([n,l],i) => `
+            <div class="jv-stat-card" style="animation-delay:${i*0.06}s">
+              <div class="jv-stat-num">${n}</div>
+              <div class="jv-stat-label">${l}</div>
+            </div>`).join('')}
         </div>
 
         <div class="jv-graph-section">
@@ -309,10 +299,8 @@ const JsonViewerTool = {
               <div class="jv-bar-row">
                 <div class="jv-bar-label" style="color:${typeColor(t)}">${t}</div>
                 <div class="jv-bar-track">
-                  <div class="jv-bar-fill" style="width:${(n/maxVal*100).toFixed(1)}%;background:${typeColor(t)}22;border-color:${typeColor(t)}66"
-                       title="${n} (${(n/total*100).toFixed(1)}%)">
-                    <div class="jv-bar-inner" style="background:${typeColor(t)};width:${(n/maxVal*100).toFixed(1)}%"></div>
-                  </div>
+                  <div class="jv-bar-inner" data-pct="${(n/maxVal*100).toFixed(1)}"
+                       style="background:${typeColor(t)};opacity:0.75;"></div>
                 </div>
                 <div class="jv-bar-count">${n}</div>
                 <div class="jv-bar-pct">${(n/total*100).toFixed(1)}%</div>
@@ -323,14 +311,12 @@ const JsonViewerTool = {
         <div class="jv-graph-section">
           <div class="jv-graph-title">Depth Distribution</div>
           <div class="jv-depth-bars">
-            ${Object.entries(stats.depthCounts).sort((a,b)=>+a[0]-+b[0]).map(([d,n]) => {
-              const maxD = Math.max(...Object.values(stats.depthCounts));
-              return `<div class="jv-depth-col" title="Depth ${d}: ${n} nodes">
-                <div class="jv-depth-fill" style="height:${(n/maxD*80).toFixed(0)}px"></div>
+            ${depthEntries.map(([d,n]) => `
+              <div class="jv-depth-col" title="Depth ${d}: ${n} nodes">
+                <div class="jv-depth-fill" data-h="${(n/maxD*80).toFixed(0)}"></div>
                 <div class="jv-depth-num">${n}</div>
                 <div class="jv-depth-label">d${d}</div>
-              </div>`;
-            }).join('')}
+              </div>`).join('')}
           </div>
         </div>
 
@@ -342,13 +328,28 @@ const JsonViewerTool = {
               <div class="jv-key-row">
                 <span class="jv-key-name">"${k}"</span>
                 <div class="jv-key-bar-wrap">
-                  <div class="jv-key-bar" style="width:${(n/stats.topKeys[0][1]*100).toFixed(0)}%"></div>
+                  <div class="jv-key-bar" data-pct="${(n/stats.topKeys[0][1]*100).toFixed(0)}"></div>
                 </div>
                 <span class="jv-key-count">${n}×</span>
               </div>`).join('')}
           </div>
         </div>` : ''}
       `;
+
+      // Animate bars after paint — start from 0, then set target width
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          wrap.querySelectorAll('.jv-bar-inner[data-pct]').forEach(el => {
+            el.style.width = el.dataset.pct + '%';
+          });
+          wrap.querySelectorAll('.jv-depth-fill[data-h]').forEach(el => {
+            el.style.height = el.dataset.h + 'px';
+          });
+          wrap.querySelectorAll('.jv-key-bar[data-pct]').forEach(el => {
+            el.style.width = el.dataset.pct + '%';
+          });
+        });
+      });
     }
 
     function _collectStats(val, depth = 0, stats = null) {
