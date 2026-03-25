@@ -10,13 +10,39 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v200',
-    version: 'v2.0.0',
+    id: 'v210',
+    version: 'v2.1.0',
     badge: 'latest',
-    name: 'DevHub — Developer Tools Panel',
+    name: 'JSON Viewer Upgrade',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { improve: 1 },
+    categories: [
+      {
+        label: 'Improvements',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+        features: [
+          {
+            type: 'improve',
+            icon: `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            label: 'JSON Viewer — Full Rewrite',
+            desc: 'File upload (.json), collapsible tree with expand/collapse all, hover tooltips (type, length, key count), auto-parse on paste. New Stats & Graph tab: type distribution bars, depth histogram, top keys chart.',
+            howto: 'DevHub → JSON Viewer · Upload button or paste · Tree/Stats tabs',
+          },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v200',
+    version: 'v2.0.0',
+    badge: 'stable',
+    name: 'DevHub — Developer Tools Panel',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 6 },
     categories: [
       {
