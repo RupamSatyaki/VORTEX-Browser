@@ -1,6 +1,7 @@
 /**
  * base64/index.js — Base64 Tool main entry
  * Registers tool with DevHub, manages tabs
+ * CSS is self-contained in styles.css, injected at render time
  */
 const Base64Tool = {
   id: 'base64',
@@ -11,7 +12,22 @@ const Base64Tool = {
     <polyline points="8 6 2 12 8 18"/>
   </svg>`,
 
+  _cssInjected: false,
+
+  _injectCSS() {
+    if (this._cssInjected || document.getElementById('b64-styles')) return;
+    // Build path relative to current page (index.html is in src/renderer/)
+    const base = window.location.href.replace(/\/index\.html.*$/, '/');
+    const link = document.createElement('link');
+    link.id   = 'b64-styles';
+    link.rel  = 'stylesheet';
+    link.href = base + 'js/devhub/tools/base64/styles.css';
+    document.head.appendChild(link);
+    this._cssInjected = true;
+  },
+
   render(container) {
+    this._injectCSS();
     const self = this;
 
     container.innerHTML = `
