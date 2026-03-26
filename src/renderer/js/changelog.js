@@ -10,13 +10,33 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v241',
-    version: 'v2.4.1',
+    id: 'v242',
+    version: 'v2.4.2',
     badge: 'latest',
-    name: 'Base64 — History, Batch, JWT, Image Transform',
+    name: 'Base64 UI Polish',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { improve: 1 },
+    categories: [
+      {
+        label: 'Improvements',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+        features: [
+          { type:'improve', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Base64 UI Redesign', desc:'Full CSS rewrite: better spacing, grouped action buttons, animated slide-in for all sections, glowing detect dot, swap button spring animation, drop zone hover glow, image preview shadow, JWT section hover states, gradient file divider, hex byte hover effects.', howto:'DevHub \u2192 Base64' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v241',
+    version: 'v2.4.1',
+    badge: 'stable',
+    name: 'Base64 \u2014 History, Batch, JWT, Image Transform',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 6, fix: 1 },
     categories: [
       {
