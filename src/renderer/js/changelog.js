@@ -10,13 +10,44 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v221',
-    version: 'v2.2.1',
+    id: 'v230',
+    version: 'v2.3.0',
     badge: 'latest',
-    name: 'Color Picker — Canvas, Mixer, Named, Image, Saved',
+    name: 'Regex Tester — 12 Features',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 12 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/></svg>`, label:'Replace Mode', desc:'Pattern + replacement string → replaced output. Supports $1, $2 backreferences, $&, $`, $\'. Live preview.', howto:'Regex Tester → Replace tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Named Capture Groups', desc:'(?<name>...) syntax fully supported. Named groups shown in a separate table alongside numbered groups.', howto:'Use (?<name>...) in pattern → see groups in Test tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg>`, label:'Match Details Table', desc:'Every match with index, length, value, line number, and all capture groups in a sortable table.', howto:'Regex Tester → Match Table tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Pattern Library', desc:'22 pre-built patterns: Email, URL, Phone, IP, Date, UUID, Hex Color, Credit Card, HTML Tag, Password, and more. Click to load.', howto:'Regex Tester → Library tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/></svg>`, label:'Regex Explainer', desc:'Token-by-token breakdown of any pattern in plain English. Also shows a pattern summary with all detected constructs.', howto:'Regex Tester → Explainer tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/></svg>`, label:'Multi-line Tester', desc:'Test each line independently. Green ✓ / red ✗ per line with match count. Useful for batch validation.', howto:'Regex Tester → Multi-line tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27"/></svg>`, label:'Split Mode', desc:'Split a string by the regex pattern. Shows all parts with index numbers.', howto:'Regex Tester → Split tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`, label:'Code Generator', desc:'Generates ready-to-use regex code in 6 languages: JavaScript, Python, Java, Go, PHP, Rust.', howto:'Regex Tester → Code Gen tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`, label:'Test Cases', desc:'Add multiple test strings with expected outcome (should match / should NOT match). Run all → PASS/FAIL per case.', howto:'Regex Tester → Test Cases tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`, label:'Saved Patterns', desc:'Save frequently used patterns with names. Persists in localStorage. Load or delete anytime.', howto:'Regex Tester → Saved tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>`, label:'u and y Flags', desc:'Added Unicode (u) and Sticky (y) flags alongside g/i/m/s. All 6 flags with tooltip explanations.', howto:'Flag checkboxes in pattern row' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/></svg>`, label:'Character Class Helper', desc:'20 clickable buttons for \\d, \\w, \\s, \\b, lookaheads, lookbehinds, named groups etc. Click to insert at cursor.', howto:'Button row below pattern input' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v221',
+    version: 'v2.2.1',
+    badge: 'stable',
+    name: 'Color Picker — Canvas, Mixer, Named, Image, Saved',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 5 },
     categories: [
       {
