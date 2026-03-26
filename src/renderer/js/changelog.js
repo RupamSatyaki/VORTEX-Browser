@@ -10,13 +10,45 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v240',
-    version: 'v2.4.0',
+    id: 'v241',
+    version: 'v2.4.1',
     badge: 'latest',
-    name: 'Base64 — Full Rewrite (Multi-component)',
+    name: 'Base64 — History, Batch, JWT, Image Transform',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 6, fix: 1 },
+    categories: [
+      {
+        label: 'Bug Fixes',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+        features: [
+          { type:'fix', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`, label:'Deprecated escape/unescape Removed', desc:'utils.js now uses TextEncoder/TextDecoder for encode/decode — no more deprecated escape() and unescape() calls. Proper Unicode support.', },
+        ],
+      },
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Operation History', desc:'Last 10 encode/decode operations saved per session. Shows op type, input/output preview, timestamp. Click Load to restore any operation.', howto:'Text tab → History mode' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg>`, label:'Batch Mode', desc:'Encode or decode multiple strings at once — one per line. Output is newline-separated. Shows count of processed lines.', howto:'Text tab → Batch mode' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`, label:'Copy as Code', desc:'Copy encoded Base64 directly as a variable in JS, TypeScript, Python, Java, Go, or C#.', howto:'Text tab → Copy as: buttons' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>`, label:'Image Resize + Quality + Format', desc:'Before encoding: resize to custom dimensions, set JPEG quality (1-100 slider), convert format (PNG/JPEG/WebP). Re-encode with one click.', howto:'Image tab → Transform before encode section' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Multiple Images → JSON Array', desc:'Upload multiple images at once → all encoded to Base64 and output as a JSON array with name, type, base64 fields.', howto:'Image tab → Multiple button' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`, label:'JWT Decoder Tab', desc:'Paste any JWT → colored token display, header/payload/signature sections, claims table with human-readable names, expiry check (valid/expired with time remaining), copy header/payload/full JSON.', howto:'Base64 → JWT tab' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v240',
+    version: 'v2.4.0',
+    badge: 'stable',
+    name: 'Base64 — Full Rewrite (Multi-component)',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 8, improve: 1 },
     categories: [
       {

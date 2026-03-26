@@ -83,3 +83,78 @@
 .b64-text-preview { font-family: 'Consolas',monospace; font-size: 11px; color: #7aadad; background: #060e0e; border-radius: 7px; padding: 8px 10px; margin: 0; max-height: 80px; overflow-y: auto; }
 .b64-text-preview::-webkit-scrollbar { width: 4px; }
 .b64-text-preview::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+
+/* ── Text tab v2 additions ── */
+.b64-mode-tabs { display: flex; gap: 2px; background: #060e0e; border: 1px solid #1a3030; border-radius: 8px; padding: 2px; margin-bottom: 8px; }
+.b64-mode-tab { flex: 1; background: none; border: none; border-radius: 6px; color: #4a8080; font-size: 11px; padding: 5px 8px; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+.b64-mode-tab:hover { color: #c8e8e5; background: rgba(255,255,255,0.04); }
+.b64-mode-tab.active { background: #122222; color: #00c8b4; }
+.b64-code-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.b64-code-label { font-size: 10.5px; color: #4a8080; flex-shrink: 0; }
+.b64-code-btn { padding: 4px 9px !important; font-size: 10.5px !important; }
+.b64-batch-info { font-size: 11px; color: #4a8080; margin-bottom: 6px; }
+.b64-batch-stats { font-size: 11px; color: #22c55e; margin-top: 4px; }
+.b64-history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.b64-hist-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; }
+.b64-hist-list::-webkit-scrollbar { width: 4px; }
+.b64-hist-list::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+.b64-hist-item { background: #060e0e; border: 1px solid #1a3030; border-radius: 9px; padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; animation: dh-tool-in 0.18s ease both; }
+.b64-hist-header { display: flex; align-items: center; justify-content: space-between; }
+.b64-hist-op { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
+.b64-hist-encode { background: rgba(0,200,180,0.12); color: #00c8b4; }
+.b64-hist-decode { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.b64-hist-url-enc, .b64-hist-url-dec { background: rgba(167,139,250,0.12); color: #a78bfa; }
+.b64-hist-time { font-size: 10px; color: #2e6060; }
+.b64-hist-row { display: flex; gap: 8px; font-size: 11px; }
+.b64-hist-k { color: #4a8080; width: 20px; flex-shrink: 0; }
+.b64-hist-v { color: #c8e8e5; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.b64-hex-out { margin-top: 8px; }
+.b64-hex-meta { font-size: 10.5px; color: #4a8080; margin-bottom: 6px; }
+.b64-hex-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+.b64-hex-byte { font-family: 'Consolas',monospace; font-size: 11px; color: #00c8b4; background: #060e0e; border: 1px solid #1a3030; border-radius: 4px; padding: 2px 5px; }
+
+/* ── Image tab v2 additions ── */
+.b64-transform-section { background: #060e0e; border: 1px solid #1a3030; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
+.b64-transform-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 10px; }
+.b64-transform-field { display: flex; flex-direction: column; gap: 4px; }
+.b64-transform-field label { font-size: 10px; color: #4a8080; text-transform: uppercase; letter-spacing: 0.4px; }
+.b64-dim-input { width: 100% !important; text-align: center; }
+.b64-quality-slider { width: 100%; accent-color: #00c8b4; cursor: pointer; }
+
+/* ── JWT tab ── */
+.b64-jwt-wrap { display: flex; flex-direction: column; gap: 10px; }
+.b64-jwt-input-row { display: flex; flex-direction: column; gap: 6px; }
+.b64-jwt-input { font-family: 'Consolas',monospace !important; font-size: 11px !important; word-break: break-all; }
+.b64-jwt-actions { display: flex; gap: 6px; }
+.b64-jwt-colored {
+  font-family: 'Consolas',monospace; font-size: 11px; word-break: break-all;
+  background: #060e0e; border: 1px solid #1a3030; border-radius: 8px;
+  padding: 10px 12px; line-height: 1.7;
+}
+.b64-jwt-part-header  { color: #f59e0b; }
+.b64-jwt-part-payload { color: #22c55e; }
+.b64-jwt-part-sig     { color: #60a5fa; }
+.b64-jwt-dot          { color: #4a8080; }
+.b64-jwt-status-row { margin-bottom: 4px; }
+.b64-jwt-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 20px; font-size: 11.5px; font-weight: 600; }
+.b64-jwt-badge-valid   { background: rgba(34,197,94,0.12);  color: #22c55e;  border: 1px solid rgba(34,197,94,0.25); }
+.b64-jwt-badge-expired { background: rgba(239,68,68,0.12);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.25); }
+.b64-jwt-badge-noexp   { background: rgba(74,128,128,0.12); color: #4a8080;  border: 1px solid #1e3838; }
+.b64-jwt-section { background: #060e0e; border: 1px solid #1a3030; border-radius: 10px; overflow: hidden; }
+.b64-jwt-section-header { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #1a3030; }
+.b64-jwt-header-color  { color: #f59e0b; background: rgba(245,158,11,0.06); }
+.b64-jwt-payload-color { color: #22c55e; background: rgba(34,197,94,0.06); }
+.b64-jwt-sig-color     { color: #60a5fa; background: rgba(96,165,250,0.06); }
+.b64-jwt-claims { display: flex; flex-direction: column; gap: 0; padding: 6px 0; }
+.b64-jwt-claim-row { display: flex; align-items: baseline; gap: 10px; padding: 5px 12px; border-bottom: 1px solid #0d1a1a; font-size: 11.5px; }
+.b64-jwt-claim-row:last-child { border-bottom: none; }
+.b64-jwt-claim-key { color: #4a8080; min-width: 100px; flex-shrink: 0; font-family: monospace; }
+.b64-jwt-claim-val { color: #c8e8e5; font-family: monospace; flex: 1; word-break: break-all; }
+.b64-jwt-time { display: block; font-size: 10px; color: #4a8080; margin-top: 2px; }
+.b64-jwt-expired { color: #ef4444 !important; }
+.b64-jwt-valid   { color: #22c55e !important; }
+.b64-jwt-raw { font-family: 'Consolas',monospace; font-size: 10.5px; color: #4a8080; padding: 8px 12px; margin: 0; white-space: pre; overflow-x: auto; border-top: 1px solid #0d1a1a; max-height: 80px; overflow-y: auto; }
+.b64-jwt-raw::-webkit-scrollbar { width: 4px; height: 4px; }
+.b64-jwt-raw::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+.b64-jwt-sig { font-family: 'Consolas',monospace; font-size: 10.5px; color: #60a5fa; padding: 10px 12px; display: block; word-break: break-all; }
+.b64-jwt-copy-row { display: flex; gap: 6px; flex-wrap: wrap; }
