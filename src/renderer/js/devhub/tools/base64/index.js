@@ -47,6 +47,10 @@ const Base64Tool = {
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
             File
           </button>
+          <button class="b64-main-tab" data-tab="jwt">
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            JWT
+          </button>
         </div>
 
         <!-- Status bar -->
@@ -58,6 +62,7 @@ const Base64Tool = {
         <div class="b64-main-content" id="b64-text-content"></div>
         <div class="b64-main-content" id="b64-image-content" style="display:none"></div>
         <div class="b64-main-content" id="b64-file-content" style="display:none"></div>
+        <div class="b64-main-content" id="b64-jwt-content" style="display:none"></div>
 
       </div>`;
 
@@ -74,15 +79,17 @@ const Base64Tool = {
     B64Text.render($('b64-text-content'), setStatus);
     B64Image.render($('b64-image-content'), setStatus);
     B64File.render($('b64-file-content'), setStatus);
+    B64JWT.render($('b64-jwt-content'), setStatus);
 
     // Tab switching
     container.querySelectorAll('.b64-main-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         container.querySelectorAll('.b64-main-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        $('b64-text-content').style.display   = tab.dataset.tab === 'text'  ? '' : 'none';
-        $('b64-image-content').style.display  = tab.dataset.tab === 'image' ? '' : 'none';
-        $('b64-file-content').style.display   = tab.dataset.tab === 'file'  ? '' : 'none';
+        $('b64-text-content').style.display  = tab.dataset.tab === 'text'  ? '' : 'none';
+        $('b64-image-content').style.display = tab.dataset.tab === 'image' ? '' : 'none';
+        $('b64-file-content').style.display  = tab.dataset.tab === 'file'  ? '' : 'none';
+        $('b64-jwt-content').style.display   = tab.dataset.tab === 'jwt'   ? '' : 'none';
       });
     });
   },
