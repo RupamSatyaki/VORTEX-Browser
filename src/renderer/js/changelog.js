@@ -10,13 +10,40 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v230',
-    version: 'v2.3.0',
+    id: 'v231',
+    version: 'v2.3.1',
     badge: 'latest',
-    name: 'Regex Tester — 12 Features',
+    name: 'Regex Tester — 8 More Features',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 8 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Regex Visualizer', desc:'Token-by-token visual flow diagram. Each part of the pattern shown as a colored node with type label. Hover for details.', howto:'Regex Tester → Visual tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>`, label:'Match Navigator', desc:'Prev/Next buttons to jump between matches one by one. Current match highlighted in gold. Shows index, length, groups for each match.', howto:'Regex Tester → Navigator tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`, label:'Performance Benchmark', desc:'Run regex N times (1K–1M iterations), measure total time, per-op µs, ops/sec. Detects catastrophic backtracking automatically.', howto:'Regex Tester → Bench tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Pattern History', desc:'Last 20 typed patterns auto-saved per session. Click any to reload. Clear all with one button.', howto:'Regex Tester → History tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/></svg>`, label:'Share Pattern', desc:'Encode pattern + flags + test string into a shareable link. Import from link. Also copy as JSON.', howto:'Regex Tester → Share tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>`, label:'Import/Export Saved Patterns', desc:'Export all saved patterns as JSON file. Import from JSON to merge with existing. Share patterns with teammates.', howto:'Regex Tester → Saved tab → ↓ Export / ↑ Import' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, label:'Escape Helper', desc:'Paste any raw string → auto-escapes all regex special chars (., *, +, ?, ^, $, {, }, (, ), [, ], \\, |). Load directly into pattern.', howto:'Regex Tester → Escape tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>`, label:'Quantifier Helper + Unicode Properties', desc:'Visual quantifier cards (*, +, ?, lazy) + custom {n,m} builder. Unicode tab with \\p{Letter}, \\p{Number}, Scripts etc. — click to insert.', howto:'Regex Tester → Quant tab · Unicode tab' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v230',
+    version: 'v2.3.0',
+    badge: 'stable',
+    name: 'Regex Tester — 12 Features',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 12 },
     categories: [
       {
