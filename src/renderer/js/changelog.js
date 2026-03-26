@@ -10,13 +10,48 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v242',
-    version: 'v2.4.2',
+    id: 'v250',
+    version: 'v2.5.0',
     badge: 'latest',
-    name: 'Base64 UI Polish',
+    name: 'URL Encoder — Full Rewrite (Multi-component)',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 9, improve: 1 },
+    categories: [
+      {
+        label: 'Architecture',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>`,
+        features: [
+          { type:'improve', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>`, label:'Modular Directory Structure', desc:'URL Encoder split into tools/url-encoder/ with 6 files: utils.js, encode.js, parser.js, builder.js, tools.js, index.js. CSS self-contained in styles.css injected by index.js.', howto:'DevHub → URL Encoder' },
+        ],
+      },
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Auto-detect', desc:'Paste anything → auto-detects plain text, encoded string, URL, or query string. Badge shows detection. Auto button encodes or decodes based on detection.', howto:'Encode/Decode tab → Auto button' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`, label:'Parse & Edit + URL Diff', desc:'Parse any URL into all components. Edit query params inline — URL rebuilds live. Copy individual parts. Diff two URLs side-by-side showing added/removed/changed params and fields.', howto:'Parse & Edit tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`, label:'Query String Builder', desc:'Visually add/remove/toggle key-value pairs. URL builds live. Import params from any URL. Copy as URL, query string, or JSON object.', howto:'Builder tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg>`, label:'Batch Encode/Decode/Canonicalize', desc:'Process multiple URLs at once — one per line. Encode all, decode all, or canonicalize all. Shows processed count.', howto:'Tools → Batch tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`, label:'URL Validator', desc:'Validates protocol, hostname, TLD, path encoding. Shows detailed pass/fail with specific issue messages.', howto:'Tools → Validate tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`, label:'URL Canonicalize', desc:'Normalizes URL: lowercase hostname, remove default ports (80/443), sort query params alphabetically, remove trailing slash. Shows what changed.', howto:'Tools → Canonicalize tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`, label:'URL to Code', desc:'Generate ready-to-use code in 8 formats: JS fetch, JS axios, Python requests, curl, curl -v, wget, PHP, Go.', howto:'Tools → URL to Code tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'QR Code Generator', desc:'Generate a visual QR-style pattern from any URL. Download as PNG.', howto:'Tools → QR Code tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'URL History', desc:'Last 15 processed URLs saved per session. Copy any URL from history.', howto:'Tools → History tab' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v242',
+    version: 'v2.4.2',
+    badge: 'stable',
+    name: 'Base64 UI Polish',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { improve: 1 },
     categories: [
       {
@@ -668,8 +703,8 @@ function _computeStats() {
   let versions = 0, features = 0, fixes = 0, improvements = 0;
   CHANGELOG_VERSIONS.forEach(v => {
     versions++;
-    v.categories.forEach(cat => {
-      cat.features.forEach(f => {
+    (v.categories || []).forEach(cat => {
+      (cat.features || []).forEach(f => {
         if (f.type === 'new')     features++;
         else if (f.type === 'fix')     fixes++;
         else if (f.type === 'improve') improvements++;
@@ -710,7 +745,7 @@ function _renderCategory(cat, first) {
 }
 
 function _renderCounts(counts) {
-  return Object.entries(counts)
+  return Object.entries(counts || {})
     .map(([type, n]) => `<span class="cl-count ${type}">${n} ${type}</span>`)
     .join('');
 }
@@ -741,7 +776,7 @@ function _renderVersion(v) {
       </div>
       <div class="cl-features">
         <div class="cl-features-inner">
-          ${v.categories.map((cat, i) => _renderCategory(cat, i === 0)).join('')}
+          ${(v.categories || []).map((cat, i) => _renderCategory(cat, i === 0)).join('')}
         </div>
       </div>
     </div>`;

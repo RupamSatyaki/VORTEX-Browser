@@ -633,12 +633,6 @@ const DevHub = (() => {
     }
     .b64-drop:hover { border-color: rgba(0,200,180,0.3); background: rgba(0,200,180,0.03); }
 
-    /* URL Encoder */
-    .ue-parse-table { display: flex; flex-direction: column; gap: 4px; }
-    .ue-parse-row { display: flex; gap: 10px; font-size: 12px; padding: 5px 9px; background: #080f0f; border-radius: 6px; }
-    .ue-parse-key { color: #4a8080; width: 82px; flex-shrink: 0; font-size: 11px; }
-    .ue-parse-val { color: #c8e8e5; font-family: monospace; word-break: break-all; }
-
     /* ── JSON Viewer v2.1 ── */
     .jv-wrap { display: flex; flex-direction: column; gap: 10px; }
     .jv-textarea { min-height: 80px !important; font-size: 11.5px !important; resize: vertical; }
