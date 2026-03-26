@@ -10,13 +10,47 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v231',
-    version: 'v2.3.1',
+    id: 'v240',
+    version: 'v2.4.0',
     badge: 'latest',
-    name: 'Regex Tester — 8 More Features',
+    name: 'Base64 — Full Rewrite (Multi-component)',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 8, improve: 1 },
+    categories: [
+      {
+        label: 'Architecture',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>`,
+        features: [
+          { type:'improve', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>`, label:'Modular Directory Structure', desc:'Base64 tool split into tools/base64/ directory with 4 components: utils.js (shared helpers), text.js, image.js, file.js, index.js (entry). Each component is independently maintainable.', howto:'DevHub → Base64' },
+        ],
+      },
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`, label:'Auto-detect Mode', desc:'Paste anything → auto-detects plain text, Base64, or URL-safe Base64. Badge shows detection result. Auto button encodes or decodes based on detection.', howto:'Text tab → Auto button or live typing' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`, label:'URL-safe Base64', desc:'Encode/decode URL-safe Base64 (+ → -, / → _, no padding). Essential for JWT tokens and URL parameters.', howto:'Text tab → URL-safe ↑/↓ buttons or URL-safe mode checkbox' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/></svg>`, label:'Chunked Output (MIME)', desc:'Wrap Base64 output at 76 characters per line — MIME standard for email attachments and PEM certificates.', howto:'Text tab → Chunk button or Chunk output checkbox' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`, label:'Size Info + Validation', desc:'Shows original vs encoded size with overhead %. Live validation badge shows if input is valid Base64. Swap button to flip input/output.', howto:'Text tab — appears automatically' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>`, label:'Image Embed Code Generator', desc:'Load any image → generates HTML img tag, CSS background, JSON embed, Markdown, or raw Base64. Shows dimensions, file size, encoded size. Decode Base64 back to image preview.', howto:'Image tab → embed code tabs' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/></svg>`, label:'Any File Encode/Decode', desc:'Encode any file (PDF, ZIP, binary) to Base64. Copy as raw Base64 or full data URI. Decode Base64 back to file and download. Preview text/image files inline.', howto:'File tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>`, label:'Download Outputs', desc:'Download encoded Base64 as .txt file, download decoded file directly, download embed code snippets.', howto:'Download buttons in each tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, label:'Live Encode on Type', desc:'Toggle live encoding as you type. Swap button flips input/output. Individual clear buttons per field.', howto:'Text tab → Live encode checkbox' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v231',
+    version: 'v2.3.1',
+    badge: 'stable',
+    name: 'Regex Tester — 8 More Features',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 8 },
     categories: [
       {
