@@ -22,32 +22,49 @@ var ImageConverter = {
       '<label class="dh-btn ic-upload-btn">',
       '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
       ' Choose Images',
-      '<input type="file" id="ic-file-input" accept="image/*" multiple style="display:none"/>',
+      '<input type="file" id="ic-file-input" accept="image/*,.ico,.svg,.tiff,.tif,.avif,.heic,.heif,.webp,.bmp" multiple style="display:none"/>',
       '</label>',
-      '<div class="ic-drop-hint">JPG \u00b7 PNG \u00b7 WebP \u00b7 GIF \u00b7 BMP \u00b7 SVG \u00b7 TIFF \u00b7 ICO \u00b7 Multiple files supported</div>',
+      '<div class="ic-drop-hint">JPG \u00b7 PNG \u00b7 WebP \u00b7 GIF \u00b7 BMP \u00b7 SVG \u00b7 TIFF \u00b7 AVIF \u00b7 ICO \u00b7 HEIC \u00b7 Multiple files</div>',
       '</div>',
 
       // Settings panel
       '<div class="ic-settings" id="ic-settings" style="display:none">',
 
-      // Output format
+      // Output format — all types
       '<div class="ic-settings-row">',
-      '<div class="ic-settings-group">',
+      '<div class="ic-settings-group" style="grid-column:1/-1;">',
       '<div class="ic-settings-label">Output Format</div>',
       '<div class="ic-format-grid" id="ic-format-grid">',
-      '<button class="ic-fmt-btn active" data-fmt="image/jpeg" data-ext="jpg">JPG</button>',
-      '<button class="ic-fmt-btn" data-fmt="image/png"  data-ext="png">PNG</button>',
-      '<button class="ic-fmt-btn" data-fmt="image/webp" data-ext="webp">WebP</button>',
-      '<button class="ic-fmt-btn" data-fmt="image/bmp"  data-ext="bmp">BMP</button>',
-      '<button class="ic-fmt-btn" data-fmt="image/gif"  data-ext="gif">GIF</button>',
+      '<button class="ic-fmt-btn active" data-fmt="image/jpeg"    data-ext="jpg">JPG</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/png"            data-ext="png">PNG</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/webp"           data-ext="webp">WebP</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/bmp"            data-ext="bmp">BMP</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/gif"            data-ext="gif">GIF</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/tiff"           data-ext="tiff">TIFF</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/avif"           data-ext="avif">AVIF</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/svg+xml"        data-ext="svg">SVG</button>',
+      '<button class="ic-fmt-btn" data-fmt="image/x-icon"         data-ext="ico">ICO</button>',
+      '</div>',
       '</div>',
       '</div>',
 
-      // Quality
+      // Quality + Filename row
+      '<div class="ic-settings-row">',
       '<div class="ic-settings-group" id="ic-quality-group">',
       '<div class="ic-settings-label">Quality <span id="ic-quality-val">85%</span></div>',
       '<input type="range" id="ic-quality" min="1" max="100" value="85" class="ic-slider"/>',
       '<div class="ic-quality-hints"><span>Smaller file</span><span>Better quality</span></div>',
+      '</div>',
+      '<div class="ic-settings-group">',
+      '<div class="ic-settings-label">',
+      'Output Filename',
+      '<span class="ic-filename-hint">Leave blank to use original name</span>',
+      '</div>',
+      '<div class="ic-filename-row">',
+      '<input class="dh-input ic-filename-input" id="ic-custom-name" type="text" placeholder="e.g. my-image (no extension)" spellcheck="false" maxlength="100"/>',
+      '<span class="ic-filename-ext" id="ic-filename-ext">.jpg</span>',
+      '</div>',
+      '<div class="ic-filename-preview" id="ic-filename-preview"></div>',
       '</div>',
       '</div>',
 
@@ -135,12 +152,26 @@ var ImageConverter = {
         btn.classList.add('active');
         _activeFmt = btn.dataset.fmt;
         _activeExt = btn.dataset.ext;
-        // Show/hide quality slider (not relevant for PNG/BMP)
-        var showQuality = _activeFmt === 'image/jpeg' || _activeFmt === 'image/webp';
+        // Update filename ext display
+        $('ic-filename-ext').textContent = '.' + _activeExt;
+        updateFilenamePreview();
+        // Show/hide quality slider (not relevant for PNG/BMP/SVG/ICO)
+        var showQuality = _activeFmt === 'image/jpeg' || _activeFmt === 'image/webp' || _activeFmt === 'image/avif';
         $('ic-quality-group').style.opacity = showQuality ? '1' : '0.4';
         $('ic-quality-group').style.pointerEvents = showQuality ? '' : 'none';
       });
     });
+
+    function updateFilenamePreview() {
+      var custom = $('ic-custom-name').value.trim();
+      var preview = $('ic-filename-preview');
+      if (!custom) { preview.textContent = ''; return; }
+      // Sanitize: remove extension if user typed one, remove special chars
+      var clean = custom.replace(/\.[^.]+$/, '').replace(/[<>:"/\\|?*]/g, '_');
+      preview.textContent = '\u2192 ' + clean + '.' + _activeExt;
+    }
+
+    $('ic-custom-name').addEventListener('input', updateFilenamePreview);
 
     $('ic-quality').addEventListener('input', function(e) {
       $('ic-quality-val').textContent = e.target.value + '%';
@@ -217,6 +248,21 @@ var ImageConverter = {
     // ── Convert ────────────────────────────────────────────────────────────────
     function convertImage(imgData) {
       return new Promise(function(resolve) {
+        // SVG: return as-is (already vector, no canvas needed)
+        if (_activeFmt === 'image/svg+xml') {
+          // If source is already SVG, return it; otherwise wrap raster in SVG
+          if (imgData.file.type === 'image/svg+xml') {
+            resolve({ dataUrl: imgData.origDataUrl, w: imgData.origW, h: imgData.origH });
+          } else {
+            var svgStr = '<svg xmlns="http://www.w3.org/2000/svg" width="' + imgData.origW + '" height="' + imgData.origH + '">' +
+              '<image href="' + imgData.origDataUrl + '" width="' + imgData.origW + '" height="' + imgData.origH + '"/>' +
+              '</svg>';
+            var b64 = btoa(svgStr);
+            resolve({ dataUrl: 'data:image/svg+xml;base64,' + b64, w: imgData.origW, h: imgData.origH });
+          }
+          return;
+        }
+
         var img = new Image();
         img.onload = function() {
           var cv = document.createElement('canvas');
@@ -231,6 +277,13 @@ var ImageConverter = {
             else if (tw && th) { w = tw; h = th; }
           }
 
+          // ICO: clamp to standard sizes
+          if (_activeFmt === 'image/x-icon') {
+            var icoSizes = [256, 128, 64, 48, 32, 16];
+            var best = icoSizes.find(function(s) { return s <= Math.max(w, h); }) || 32;
+            w = best; h = best;
+          }
+
           // Apply transforms
           var transforms = _transforms.slice();
           var needsSwap = transforms.filter(function(t) { return t === 'rotate-90' || t === 'rotate-270'; }).length % 2 === 1;
@@ -239,8 +292,8 @@ var ImageConverter = {
           cv.width = w; cv.height = h;
           var ctx = cv.getContext('2d');
 
-          // Background for JPEG (no transparency)
-          if (_activeFmt === 'image/jpeg' || _activeFmt === 'image/bmp') {
+          // White background for JPEG/BMP/ICO
+          if (_activeFmt === 'image/jpeg' || _activeFmt === 'image/bmp' || _activeFmt === 'image/x-icon') {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, w, h);
           }
@@ -273,7 +326,15 @@ var ImageConverter = {
           }
 
           var quality = +$('ic-quality').value / 100;
-          resolve({ dataUrl: cv.toDataURL(_activeFmt, quality), w: w, h: h });
+          // ICO: output as PNG data (browsers render it correctly)
+          var outFmt = _activeFmt === 'image/x-icon' ? 'image/png' : _activeFmt;
+          // TIFF: fallback to PNG (canvas doesn't support tiff natively)
+          if (outFmt === 'image/tiff') outFmt = 'image/png';
+          resolve({ dataUrl: cv.toDataURL(outFmt, quality), w: w, h: h });
+        };
+        img.onerror = function() {
+          // If image fails to load (e.g. HEIC), return original
+          resolve({ dataUrl: imgData.origDataUrl, w: imgData.origW, h: imgData.origH });
         };
         img.src = imgData.origDataUrl;
       });
@@ -300,16 +361,25 @@ var ImageConverter = {
     $('ic-convert-all').addEventListener('click', convertAll);
 
     // ── Download ───────────────────────────────────────────────────────────────
+    function getFilename(imgData) {
+      var custom = $('ic-custom-name').value.trim();
+      var baseName;
+      if (custom) {
+        // Remove extension if user typed one, sanitize
+        baseName = custom.replace(/\.[^.]+$/, '').replace(/[<>:"/\\|?*]/g, '_').trim() || 'image';
+      } else {
+        baseName = imgData.file.name.replace(/\.[^.]+$/, '');
+      }
+      return baseName + '.' + _activeExt;
+    }
+
     function downloadImage(imgData) {
       if (!imgData.convertedDataUrl) return;
-      var baseName = imgData.file.name.replace(/\.[^.]+$/, '');
-      var filename = baseName + '_converted.' + _activeExt;
+      var filename = getFilename(imgData);
 
       if (window.vortexAPI && typeof window.vortexAPI.send === 'function') {
-        // Send via IPC → triggers will-download → appears in Downloads panel
         window.vortexAPI.send('devhub:download', { dataUrl: imgData.convertedDataUrl, filename: filename });
       } else {
-        // Fallback: direct anchor download
         var a = document.createElement('a');
         a.href = imgData.convertedDataUrl;
         a.download = filename;

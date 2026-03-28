@@ -10,13 +10,34 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v271',
-    version: 'v2.7.1',
+    id: 'v272',
+    version: 'v2.7.2',
     badge: 'latest',
-    name: 'Image Converter — Preview & Download Fix',
+    name: 'Image Converter — Custom Name + More Formats',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 2, improve: 1 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>`, label:'Custom Output Filename', desc:'Set a custom name for converted images. Extension auto-appended based on selected format. Live preview shows final filename. Sanitizes special characters automatically.', howto:'Image Converter \u2192 Output Filename field' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`, label:'More Output Formats', desc:'Added TIFF, AVIF, SVG, ICO output formats. ICO auto-clamps to standard icon sizes (16\u201332\u201348\u201364\u2026256px). SVG wraps raster images. TIFF falls back to PNG (browser limitation).', howto:'Image Converter \u2192 Output Format buttons' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v271',
+    version: 'v2.7.1',
+    badge: 'stable',
+    name: 'Image Converter \u2014 Preview & Download Fix',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { fix: 2, improve: 1 },
     categories: [
       {
