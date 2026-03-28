@@ -1,0 +1,37 @@
+{
+    "id": "v273",
+    "version": "v2.7.3",
+    "badge": "stable",
+    "name": "Image Converter — Clipboard, Drag Reorder, EXIF",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 3
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Copy to Clipboard",
+                    "desc": "Copy any converted image directly to clipboard via Clipboard API. Auto-converts to PNG for clipboard compatibility. Copy button per image + Copy All button in header.",
+                    "howto": "Image Converter → Convert → Copy button on each image"
+                },
+                {
+                    "type": "new",
+                    "label": "Drag to Reorder",
+                    "desc": "Drag the handle on the left of each image to reorder them. Conversion and download order follows the new arrangement.",
+                    "howto": "Image Converter → drag the ≡ handle on any image row"
+                },
+                {
+                    "type": "new",
+                    "label": "Image Metadata Viewer (EXIF)",
+                    "desc": "Click Info on any image to see full metadata: filename, type, size, dimensions, megapixels, aspect ratio, last modified. For JPEG/TIFF: camera make/model, date taken, ISO, aperture, shutter speed, focal length, flash, GPS coordinates.",
+                    "howto": "Image Converter → Info button on any image"
+                }
+            ]
+        }
+    ]
+}

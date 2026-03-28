@@ -1,0 +1,27 @@
+{
+  "id": "v101",
+  "version": "v1.0.1",
+  "badge": "stable",
+  "name": "Network & YouTube Update",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 3, "fix": 2 },
+  "categories": [
+    {
+      "label": "New Features",
+      "features": [
+        { "type": "new", "label": "Network Speed Indicator", "desc": "Live bar showing page load time, DNS+TCP+TTFB latency, transfer size and download speed. Color-coded: green <500ms, yellow <2s, red >2s.", "howto": "Appears automatically on every page load" },
+        { "type": "new", "label": "YouTube Ad Blocker", "desc": "Two-layer blocking: main process cancels ad network requests, CSS hides all ad DOM elements.", "howto": "Settings → YouTube → Ad Blocker" },
+        { "type": "new", "label": "Ad Speed Control + Auto-Skip", "desc": "Unskippable ads muted and sped up (4x–256x). Skip button auto-clicked. Video restored after ad.", "howto": "Settings → YouTube → Ad Speed" }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        { "type": "fix", "label": "Version Display Fix", "desc": "About section showed 'Version —' in packaged builds. Fixed by using app.getVersion() as primary source." },
+        { "type": "fix", "label": "Settings Toggle Not Rendering", "desc": "YouTube section toggle class mismatch fixed — toggle now renders correctly." }
+      ]
+    }
+  ]
+}

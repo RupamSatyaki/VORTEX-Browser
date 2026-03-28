@@ -1,0 +1,52 @@
+{
+  "id": "v100",
+  "version": "v1.0.0",
+  "badge": "stable",
+  "name": "Initial Release",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 14 },
+  "categories": [
+    {
+      "label": "Browsing Core",
+      "features": [
+        { "type": "new", "label": "Multi-Tab Browser", "desc": "Full tab management — drag-drop reorder, tab sleep, thumbnail hover previews, per-tab mute, lazy loading.", "howto": "Ctrl+T new · Ctrl+W close · Ctrl+Tab switch" },
+        { "type": "new", "label": "Smart Omnibox", "desc": "Address bar with real-time search suggestions, smart URL vs search detection, 5 search engines.", "howto": "Ctrl+L to focus" },
+        { "type": "new", "label": "Find in Page", "desc": "Full-text search within any webpage. Shows match count, highlights all matches.", "howto": "Ctrl+F" },
+        { "type": "new", "label": "Incognito Mode", "desc": "Separate purple-themed private window with fully isolated session partition.", "howto": "Ctrl+Shift+N" }
+      ]
+    },
+    {
+      "label": "Productivity",
+      "features": [
+        { "type": "new", "label": "Command Palette", "desc": "Fuzzy-search launcher for all browser actions.", "howto": "Ctrl+Shift+P" },
+        { "type": "new", "label": "Bookmarks & History", "desc": "Full bookmark manager with favicon, search and bookmarks bar.", "howto": "Ctrl+D bookmark · Ctrl+H history" },
+        { "type": "new", "label": "Download Manager", "desc": "Real-time download tracking with speed, progress bar, open file/folder buttons.", "howto": "Toolbar download icon" },
+        { "type": "new", "label": "Quick Launch Panel", "desc": "Spotlight-style launcher with bookmarks grid and 50+ popular sites.", "howto": "Ctrl+Space" }
+      ]
+    },
+    {
+      "label": "AI & Content",
+      "features": [
+        { "type": "new", "label": "AI Page Summarizer", "desc": "Summarize any webpage. 4 providers: HuggingFace, OpenAI, Ollama, Extractive.", "howto": "Toolbar AI button" },
+        { "type": "new", "label": "Page Translator", "desc": "Auto-detects page language and shows translation bar.", "howto": "Auto · Settings → Languages" }
+      ]
+    },
+    {
+      "label": "Media & Tools",
+      "features": [
+        { "type": "new", "label": "Picture-in-Picture Manager", "desc": "Auto-triggers PiP when switching away from a tab with playing video.", "howto": "Auto on tab switch" },
+        { "type": "new", "label": "Screenshot Tool", "desc": "Capture visible viewport or full page. Saves PNG via system dialog.", "howto": "Ctrl+Shift+S" },
+        { "type": "new", "label": "WhatsApp Panel", "desc": "Persistent WhatsApp Web sidebar using dedicated session partition.", "howto": "WhatsApp button in toolbar" }
+      ]
+    },
+    {
+      "label": "System & Updates",
+      "features": [
+        { "type": "perf", "label": "GitHub-based Updater", "desc": "Browse last 30 commits from GitHub API, apply any commit without reinstalling.", "howto": "Settings → Updates" },
+        { "type": "perf", "label": "DNS Prefetch & Link Prefetch", "desc": "Pre-warms DNS for top sites on startup. Prefetches link hints in background.", "howto": "Settings → Performance → Prefetch" }
+      ]
+    }
+  ]
+}

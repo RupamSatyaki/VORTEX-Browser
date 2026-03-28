@@ -1,0 +1,67 @@
+{
+    "id": "v261",
+    "version": "v2.6.1",
+    "badge": "stable",
+    "name": "Hash Generator — Advanced Features",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 8
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Password Strength Checker",
+                    "desc": "Entropy bits, charset size, crack time estimate (GPU-speed), 7 requirement checks, common password detection. Live as you type.",
+                    "howto": "Hash → Advanced → Password tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Hash Format Detector",
+                    "desc": "Paste any hash → auto-detects MD5, SHA-1, SHA-256, SHA-384, SHA-512, bcrypt, CRC32, NTLM by length and pattern.",
+                    "howto": "Hash → Advanced → Detector tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Salted Hash Generator",
+                    "desc": "Text + salt (random or manual) → salted hash. 3 output formats: $salt$hash, salt:hash, JSON.",
+                    "howto": "Hash → Advanced → Salted Hash tab"
+                },
+                {
+                    "type": "new",
+                    "label": "PBKDF2 Key Derivation",
+                    "desc": "Password + salt + iterations + key length → derived key via Web Crypto PBKDF2. Output in hex and Base64.",
+                    "howto": "Hash → Advanced → PBKDF2 tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Checksum Verifier",
+                    "desc": "Drop any file → computes MD5/SHA-1/SHA-256/SHA-512. Paste expected checksum → instantly shows which algorithm matches.",
+                    "howto": "Hash → Advanced → Checksum tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Multiple Output Formats",
+                    "desc": "Hash in 7 formats: hex lowercase, hex uppercase, 0x prefix, colon-separated, Base64, Base64URL, binary.",
+                    "howto": "Hash → Formats & Export → Formats tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Hash Visualization",
+                    "desc": "Identicon-style symmetric color grid generated from any hash. Configurable grid size (8x8, 10x10, 12x12). Download as PNG.",
+                    "howto": "Hash → Formats & Export → Visualize tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Batch Export (JSON/CSV)",
+                    "desc": "Hash multiple strings with multiple algorithms at once. Export as JSON or CSV file.",
+                    "howto": "Hash → Formats & Export → Export tab"
+                }
+            ]
+        }
+    ]
+}

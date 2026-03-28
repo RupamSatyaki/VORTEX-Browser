@@ -1,0 +1,23 @@
+{
+  "id": "v200",
+  "version": "v2.0.0",
+  "badge": "stable",
+  "name": "DevHub — Developer Tools Panel",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 6 },
+  "categories": [
+    {
+      "label": "New Features",
+      "features": [
+        { "type": "new", "label": "DevHub Panel", "desc": "New toolbar button opens a slide-out DevHub panel. Home screen shows all tools in a grid. Click any tool to open it, back button returns to home.", "howto": "Click the wrench icon in toolbar" },
+        { "type": "new", "label": "JSON Viewer", "desc": "Paste JSON to pretty-print with syntax-highlighted collapsible tree. Validate, minify, and copy.", "howto": "DevHub → JSON Viewer" },
+        { "type": "new", "label": "Color Picker", "desc": "HEX ↔ RGB ↔ HSL converter with live preview swatch. WCAG contrast checker.", "howto": "DevHub → Color Picker" },
+        { "type": "new", "label": "Regex Tester", "desc": "Live regex match highlighter. Supports g/i/m/s flags. Shows match count and capture groups.", "howto": "DevHub → Regex Tester" },
+        { "type": "new", "label": "Base64 Encoder/Decoder", "desc": "Encode/decode text to Base64. Image tab: drag-drop or upload any image to get its Base64 data URI.", "howto": "DevHub → Base64" },
+        { "type": "new", "label": "URL Encoder / Parser", "desc": "Encode/decode URL components. Parse tab breaks any URL into protocol, host, pathname, query params and hash.", "howto": "DevHub → URL Encoder" }
+      ]
+    }
+  ]
+}

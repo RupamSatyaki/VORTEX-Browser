@@ -1,0 +1,25 @@
+{
+    "id": "v270",
+    "version": "v2.7.0",
+    "badge": "stable",
+    "name": "Image Converter Tool",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 1
+    },
+    "categories": [
+        {
+            "label": "New Tools",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Image Converter",
+                    "desc": "Convert JPG ↔ PNG ↔ WebP ↔ BMP ↔ GIF. Resize with aspect ratio lock + presets (1080p, 720p, 512×512 etc). Rotate 90/180/270°, flip H/V, grayscale. Quality slider. Batch convert multiple images. Download sends to browser Downloads panel.",
+                    "howto": "DevHub → Image Converter · Drop images → set format/quality/resize → Convert All → Download All"
+                }
+            ]
+        }
+    ]
+}

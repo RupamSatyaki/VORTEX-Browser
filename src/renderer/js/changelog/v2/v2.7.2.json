@@ -1,0 +1,31 @@
+{
+    "id": "v272",
+    "version": "v2.7.2",
+    "badge": "stable",
+    "name": "Image Converter — Custom Name + More Formats",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 2
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Custom Output Filename",
+                    "desc": "Set a custom name for converted images. Extension auto-appended based on selected format. Live preview shows final filename. Sanitizes special characters automatically.",
+                    "howto": "Image Converter → Output Filename field"
+                },
+                {
+                    "type": "new",
+                    "label": "More Output Formats",
+                    "desc": "Added TIFF, AVIF, SVG, ICO output formats. ICO auto-clamps to standard icon sizes (16–32–48–64…256px). SVG wraps raster images.",
+                    "howto": "Image Converter → Output Format buttons"
+                }
+            ]
+        }
+    ]
+}

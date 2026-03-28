@@ -1,0 +1,19 @@
+{
+  "id": "v110",
+  "version": "v1.1.0",
+  "badge": "stable",
+  "name": "Changelog Refactor Update",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 1, "improve": 1 },
+  "categories": [
+    {
+      "label": "Improvements",
+      "features": [
+        { "type": "improve", "label": "Changelog Extracted to Separate File", "desc": "Changelog data moved from settings.html into a dedicated changelog.js file. Stats auto-computed from data.", "howto": "Edit vortex/src/renderer/js/changelog.js" },
+        { "type": "new", "label": "Dynamic Changelog Renderer", "desc": "Changelog section is now fully data-driven. HTML generated at runtime from CHANGELOG_VERSIONS array.", "howto": "Add a new object to CHANGELOG_VERSIONS in changelog.js" }
+      ]
+    }
+  ]
+}

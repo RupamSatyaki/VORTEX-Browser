@@ -1,0 +1,18 @@
+{
+  "id": "v121",
+  "version": "v1.2.1",
+  "badge": "stable",
+  "name": "Settings Sidebar Redesign",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "improve": 1 },
+  "categories": [
+    {
+      "label": "Improvements",
+      "features": [
+        { "type": "improve", "label": "Settings Sidebar Grouped Sections", "desc": "Sidebar nav items reorganized into 5 labeled groups: General, Privacy & Performance, Account, System, and Info. Replaces plain separators with uppercase section headers.", "howto": "Open Settings — sidebar now shows group labels" }
+      ]
+    }
+  ]
+}

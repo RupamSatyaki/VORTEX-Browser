@@ -1,0 +1,95 @@
+{
+    "id": "v212",
+    "version": "v2.1.2",
+    "badge": "stable",
+    "name": "JSON Viewer — 13 Features",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 13
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Search / Filter",
+                    "desc": "Search any key or value in the tree. Matching nodes highlight, non-matching fade.",
+                    "howto": "Type in search box in Tree tab toolbar"
+                },
+                {
+                    "type": "new",
+                    "label": "JSONPath Copy",
+                    "desc": "Click any key in the tree to copy its full JSONPath (e.g. $.user.address.city).",
+                    "howto": "Click any key name in tree"
+                },
+                {
+                    "type": "new",
+                    "label": "JSON Schema Generator",
+                    "desc": "Auto-generates a JSON Schema (draft-07) from parsed JSON.",
+                    "howto": "JSON Viewer → Schema tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Diff Mode",
+                    "desc": "Paste two JSONs side by side. Differences shown as ADDED/REMOVED/CHANGED.",
+                    "howto": "JSON Viewer → Diff tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Edit Mode",
+                    "desc": "Toggle edit mode to modify values directly in the tree.",
+                    "howto": "✎ button in tree toolbar"
+                },
+                {
+                    "type": "new",
+                    "label": "JSON → CSV",
+                    "desc": "Converts array of objects to CSV and downloads it.",
+                    "howto": "→ CSV button"
+                },
+                {
+                    "type": "new",
+                    "label": "Sort Keys",
+                    "desc": "Recursively sorts all object keys alphabetically.",
+                    "howto": "Sort Keys button"
+                },
+                {
+                    "type": "new",
+                    "label": "Flatten / Unflatten",
+                    "desc": "Flatten nested JSON to dot-notation keys. Unflatten converts back.",
+                    "howto": "Flatten / Unflatten buttons"
+                },
+                {
+                    "type": "new",
+                    "label": "Size Info",
+                    "desc": "Shows file size (KB), node count, and validation status in real time.",
+                    "howto": "Appears below textarea automatically"
+                },
+                {
+                    "type": "new",
+                    "label": "Line Numbers",
+                    "desc": "Textarea now shows line numbers that sync with scroll position."
+                },
+                {
+                    "type": "new",
+                    "label": "Real-time Validation",
+                    "desc": "Green border = valid JSON, red border = invalid. Updates as you type."
+                },
+                {
+                    "type": "new",
+                    "label": "Syntax Theme Toggle",
+                    "desc": "Switch between dark and light syntax color themes.",
+                    "howto": "◑ button in tree toolbar"
+                },
+                {
+                    "type": "new",
+                    "label": "Bookmark Nodes",
+                    "desc": "Star any node in the tree to bookmark it. Gold left border for quick identification.",
+                    "howto": "Hover any row → click ★ icon"
+                }
+            ]
+        }
+    ]
+}

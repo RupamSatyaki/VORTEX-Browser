@@ -1,0 +1,18 @@
+{
+  "id": "v120",
+  "version": "v1.2.0",
+  "badge": "stable",
+  "name": "Help & FAQ Update",
+  "date": "March 2026",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 1 },
+  "categories": [
+    {
+      "label": "New Features",
+      "features": [
+        { "type": "new", "label": "Help & FAQ Section", "desc": "New dedicated Help & FAQ section in Settings with 35+ questions covering navigation, tabs, features, issues, shortcuts, privacy and updates. Full-text search, category filters, expandable answers. Data-driven via faq.js.", "howto": "Settings → Help & FAQ" }
+      ]
+    }
+  ]
+}
