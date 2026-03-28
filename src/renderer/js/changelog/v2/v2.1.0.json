@@ -1,0 +1,25 @@
+{
+    "id": "v210",
+    "version": "v2.1.0",
+    "badge": "stable",
+    "name": "JSON Viewer Upgrade",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Improvements",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "JSON Viewer — Full Rewrite",
+                    "desc": "File upload (.json), collapsible tree with expand/collapse all, hover tooltips (type, length, key count), auto-parse on paste. New Stats & Graph tab: type distribution bars, depth histogram, top keys chart.",
+                    "howto": "DevHub → JSON Viewer"
+                }
+            ]
+        }
+    ]
+}

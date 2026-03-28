@@ -1,0 +1,66 @@
+{
+    "id": "v241",
+    "version": "v2.4.1",
+    "badge": "stable",
+    "name": "Base64 — History, Batch, JWT, Image Transform",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 6,
+        "fix": 1
+    },
+    "categories": [
+        {
+            "label": "Bug Fixes",
+            "features": [
+                {
+                    "type": "fix",
+                    "label": "Deprecated escape/unescape Removed",
+                    "desc": "utils.js now uses TextEncoder/TextDecoder — no more deprecated escape() and unescape() calls."
+                }
+            ]
+        },
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Operation History",
+                    "desc": "Last 10 encode/decode operations saved per session.",
+                    "howto": "Text tab → History mode"
+                },
+                {
+                    "type": "new",
+                    "label": "Batch Mode",
+                    "desc": "Encode or decode multiple strings at once — one per line.",
+                    "howto": "Text tab → Batch mode"
+                },
+                {
+                    "type": "new",
+                    "label": "Copy as Code",
+                    "desc": "Copy encoded Base64 as a variable in JS, TypeScript, Python, Java, Go, or C#.",
+                    "howto": "Text tab → Copy as: buttons"
+                },
+                {
+                    "type": "new",
+                    "label": "Image Resize + Quality + Format",
+                    "desc": "Before encoding: resize to custom dimensions, set JPEG quality, convert format.",
+                    "howto": "Image tab → Transform section"
+                },
+                {
+                    "type": "new",
+                    "label": "Multiple Images → JSON Array",
+                    "desc": "Upload multiple images → all encoded to Base64 as a JSON array.",
+                    "howto": "Image tab → Multiple button"
+                },
+                {
+                    "type": "new",
+                    "label": "JWT Decoder Tab",
+                    "desc": "Paste any JWT → colored token display, header/payload/signature, claims table, expiry check.",
+                    "howto": "Base64 → JWT tab"
+                }
+            ]
+        }
+    ]
+}

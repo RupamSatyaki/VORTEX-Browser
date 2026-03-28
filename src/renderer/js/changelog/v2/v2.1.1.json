@@ -1,0 +1,30 @@
+{
+    "id": "v211",
+    "version": "v2.1.1",
+    "badge": "stable",
+    "name": "JSON Viewer UI Polish",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "fix": 1,
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Bug Fixes",
+            "features": [
+                {
+                    "type": "fix",
+                    "label": "JSON Tree Text Blur Fixed",
+                    "desc": "Tree text was blurry due to translate(-50%,-50%) causing subpixel rendering. Fixed with margin-based centering + translateZ(0)."
+                },
+                {
+                    "type": "improve",
+                    "label": "JSON Viewer UI Redesign",
+                    "desc": "Pill-style tab switcher, animated expand/collapse, shimmer effect on stat bars, animated depth histogram, staggered stat card entrance."
+                }
+            ]
+        }
+    ]
+}

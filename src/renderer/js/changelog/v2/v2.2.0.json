@@ -1,0 +1,96 @@
+{
+    "id": "v220",
+    "version": "v2.2.0",
+    "badge": "stable",
+    "name": "Color Picker — Full Upgrade",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 13
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Palette Generator",
+                    "desc": "Auto-generates Shades, Tints and Tones from any color — 7 swatches each.",
+                    "howto": "Color Picker → Palette tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Color Harmony",
+                    "desc": "Complementary, Split-Complementary, Triadic, Analogous, Tetradic — all with swatches.",
+                    "howto": "Color Picker → Harmony tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Gradient Generator",
+                    "desc": "Pick two colors, angle and type (linear/radial/conic). Live preview + copy CSS.",
+                    "howto": "Color Picker → Gradient tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Color History",
+                    "desc": "Last 12 picked colors shown as swatches.",
+                    "howto": "Appears below actions automatically"
+                },
+                {
+                    "type": "new",
+                    "label": "CMYK + HWB Support",
+                    "desc": "Full CMYK and HWB format support with copy buttons.",
+                    "howto": "Copy buttons in action bar"
+                },
+                {
+                    "type": "new",
+                    "label": "CSS Variables Output",
+                    "desc": "One-click CSS custom properties: --color, --color-rgb, --color-hsl, --color-rgba, --color-cmyk, --color-hwb.",
+                    "howto": "Color Picker → CSS/TW tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Tailwind CSS Match",
+                    "desc": "Finds the closest Tailwind color class with color distance.",
+                    "howto": "Color Picker → CSS/TW tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Color Blindness Simulator",
+                    "desc": "Simulates Protanopia, Deuteranopia, Tritanopia and Achromatopsia.",
+                    "howto": "Color Picker → Blindness tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Eyedropper API",
+                    "desc": "Pick any color from the screen using the native browser Eyedropper API.",
+                    "howto": "💉 Pick button"
+                },
+                {
+                    "type": "new",
+                    "label": "Export Palette JSON",
+                    "desc": "Export current color + history as a JSON file.",
+                    "howto": "Color Picker → CSS/TW tab → Export"
+                },
+                {
+                    "type": "new",
+                    "label": "Alpha / Opacity Slider",
+                    "desc": "Visual alpha slider with checkerboard background. RGBA output.",
+                    "howto": "Opacity slider below color fields"
+                },
+                {
+                    "type": "new",
+                    "label": "Large Preview Hero",
+                    "desc": "Big color swatch at top shows current color with HEX overlay and nearest Tailwind name."
+                },
+                {
+                    "type": "improve",
+                    "label": "WCAG Contrast Checker Upgraded",
+                    "desc": "Now shows AA Normal, AA Large, AAA Normal, AAA Large — all four levels vs both white and black.",
+                    "howto": "Color Picker → Contrast tab"
+                }
+            ]
+        }
+    ]
+}

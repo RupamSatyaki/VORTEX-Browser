@@ -1,0 +1,67 @@
+{
+    "id": "v231",
+    "version": "v2.3.1",
+    "badge": "stable",
+    "name": "Regex Tester — 8 More Features",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 8
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Regex Visualizer",
+                    "desc": "Token-by-token visual flow diagram. Each part of the pattern shown as a colored node.",
+                    "howto": "Regex Tester → Visual tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Match Navigator",
+                    "desc": "Prev/Next buttons to jump between matches one by one. Current match highlighted in gold.",
+                    "howto": "Regex Tester → Navigator tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Performance Benchmark",
+                    "desc": "Run regex N times (1K–1M iterations), measure total time, per-op µs, ops/sec. Detects catastrophic backtracking.",
+                    "howto": "Regex Tester → Bench tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Pattern History",
+                    "desc": "Last 20 typed patterns auto-saved per session.",
+                    "howto": "Regex Tester → History tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Share Pattern",
+                    "desc": "Encode pattern + flags + test string into a shareable link. Import from link.",
+                    "howto": "Regex Tester → Share tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Import/Export Saved Patterns",
+                    "desc": "Export all saved patterns as JSON file. Import from JSON to merge.",
+                    "howto": "Regex Tester → Saved tab → Export / Import"
+                },
+                {
+                    "type": "new",
+                    "label": "Escape Helper",
+                    "desc": "Paste any raw string → auto-escapes all regex special chars.",
+                    "howto": "Regex Tester → Escape tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Quantifier Helper + Unicode Properties",
+                    "desc": "Visual quantifier cards + custom {n,m} builder. Unicode tab with \\p{...} property buttons.",
+                    "howto": "Regex Tester → Quant tab · Unicode tab"
+                }
+            ]
+        }
+    ]
+}

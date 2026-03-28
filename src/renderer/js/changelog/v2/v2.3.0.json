@@ -1,0 +1,91 @@
+{
+    "id": "v230",
+    "version": "v2.3.0",
+    "badge": "stable",
+    "name": "Regex Tester — 12 Features",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 12
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Replace Mode",
+                    "desc": "Pattern + replacement string → replaced output. Supports $1, $2 backreferences.",
+                    "howto": "Regex Tester → Replace tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Named Capture Groups",
+                    "desc": "(?<name>...) syntax fully supported. Named groups shown in a separate table.",
+                    "howto": "Use (?<name>...) in pattern"
+                },
+                {
+                    "type": "new",
+                    "label": "Match Details Table",
+                    "desc": "Every match with index, length, value, line number, and all capture groups.",
+                    "howto": "Regex Tester → Match Table tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Pattern Library",
+                    "desc": "22 pre-built patterns: Email, URL, Phone, IP, Date, UUID, Hex Color, Credit Card, HTML Tag, Password, and more.",
+                    "howto": "Regex Tester → Library tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Regex Explainer",
+                    "desc": "Token-by-token breakdown of any pattern in plain English.",
+                    "howto": "Regex Tester → Explainer tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Multi-line Tester",
+                    "desc": "Test each line independently. Green/red per line with match count.",
+                    "howto": "Regex Tester → Multi-line tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Split Mode",
+                    "desc": "Split a string by the regex pattern. Shows all parts with index numbers.",
+                    "howto": "Regex Tester → Split tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Code Generator",
+                    "desc": "Generates ready-to-use regex code in 6 languages: JavaScript, Python, Java, Go, PHP, Rust.",
+                    "howto": "Regex Tester → Code Gen tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Test Cases",
+                    "desc": "Add multiple test strings with expected outcome. Run all → PASS/FAIL per case.",
+                    "howto": "Regex Tester → Test Cases tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Saved Patterns",
+                    "desc": "Save frequently used patterns with names. Persists in localStorage.",
+                    "howto": "Regex Tester → Saved tab"
+                },
+                {
+                    "type": "new",
+                    "label": "u and y Flags",
+                    "desc": "Added Unicode (u) and Sticky (y) flags alongside g/i/m/s.",
+                    "howto": "Flag checkboxes in pattern row"
+                },
+                {
+                    "type": "new",
+                    "label": "Character Class Helper",
+                    "desc": "20 clickable buttons for \\d, \\w, \\s, \\b, lookaheads, lookbehinds, named groups etc.",
+                    "howto": "Button row below pattern input"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,49 @@
+{
+    "id": "v221",
+    "version": "v2.2.1",
+    "badge": "stable",
+    "name": "Color Picker — Canvas, Mixer, Named, Image, Saved",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 5
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Visual Color Canvas",
+                    "desc": "2D saturation/lightness picker canvas + hue bar slider. Drag to pick color visually — like Figma/Photoshop. Now the default tab.",
+                    "howto": "Color Picker → Canvas tab (default)"
+                },
+                {
+                    "type": "new",
+                    "label": "Color Mixer",
+                    "desc": "Pick two colors + ratio slider → mixed color preview. Also shows 7-step gradient between the two colors.",
+                    "howto": "Color Picker → Mixer tab"
+                },
+                {
+                    "type": "new",
+                    "label": "CSS Named Colors",
+                    "desc": "140+ CSS named colors (tomato, steelblue, coral…) in a searchable grid.",
+                    "howto": "Color Picker → Named tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Color from Image",
+                    "desc": "Upload or drag-drop any image → extracts top 8 dominant colors using pixel quantization.",
+                    "howto": "Color Picker → Image tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Saved Palettes",
+                    "desc": "Save named palettes from your color history. Persists in localStorage.",
+                    "howto": "Color Picker → Saved tab"
+                }
+            ]
+        }
+    ]
+}
