@@ -94,6 +94,17 @@ var EditorAdjustments = {
   buildCropPanel: function() {
     return '<div class="ie-panel-section"><div class="ie-panel-title">Crop</div>' +
       '<div class="ie-panel-hint">Drag on canvas to select crop area</div>' +
+      '<div class="ie-panel-title" style="margin-top:6px;font-size:9.5px;">Aspect Ratio Presets</div>' +
+      '<div class="ie-aspect-grid">' +
+      '<button class="ie-aspect-btn" data-ratio="free">Free</button>' +
+      '<button class="ie-aspect-btn" data-ratio="1:1">1:1</button>' +
+      '<button class="ie-aspect-btn" data-ratio="16:9">16:9</button>' +
+      '<button class="ie-aspect-btn" data-ratio="4:3">4:3</button>' +
+      '<button class="ie-aspect-btn" data-ratio="3:2">3:2</button>' +
+      '<button class="ie-aspect-btn" data-ratio="9:16">9:16</button>' +
+      '<button class="ie-aspect-btn" data-ratio="2:3">2:3</button>' +
+      '<button class="ie-aspect-btn" data-ratio="3:4">3:4</button>' +
+      '</div>' +
       '<div class="ie-crop-grid">' +
       '<div class="ie-crop-field"><label>X</label><input class="dh-input ie-crop-inp" id="ie-crop-x" type="number" min="0" value="0"/></div>' +
       '<div class="ie-crop-field"><label>Y</label><input class="dh-input ie-crop-inp" id="ie-crop-y" type="number" min="0" value="0"/></div>' +
@@ -111,6 +122,27 @@ var EditorAdjustments = {
     var x = panel.querySelector('#ie-crop-cancel');
     if (c) c.addEventListener('click', onConfirm);
     if (x) x.addEventListener('click', onCancel);
+
+    // Aspect ratio presets
+    var _lockedRatio = null;
+    panel.querySelectorAll('.ie-aspect-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        panel.querySelectorAll('.ie-aspect-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        var ratio = btn.dataset.ratio;
+        if (ratio === 'free') { _lockedRatio = null; EditorInteractions._lockedAspect = null; return; }
+        var parts = ratio.split(':');
+        _lockedRatio = +parts[0] / +parts[1];
+        EditorInteractions._lockedAspect = _lockedRatio;
+        // Apply to current crop rect
+        var r = EditorInteractions._cropRect;
+        if (r) {
+          r.h = Math.round(r.w / _lockedRatio);
+          EditorInteractions._drawCrop();
+        }
+      });
+    });
+
     // Live update from inputs
     ['ie-crop-x','ie-crop-y','ie-crop-w','ie-crop-h'].forEach(function(id) {
       var el = panel.querySelector('#' + id);
@@ -119,6 +151,8 @@ var EditorAdjustments = {
         var py = +panel.querySelector('#ie-crop-y').value;
         var pw = +panel.querySelector('#ie-crop-w').value;
         var ph = +panel.querySelector('#ie-crop-h').value;
+        if (_lockedRatio && id === 'ie-crop-w') ph = Math.round(pw / _lockedRatio);
+        if (_lockedRatio && id === 'ie-crop-h') pw = Math.round(ph * _lockedRatio);
         EditorInteractions.setCropFromPanel(px, py, pw, ph);
       });
     });
