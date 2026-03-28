@@ -84,6 +84,8 @@ var ImageEditor = {
       '</div>',
 
       '<div class="ie-header-right">',
+      '<button class="ie-hdr-btn" id="ie-before-after-btn" title="Toggle Before/After (\\)">B/A</button>',
+      '<button class="ie-hdr-btn" id="ie-shortcuts-btn" title="Keyboard shortcuts (?)">?</button>',
       '<div class="ie-dropdown-wrap">',
       '<button class="dh-btn ie-save-btn" id="ie-save-btn">',
       '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
@@ -123,7 +125,12 @@ var ImageEditor = {
 
       // Right panel
       '<div class="ie-panel" id="ie-panel">',
+      '<div class="ie-panel-tabs">',
+      '<button class="ie-ptab active" data-ptab="options">Options</button>',
+      '<button class="ie-ptab" data-ptab="layers">Layers</button>',
+      '</div>',
       '<div id="ie-panel-content"></div>',
+      '<div id="ie-layers-content" style="display:none"></div>',
       '</div>',
 
       '</div>',
@@ -167,6 +174,7 @@ var ImageEditor = {
       { id:'eraser',   icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l10-10 7 7-3 3"/><path d="M6.0001 10.0001L14 18"/></svg>', title:'Eraser (E)' },
       { id:'text',     icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>', title:'Text (T)' },
       { id:'overlay',  icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>', title:'Image Overlay (O)' },
+      { id:'border',   icon:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg>', title:'Border / Frame' },
     ];
     return tools.map(function(t) {
       return '<button class="ie-tool-btn" data-tool="' + t.id + '" id="ie-tool-' + t.id + '" title="' + t.title + '">' + t.icon + '</button>';
@@ -217,8 +225,19 @@ ImageEditor._renderPanel = function(tool) {
       EditorCanvas.commitAdjustments();
     });
   } else if (tool === 'filter') {
-    panel.innerHTML = EditorAdjustments.buildFilterPanel();
-    EditorAdjustments.bindFilters(panel, function(name) { EditorCanvas.applyFilter(name); });
+    panel.innerHTML = EditorFilters.buildPanel();
+    EditorFilters.bindPanel(panel,
+      function() { return EditorCanvas._ctx; },
+      function() { return EditorCanvas._canvas; },
+      function() { EditorCanvas._saveHistory(); }
+    );
+  } else if (tool === 'border') {
+    panel.innerHTML = EditorFilters.buildBorderPanel();
+    EditorFilters.bindBorderPanel(panel,
+      function() { return EditorCanvas._ctx; },
+      function() { return EditorCanvas._canvas; },
+      function() { EditorCanvas._saveHistory(); EditorCanvas.fitToContainer(); }
+    );
   } else if (tool === 'crop') {
     panel.innerHTML = EditorAdjustments.buildCropPanel();
     EditorAdjustments.bindCrop(panel, function() { self._confirmCrop(); }, function() { self._cancelCrop(); });
@@ -255,7 +274,9 @@ ImageEditor._renderPanel = function(tool) {
     placeBtn.style.marginTop = '6px';
     placeBtn.addEventListener('click', function() {
       var sz = EditorCanvas.getSize();
-      EditorInteractions.addTextItem({ text: self2._textOpts.text, x: sz.w/2, y: sz.h/2, opts: Object.assign({}, self2._textOpts) });
+      var item = { text: self2._textOpts.text, x: sz.w/2, y: sz.h/2, opts: Object.assign({}, self2._textOpts) };
+      EditorInteractions.addTextItem(item);
+      EditorLayers.addLayer('text', '"' + self2._textOpts.text.slice(0,12) + '"', item);
     });
     var commitBtn = document.createElement('button');
     commitBtn.className = 'dh-btn ie-action-btn';
@@ -270,7 +291,9 @@ ImageEditor._renderPanel = function(tool) {
   } else if (tool === 'overlay') {
     panel.innerHTML = EditorOverlay.buildPanel();
     EditorOverlay.bind(panel, function(img, x, y, w, h, opacity) {
-      EditorInteractions.addOverlayItem({ img: img, x: x, y: y, w: w, h: h, opacity: opacity });
+      var item = { img: img, x: x, y: y, w: w, h: h, opacity: opacity };
+      EditorInteractions.addOverlayItem(item);
+      EditorLayers.addLayer('overlay', 'Image overlay', item);
     });
     // Commit button
     var commitOvBtn = document.createElement('button');
@@ -302,6 +325,9 @@ ImageEditor._loadFile = function(file) {
         function(r) { /* crop change */ },
         function(deg) { /* rotate change */ }
       );
+      EditorShortcuts.init(self._container.querySelector('#ie-canvas'));
+      EditorShortcuts.saveBeforeSnapshot();
+      EditorLayers.init(self._container.querySelector('#ie-layers-content'), function() {});
       var fn = self._container.querySelector('#ie-filename');
       if (fn) fn.textContent = file.name;
       self._setTool('select');
@@ -412,6 +438,22 @@ ImageEditor._bindAll = function() {
     } catch(e) {}
   });
 
+  // Before/After + Shortcuts
+  var baBtn = $('ie-before-after-btn');
+  if (baBtn) baBtn.addEventListener('click', function() { EditorShortcuts.toggleBeforeAfter(); });
+  var scBtn = $('ie-shortcuts-btn');
+  if (scBtn) scBtn.addEventListener('click', function() { EditorShortcuts.showCheatsheet(); });
+
+  // Panel tabs (Options / Layers)
+  c.querySelectorAll('.ie-ptab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      c.querySelectorAll('.ie-ptab').forEach(function(t) { t.classList.remove('active'); });
+      tab.classList.add('active');
+      $('ie-panel-content').style.display  = tab.dataset.ptab === 'options' ? '' : 'none';
+      $('ie-layers-content').style.display = tab.dataset.ptab === 'layers'  ? '' : 'none';
+    });
+  });
+
   // Info modal
   $('ie-info-btn').addEventListener('click', function() {
     var sz = EditorCanvas.getSize();
@@ -504,6 +546,8 @@ ImageEditor._bindAll = function() {
       if (k === 't') self._setTool('text');
       if (k === 'o') self._setTool('overlay');
       if (k === 'h') EditorCanvas.flip('h');
+      if (k === '\\') EditorShortcuts.toggleBeforeAfter();
+      if (k === '?') EditorShortcuts.showCheatsheet();
       if (k === 'enter') self._confirmCrop();
       if (k === 'escape') self._cancelCrop();
       if (k === '[') { self._brushOpts.size = Math.max(1, self._brushOpts.size - 2); }

@@ -1,0 +1,34 @@
+{
+    "id": "v281",
+    "version": "v2.8.1",
+    "badge": "stable",
+    "name": "Image Editor — Crop Handles, Rotate Wheel, Text/Overlay Drag",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "improve": 3
+    },
+    "categories": [
+        {
+            "label": "Improvements",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "Crop with Draggable Border Handles",
+                    "desc": "Crop selection shows 8 resize handles (corners + edges) with rule-of-thirds grid. Drag handles to resize, drag inside to move. Inputs sync live."
+                },
+                {
+                    "type": "improve",
+                    "label": "Rotate Wheel UI",
+                    "desc": "Quarter-circle arc with tick marks on canvas. Drag to set angle. Right panel shows degree input + axis selector."
+                },
+                {
+                    "type": "improve",
+                    "label": "Text & Overlay Drag-Drop",
+                    "desc": "Text items show dashed selection box and can be dragged on canvas. Image overlays have move + resize handle (bottom-right corner)."
+                }
+            ]
+        }
+    ]
+}
