@@ -37,8 +37,8 @@ const DevHub = (() => {
     #devhub-panel {
       position: fixed;
       top: 50%; left: 50%;
-      width: min(680px, 92vw);
-      max-height: min(600px, 88vh);
+      width: min(900px, 96vw);
+      max-height: min(720px, 92vh);
       background: #0d1f1f;
       border: 1px solid #1e3838;
       border-radius: 18px;
@@ -47,7 +47,7 @@ const DevHub = (() => {
       flex-direction: column;
       opacity: 0; pointer-events: none;
       /* Use margin instead of translate to avoid subpixel blur */
-      margin-left: calc(min(680px, 92vw) / -2);
+      margin-left: calc(min(900px, 96vw) / -2);
       margin-top: -300px;
       transform: scale(0.93);
       transform-origin: center center;
