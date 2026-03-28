@@ -90,3 +90,74 @@
 .hash-hist-time { font-size: 10px; color: #2e6060; }
 .hash-hist-input { font-size: 11px; color: #7aadad; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hash-hist-val { font-size: 10.5px; color: #4a8080; font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Sub-tabs (Advanced + Formats) ── */
+.hash-sub-tabs { display: flex; gap: 2px; background: #060e0e; border: 1px solid #1a3030; border-radius: 8px; padding: 2px; flex-wrap: wrap; margin-bottom: 10px; }
+.hash-sub-tab { background: none; border: none; border-radius: 6px; color: #4a8080; font-size: 10.5px; padding: 5px 9px; cursor: pointer; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+.hash-sub-tab:hover { color: #c8e8e5; background: rgba(255,255,255,0.04); }
+.hash-sub-tab.active { background: #122222; color: #00c8b4; }
+.hash-sub-content { animation: dh-tool-in 0.18s ease both; }
+
+/* ── Password Strength ── */
+.hash-pw-input-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+.hash-pw-input { flex: 1; font-family: 'Consolas',monospace; }
+.hash-pw-strength-bar { height: 6px; background: #0a1616; border-radius: 3px; overflow: hidden; border: 1px solid #1a3030; margin-bottom: 6px; }
+.hash-pw-fill { height: 100%; border-radius: 3px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1), background 0.3s; }
+.hash-pw-label { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.hash-pw-warn { font-size: 11px; color: #fbbf24; background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.2); border-radius: 6px; padding: 5px 10px; margin-bottom: 8px; }
+.hash-pw-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
+.hash-pw-stat { background: #060e0e; border: 1px solid #1a3030; border-radius: 8px; padding: 8px; text-align: center; }
+.hash-pw-stat-k { display: block; font-size: 9.5px; color: #4a8080; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 3px; }
+.hash-pw-stat-v { display: block; font-size: 13px; font-weight: 700; color: #c8e8e5; font-family: monospace; }
+.hash-pw-checks { display: flex; flex-direction: column; gap: 3px; }
+.hash-pw-check { font-size: 11.5px; padding: 3px 6px; border-radius: 5px; }
+.hash-pw-check.ok   { color: #22c55e; background: rgba(34,197,94,0.06); }
+.hash-pw-check.fail { color: #4a8080; }
+
+/* ── Hash Detector ── */
+.hash-det-count { font-size: 11px; color: #4a8080; margin-bottom: 6px; }
+.hash-det-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; background: #060e0e; border: 1px solid #1a3030; border-radius: 8px; margin-bottom: 4px; animation: dh-tool-in 0.15s ease both; }
+.hash-det-name { font-size: 12px; font-weight: 700; color: #00c8b4; min-width: 80px; font-family: monospace; }
+.hash-det-note { font-size: 11px; color: #4a8080; flex: 1; }
+.hash-det-len  { font-size: 10.5px; color: #2e6060; flex-shrink: 0; font-family: monospace; }
+
+/* ── Salted Hash ── */
+.hash-salt-row { margin-bottom: 4px; }
+.hash-salt-format-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+
+/* ── PBKDF2 ── */
+.hash-pbkdf2-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+.hash-pbkdf2-field { display: flex; flex-direction: column; gap: 3px; }
+.hash-pbkdf2-field label { font-size: 10px; color: #4a8080; text-transform: uppercase; letter-spacing: 0.4px; }
+.hash-pbkdf2-result { }
+
+/* ── Checksum ── */
+.hash-checksum-drop { border: 2px dashed #1a3030; border-radius: 10px; padding: 16px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: #4a8080; cursor: pointer; transition: all 0.2s; margin-bottom: 8px; }
+.hash-checksum-drop:hover { border-color: rgba(0,200,180,0.4); background: rgba(0,200,180,0.03); }
+.hash-cs-expected-row { display: flex; gap: 6px; }
+.hash-cs-match { border-color: rgba(34,197,94,0.3) !important; }
+
+/* ── Formats ── */
+.hash-fmt-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: #060e0e; border: 1px solid #1a3030; border-radius: 8px; margin-bottom: 4px; animation: dh-tool-in 0.15s ease both; flex-wrap: wrap; }
+.hash-fmt-label { font-size: 10.5px; color: #4a8080; min-width: 120px; flex-shrink: 0; }
+.hash-fmt-val { font-family: 'Consolas',monospace; font-size: 11px; color: #c8e8e5; flex: 1; word-break: break-all; }
+
+/* ── Visualize ── */
+.hash-vis-options { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+.hash-vis-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 8px; }
+.hash-vis-canvas { border-radius: 10px; border: 1px solid rgba(0,200,180,0.2); image-rendering: pixelated; }
+.hash-vis-info { font-size: 10.5px; color: #4a8080; font-family: monospace; }
+.hash-vis-actions { display: flex; gap: 6px; }
+
+/* ── Export ── */
+.hash-export-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.hash-exp-preview { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; max-height: 120px; overflow-y: auto; }
+.hash-exp-preview::-webkit-scrollbar { width: 4px; }
+.hash-exp-preview::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+.hash-exp-row { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; background: #060e0e; border-radius: 6px; font-size: 11px; }
+.hash-exp-input { color: #c8e8e5; font-family: monospace; }
+.hash-exp-hash { color: #4a8080; font-family: monospace; font-size: 10px; }
+
+/* ── Advanced wrap ── */
+.hash-adv-wrap { display: flex; flex-direction: column; gap: 8px; }
+.hash-fmt-wrap { display: flex; flex-direction: column; gap: 8px; }

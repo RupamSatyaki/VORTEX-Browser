@@ -36,11 +36,21 @@ var HashTool = {
       '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
       ' Compare &amp; Batch',
       '</button>',
+      '<button class="hash-main-tab" data-tab="advanced">',
+      '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+      ' Advanced',
+      '</button>',
+      '<button class="hash-main-tab" data-tab="formats">',
+      '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>',
+      ' Formats &amp; Export',
+      '</button>',
       '</div>',
       '<div class="hash-status-bar"><span class="dh-status" id="hash-status"></span></div>',
       '<div class="hash-main-content" id="hash-text-content"></div>',
-      '<div class="hash-main-content" id="hash-file-content"    style="display:none"></div>',
-      '<div class="hash-main-content" id="hash-compare-content" style="display:none"></div>',
+      '<div class="hash-main-content" id="hash-file-content"     style="display:none"></div>',
+      '<div class="hash-main-content" id="hash-compare-content"  style="display:none"></div>',
+      '<div class="hash-main-content" id="hash-advanced-content" style="display:none"></div>',
+      '<div class="hash-main-content" id="hash-formats-content"  style="display:none"></div>',
       '</div>'
     ].join('');
 
@@ -53,17 +63,21 @@ var HashTool = {
       if (ok && msg) setTimeout(function() { if (el.textContent === msg) el.textContent = ''; }, 2000);
     }
 
-    HashText.render($('hash-text-content'),    setStatus);
-    HashFile.render($('hash-file-content'),    setStatus);
+    HashText.render($('hash-text-content'),       setStatus);
+    HashFile.render($('hash-file-content'),       setStatus);
     HashCompare.render($('hash-compare-content'), setStatus);
+    HashAdvanced.render($('hash-advanced-content'), setStatus);
+    HashFormats.render($('hash-formats-content'), setStatus);
 
     container.querySelectorAll('.hash-main-tab').forEach(function(tab) {
       tab.addEventListener('click', function() {
         container.querySelectorAll('.hash-main-tab').forEach(function(t) { t.classList.remove('active'); });
         tab.classList.add('active');
-        $('hash-text-content').style.display    = tab.dataset.tab === 'text'    ? '' : 'none';
-        $('hash-file-content').style.display    = tab.dataset.tab === 'file'    ? '' : 'none';
-        $('hash-compare-content').style.display = tab.dataset.tab === 'compare' ? '' : 'none';
+        $('hash-text-content').style.display     = tab.dataset.tab === 'text'     ? '' : 'none';
+        $('hash-file-content').style.display     = tab.dataset.tab === 'file'     ? '' : 'none';
+        $('hash-compare-content').style.display  = tab.dataset.tab === 'compare'  ? '' : 'none';
+        $('hash-advanced-content').style.display = tab.dataset.tab === 'advanced' ? '' : 'none';
+        $('hash-formats-content').style.display  = tab.dataset.tab === 'formats'  ? '' : 'none';
       });
     });
   },
