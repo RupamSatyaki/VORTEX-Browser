@@ -121,3 +121,13 @@
 .ie-info-row:hover { background:rgba(0,200,180,0.05); }
 .ie-info-row span:first-child { color:#4a8080; }
 .ie-info-row span:last-child  { color:#c8e8e5; font-family:monospace; }
+
+/* Rotate info panel */
+.ie-rotate-info { display:flex; flex-direction:column; gap:6px; margin-bottom:8px; }
+.ie-rotate-info-row { display:flex; align-items:center; gap:6px; font-size:11px; }
+.ie-ri-label { color:#4a8080; width:36px; flex-shrink:0; }
+.ie-ri-input { width:60px !important; text-align:center; font-family:monospace; font-size:12px !important; padding:4px 6px !important; }
+.ie-ri-select { flex:1; }
+
+/* Overlay canvas pointer events */
+#ie-overlay-canvas { pointer-events:auto !important; cursor:crosshair; }

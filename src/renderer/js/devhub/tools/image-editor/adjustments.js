@@ -111,30 +111,67 @@ var EditorAdjustments = {
     var x = panel.querySelector('#ie-crop-cancel');
     if (c) c.addEventListener('click', onConfirm);
     if (x) x.addEventListener('click', onCancel);
+    // Live update from inputs
+    ['ie-crop-x','ie-crop-y','ie-crop-w','ie-crop-h'].forEach(function(id) {
+      var el = panel.querySelector('#' + id);
+      if (el) el.addEventListener('input', function() {
+        var px = +panel.querySelector('#ie-crop-x').value;
+        var py = +panel.querySelector('#ie-crop-y').value;
+        var pw = +panel.querySelector('#ie-crop-w').value;
+        var ph = +panel.querySelector('#ie-crop-h').value;
+        EditorInteractions.setCropFromPanel(px, py, pw, ph);
+      });
+    });
   },
 
   // ── Rotate panel ──────────────────────────────────────────────────────────
   buildRotatePanel: function() {
     return '<div class="ie-panel-section"><div class="ie-panel-title">Rotate</div>' +
-      '<div class="ie-slider-row"><div class="ie-slider-label"><span>Angle</span><span class="ie-slider-val" id="ie-rot-val">0°</span></div>' +
-      '<input type="range" class="ie-slider" id="ie-rot-angle" min="-180" max="180" value="0"/></div>' +
+      '<div class="ie-rotate-info">' +
+      '<div class="ie-rotate-info-row"><span class="ie-ri-label">Angle</span><input class="dh-input ie-ri-input" id="ie-rot-deg-inp" type="number" min="-360" max="360" value="0"/>°</div>' +
+      '<div class="ie-rotate-info-row"><span class="ie-ri-label">Axis</span>' +
+      '<select class="dh-input ie-ri-select" id="ie-rot-axis" style="font-size:11px;padding:4px 6px;">' +
+      '<option value="z">Z (standard)</option>' +
+      '<option value="x">X (horizontal)</option>' +
+      '<option value="y">Y (vertical)</option>' +
+      '</select></div>' +
+      '</div>' +
+      '<div class="ie-panel-hint" style="margin-top:6px;">Drag the wheel on canvas to rotate, or enter angle above</div>' +
       '<div class="ie-panel-actions">' +
       '<button class="dh-btn primary ie-action-btn" id="ie-rot-apply">Apply Rotation</button>' +
       '<button class="dh-btn ie-action-btn" id="ie-rot-90cw">90° CW</button>' +
       '<button class="dh-btn ie-action-btn" id="ie-rot-90ccw">90° CCW</button>' +
+      '<button class="dh-btn ie-action-btn" id="ie-rot-180">180°</button>' +
       '</div></div>';
   },
 
   bindRotate: function(panel, onApply) {
-    var inp = panel.querySelector('#ie-rot-angle');
-    var val = panel.querySelector('#ie-rot-val');
-    if (inp) inp.addEventListener('input', function() { if (val) val.textContent = inp.value + '°'; });
-    var apply = panel.querySelector('#ie-rot-apply');
-    if (apply) apply.addEventListener('click', function() { onApply(+inp.value); if (inp) inp.value=0; if (val) val.textContent='0°'; });
-    var cw  = panel.querySelector('#ie-rot-90cw');
-    var ccw = panel.querySelector('#ie-rot-90ccw');
-    if (cw)  cw.addEventListener('click',  function() { onApply(90); });
-    if (ccw) ccw.addEventListener('click', function() { onApply(-90); });
+    var degInp = panel.querySelector('#ie-rot-deg-inp');
+    var apply  = panel.querySelector('#ie-rot-apply');
+    var cw     = panel.querySelector('#ie-rot-90cw');
+    var ccw    = panel.querySelector('#ie-rot-90ccw');
+    var r180   = panel.querySelector('#ie-rot-180');
+
+    // Sync from wheel
+    if (window._ieRotateSync) clearInterval(window._ieRotateSync);
+    window._ieRotateSync = setInterval(function() {
+      if (degInp && document.contains(degInp)) {
+        var a = EditorInteractions.getRotateAngle();
+        if (+degInp.value !== a) degInp.value = a;
+      } else { clearInterval(window._ieRotateSync); }
+    }, 100);
+
+    if (degInp) degInp.addEventListener('input', function() {
+      EditorInteractions.setRotateAngle(+degInp.value);
+    });
+    if (apply) apply.addEventListener('click', function() {
+      onApply(+degInp.value);
+      degInp.value = 0;
+      EditorInteractions.setRotateAngle(0);
+    });
+    if (cw)  cw.addEventListener('click',  function() { onApply(90);  degInp.value=0; EditorInteractions.setRotateAngle(0); });
+    if (ccw) ccw.addEventListener('click', function() { onApply(-90); degInp.value=0; EditorInteractions.setRotateAngle(0); });
+    if (r180) r180.addEventListener('click', function() { onApply(180); degInp.value=0; EditorInteractions.setRotateAngle(0); });
   },
 
   // ── Resize panel ──────────────────────────────────────────────────────────
