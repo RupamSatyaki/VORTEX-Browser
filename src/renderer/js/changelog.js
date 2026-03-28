@@ -10,13 +10,33 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v261',
-    version: 'v2.6.1',
+    id: 'v270',
+    version: 'v2.7.0',
     badge: 'latest',
-    name: 'Hash Generator — Advanced Features',
+    name: 'Image Converter Tool',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 1 },
+    categories: [
+      {
+        label: 'New Tools',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`, label:'Image Converter', desc:'Convert JPG \u2194 PNG \u2194 WebP \u2194 BMP \u2194 GIF. Resize with aspect ratio lock + presets (1080p, 720p, 512\u00d7512 etc). Rotate 90/180/270\u00b0, flip H/V, grayscale. Quality slider. Batch convert multiple images. Download sends to browser Downloads panel.', howto:'DevHub \u2192 Image Converter \u2022 Drop images \u2192 set format/quality/resize \u2192 Convert All \u2192 Download All' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v261',
+    version: 'v2.6.1',
+    badge: 'stable',
+    name: 'Hash Generator \u2014 Advanced Features',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 8 },
     categories: [
       {

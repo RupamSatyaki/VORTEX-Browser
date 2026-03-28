@@ -11,6 +11,7 @@ const DevHub = (() => {
     Base64Tool,
     UrlEncoderTool,
     HashTool,
+    ImageConverterTool,
   ];
 
   let _open       = false;

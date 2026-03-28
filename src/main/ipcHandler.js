@@ -106,6 +106,26 @@ function registerHandlers() {
 
   ipcMain.on('shell:openExternal', (_e, url) => { shell.openExternal(url); });
 
+  // ── DevHub: trigger a data-URI download through the normal download pipeline ──
+  ipcMain.on('devhub:download', (e, { dataUrl, filename }) => {
+    const win = _getWin(e);
+    if (!win) return;
+    // Write to temp file then trigger download via webContents
+    const { app } = require('electron');
+    const fs = require('fs');
+    const os = require('os');
+    const tmpPath = require('path').join(os.tmpdir(), filename);
+    try {
+      const base64 = dataUrl.split(',')[1];
+      const buf = Buffer.from(base64, 'base64');
+      fs.writeFileSync(tmpPath, buf);
+      win.webContents.downloadURL('file://' + tmpPath);
+    } catch(err) {
+      // fallback: just trigger via URL if file write fails
+      win.webContents.downloadURL(dataUrl);
+    }
+  });
+
   ipcMain.on('app:relaunch', () => {
     const { app } = require('electron');
     app.relaunch();
