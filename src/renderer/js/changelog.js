@@ -10,13 +10,33 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v250',
-    version: 'v2.5.0',
+    id: 'v260',
+    version: 'v2.6.0',
     badge: 'latest',
-    name: 'URL Encoder — Full Rewrite (Multi-component)',
+    name: 'Hash Generator Tool',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 1 },
+    categories: [
+      {
+        label: 'New Tools',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h7"/><path d="M15 15l2 2 4-4"/></svg>`, label:'Hash Generator', desc:'MD5, SHA-1, SHA-256, SHA-384, SHA-512 via Web Crypto API. HMAC-SHA256 with secret key. File hashing with progress bar. Hash comparison with diff position. Batch hashing. History. All in tools/hash/ modular directory.', howto:'DevHub \u2192 Hash Generator' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v250',
+    version: 'v2.5.0',
+    badge: 'stable',
+    name: 'URL Encoder \u2014 Full Rewrite',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 9, improve: 1 },
     categories: [
       {
