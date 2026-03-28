@@ -1,0 +1,25 @@
+{
+    "id": "v260",
+    "version": "v2.6.0",
+    "badge": "stable",
+    "name": "Hash Generator Tool",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 1
+    },
+    "categories": [
+        {
+            "label": "New Tools",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Hash Generator",
+                    "desc": "MD5, SHA-1, SHA-256, SHA-384, SHA-512 via Web Crypto API. HMAC-SHA256 with secret key. File hashing with progress bar. Hash comparison with diff position. Batch hashing. History. All in tools/hash/ modular directory.",
+                    "howto": "DevHub → Hash Generator"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,25 @@
+{
+    "id": "v242",
+    "version": "v2.4.2",
+    "badge": "stable",
+    "name": "Base64 UI Polish",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Improvements",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "Base64 UI Redesign",
+                    "desc": "Full CSS rewrite: better spacing, grouped action buttons, animated slide-in, glowing detect dot, swap button spring animation, drop zone hover glow.",
+                    "howto": "DevHub → Base64"
+                }
+            ]
+        }
+    ]
+}

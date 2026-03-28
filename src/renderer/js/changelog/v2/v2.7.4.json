@@ -1,0 +1,25 @@
+{
+    "id": "v274",
+    "version": "v2.7.4",
+    "badge": "latest",
+    "name": "Changelog Modular Directory Refactor",
+    "date": "March 2026",
+    "isCurrent": true,
+    "open": true,
+    "counts": {
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Improvements",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "Changelog Moved to Modular JSON Directory",
+                    "desc": "All version data split into individual JSON files under changelog/v1/ and changelog/v2/. index.js fetches all files at runtime via fetch(). Adding a new version = create one JSON file + add path to VERSION_FILES array. No more editing a 900-line JS file.",
+                    "howto": "Edit vortex/src/renderer/js/changelog/vX/vX.Y.Z.json"
+                }
+            ]
+        }
+    ]
+}

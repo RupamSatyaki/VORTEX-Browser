@@ -1,0 +1,85 @@
+{
+    "id": "v250",
+    "version": "v2.5.0",
+    "badge": "stable",
+    "name": "URL Encoder — Full Rewrite",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 9,
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Architecture",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "Modular Directory Structure",
+                    "desc": "URL Encoder split into tools/url-encoder/ with 6 files: utils.js, encode.js, parser.js, builder.js, tools.js, index.js.",
+                    "howto": "DevHub → URL Encoder"
+                }
+            ]
+        },
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Auto-detect",
+                    "desc": "Paste anything → auto-detects plain text, encoded string, URL, or query string.",
+                    "howto": "Encode/Decode tab → Auto button"
+                },
+                {
+                    "type": "new",
+                    "label": "Parse & Edit + URL Diff",
+                    "desc": "Parse any URL into all components. Edit query params inline. Diff two URLs side-by-side.",
+                    "howto": "Parse & Edit tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Query String Builder",
+                    "desc": "Visually add/remove/toggle key-value pairs. URL builds live. Import params from any URL.",
+                    "howto": "Builder tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Batch Encode/Decode/Canonicalize",
+                    "desc": "Process multiple URLs at once — one per line.",
+                    "howto": "Tools → Batch tab"
+                },
+                {
+                    "type": "new",
+                    "label": "URL Validator",
+                    "desc": "Validates protocol, hostname, TLD, path encoding.",
+                    "howto": "Tools → Validate tab"
+                },
+                {
+                    "type": "new",
+                    "label": "URL Canonicalize",
+                    "desc": "Normalizes URL: lowercase hostname, remove default ports, sort query params, remove trailing slash.",
+                    "howto": "Tools → Canonicalize tab"
+                },
+                {
+                    "type": "new",
+                    "label": "URL to Code",
+                    "desc": "Generate ready-to-use code in 8 formats: JS fetch, JS axios, Python, curl, wget, PHP, Go.",
+                    "howto": "Tools → URL to Code tab"
+                },
+                {
+                    "type": "new",
+                    "label": "QR Code Generator",
+                    "desc": "Generate a visual QR-style pattern from any URL. Download as PNG.",
+                    "howto": "Tools → QR Code tab"
+                },
+                {
+                    "type": "new",
+                    "label": "URL History",
+                    "desc": "Last 15 processed URLs saved per session.",
+                    "howto": "Tools → History tab"
+                }
+            ]
+        }
+    ]
+}

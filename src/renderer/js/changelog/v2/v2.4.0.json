@@ -1,0 +1,79 @@
+{
+    "id": "v240",
+    "version": "v2.4.0",
+    "badge": "stable",
+    "name": "Base64 — Full Rewrite (Multi-component)",
+    "date": "March 2026",
+    "isCurrent": false,
+    "open": false,
+    "counts": {
+        "new": 8,
+        "improve": 1
+    },
+    "categories": [
+        {
+            "label": "Architecture",
+            "features": [
+                {
+                    "type": "improve",
+                    "label": "Modular Directory Structure",
+                    "desc": "Base64 tool split into tools/base64/ directory with 4 components: utils.js, text.js, image.js, file.js, index.js.",
+                    "howto": "DevHub → Base64"
+                }
+            ]
+        },
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Auto-detect Mode",
+                    "desc": "Paste anything → auto-detects plain text, Base64, or URL-safe Base64.",
+                    "howto": "Text tab → Auto button"
+                },
+                {
+                    "type": "new",
+                    "label": "URL-safe Base64",
+                    "desc": "Encode/decode URL-safe Base64 (+ → -, / → _, no padding). Essential for JWT tokens.",
+                    "howto": "Text tab → URL-safe buttons"
+                },
+                {
+                    "type": "new",
+                    "label": "Chunked Output (MIME)",
+                    "desc": "Wrap Base64 output at 76 characters per line — MIME standard.",
+                    "howto": "Text tab → Chunk button"
+                },
+                {
+                    "type": "new",
+                    "label": "Size Info + Validation",
+                    "desc": "Shows original vs encoded size with overhead %. Live validation badge.",
+                    "howto": "Text tab — appears automatically"
+                },
+                {
+                    "type": "new",
+                    "label": "Image Embed Code Generator",
+                    "desc": "Load any image → generates HTML img tag, CSS background, JSON embed, Markdown, or raw Base64.",
+                    "howto": "Image tab → embed code tabs"
+                },
+                {
+                    "type": "new",
+                    "label": "Any File Encode/Decode",
+                    "desc": "Encode any file (PDF, ZIP, binary) to Base64. Decode Base64 back to file.",
+                    "howto": "File tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Download Outputs",
+                    "desc": "Download encoded Base64 as .txt file, download decoded file directly.",
+                    "howto": "Download buttons in each tab"
+                },
+                {
+                    "type": "new",
+                    "label": "Live Encode on Type",
+                    "desc": "Toggle live encoding as you type. Swap button flips input/output.",
+                    "howto": "Text tab → Live encode checkbox"
+                }
+            ]
+        }
+    ]
+}
