@@ -10,13 +10,35 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v272',
-    version: 'v2.7.2',
+    id: 'v273',
+    version: 'v2.7.3',
     badge: 'latest',
-    name: 'Image Converter — Custom Name + More Formats',
+    name: 'Image Converter — Clipboard, Drag Reorder, EXIF',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 3 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`, label:'Copy to Clipboard', desc:'Copy any converted image directly to clipboard via Clipboard API. Auto-converts to PNG for clipboard compatibility. Copy button per image + Copy All button in header.', howto:'Image Converter \u2192 Convert \u2192 Copy button on each image' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`, label:'Drag to Reorder', desc:'Drag the handle on the left of each image to reorder them. Conversion and download order follows the new arrangement.', howto:'Image Converter \u2192 drag the \u2261 handle on any image row' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`, label:'Image Metadata Viewer (EXIF)', desc:'Click Info on any image to see full metadata: filename, type, size, dimensions, megapixels, aspect ratio, last modified. For JPEG/TIFF: camera make/model, date taken, ISO, aperture, shutter speed, focal length, flash, GPS coordinates.', howto:'Image Converter \u2192 Info button on any image' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v272',
+    version: 'v2.7.2',
+    badge: 'stable',
+    name: 'Image Converter \u2014 Custom Name + More Formats',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 2, improve: 1 },
     categories: [
       {
