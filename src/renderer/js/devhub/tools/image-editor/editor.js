@@ -199,8 +199,8 @@ ImageEditor._setTool = function(tool) {
   var footer = document.getElementById('ie-footer-tool');
   if (footer) footer.textContent = tool.charAt(0).toUpperCase() + tool.slice(1);
   this._renderPanel(tool);
-  // Reset crop overlay
-  if (tool !== 'crop') this._clearCropOverlay();
+  // Activate interaction mode
+  EditorInteractions.setMode(tool);
 };
 
 ImageEditor._renderPanel = function(tool) {
@@ -237,12 +237,51 @@ ImageEditor._renderPanel = function(tool) {
     EditorAdjustments.bindDraw(panel, this._brushOpts, function(opts) { self._brushOpts = opts; });
   } else if (tool === 'text') {
     panel.innerHTML = EditorAdjustments.buildTextPanel(this._textOpts);
-    EditorAdjustments.bindText(panel, this._textOpts, function(opts) { self._textOpts = opts; });
+    var self2 = this;
+    EditorAdjustments.bindText(panel, this._textOpts, function(opts) {
+      self2._textOpts = opts;
+      // Live preview: update last text item
+      var items = EditorInteractions._textItems;
+      if (items.length) {
+        items[items.length-1].text = opts.text;
+        items[items.length-1].opts = Object.assign({}, opts);
+        EditorInteractions._drawTextOverlay();
+      }
+    });
+    // Place text button
+    var placeBtn = document.createElement('button');
+    placeBtn.className = 'dh-btn primary ie-action-btn';
+    placeBtn.textContent = 'Place Text';
+    placeBtn.style.marginTop = '6px';
+    placeBtn.addEventListener('click', function() {
+      var sz = EditorCanvas.getSize();
+      EditorInteractions.addTextItem({ text: self2._textOpts.text, x: sz.w/2, y: sz.h/2, opts: Object.assign({}, self2._textOpts) });
+    });
+    var commitBtn = document.createElement('button');
+    commitBtn.className = 'dh-btn ie-action-btn';
+    commitBtn.textContent = 'Commit to Image';
+    commitBtn.style.marginTop = '4px';
+    commitBtn.addEventListener('click', function() {
+      EditorInteractions.commitTextToCanvas();
+      EditorCanvas._saveHistory();
+    });
+    panel.querySelector('.ie-panel-section').appendChild(placeBtn);
+    panel.querySelector('.ie-panel-section').appendChild(commitBtn);
   } else if (tool === 'overlay') {
     panel.innerHTML = EditorOverlay.buildPanel();
     EditorOverlay.bind(panel, function(img, x, y, w, h, opacity) {
-      EditorCanvas.drawOverlay(img, x, y, w, h, opacity);
+      EditorInteractions.addOverlayItem({ img: img, x: x, y: y, w: w, h: h, opacity: opacity });
     });
+    // Commit button
+    var commitOvBtn = document.createElement('button');
+    commitOvBtn.className = 'dh-btn primary ie-action-btn';
+    commitOvBtn.textContent = 'Commit Overlay';
+    commitOvBtn.style.marginTop = '6px';
+    commitOvBtn.addEventListener('click', function() {
+      EditorInteractions.commitOverlayToCanvas();
+      EditorCanvas._saveHistory();
+    });
+    panel.querySelector('.ie-panel-section').appendChild(commitOvBtn);
   } else {
     panel.innerHTML = '<div class="ie-panel-empty"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#1e3838" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>Select a tool to see options</div></div>';
   }
@@ -259,6 +298,10 @@ ImageEditor._loadFile = function(file) {
     img.onload = function() {
       self._showDropZone(false);
       EditorCanvas.loadImage(img);
+      EditorInteractions.init(self._container,
+        function(r) { /* crop change */ },
+        function(deg) { /* rotate change */ }
+      );
       var fn = self._container.querySelector('#ie-filename');
       if (fn) fn.textContent = file.name;
       self._setTool('select');
@@ -269,11 +312,11 @@ ImageEditor._loadFile = function(file) {
 };
 
 ImageEditor._confirmCrop = function() {
-  if (!this._cropRect) return;
-  var r = this._cropRect;
+  var r = EditorInteractions.getCropRect() || this._cropRect;
+  if (!r || r.w < 2 || r.h < 2) return;
   EditorCanvas.crop(r.x, r.y, r.w, r.h);
-  this._cropRect = null;
-  this._clearCropOverlay();
+  EditorInteractions.setMode('select');
+  this._setTool('select');
 };
 
 ImageEditor._cancelCrop = function() {
