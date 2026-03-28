@@ -305,15 +305,17 @@ var ImageConverter = {
       var baseName = imgData.file.name.replace(/\.[^.]+$/, '');
       var filename = baseName + '_converted.' + _activeExt;
 
-      // Try to send to downloads panel via IPC
-      if (window.vortexAPI && window.vortexAPI.send) {
+      if (window.vortexAPI && typeof window.vortexAPI.send === 'function') {
+        // Send via IPC → triggers will-download → appears in Downloads panel
         window.vortexAPI.send('devhub:download', { dataUrl: imgData.convertedDataUrl, filename: filename });
       } else {
-        // Fallback: direct browser download
+        // Fallback: direct anchor download
         var a = document.createElement('a');
         a.href = imgData.convertedDataUrl;
         a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
       }
     }
 
@@ -344,24 +346,68 @@ var ImageConverter = {
         var origSize = fmtBytes(img.file.size);
 
         return '<div class="ic-item" data-id="' + img.id + '">' +
-          '<div class="ic-item-preview-wrap">' +
-          '<img class="ic-item-preview" src="' + img.origDataUrl + '" alt=""/>' +
-          (img.convertedDataUrl ? '<div class="ic-item-arrow">\u2192</div><img class="ic-item-preview ic-item-converted" src="' + img.convertedDataUrl + '" alt=""/>' : '') +
+
+          // ── Preview section ──
+          '<div class="ic-item-previews">' +
+          '<div class="ic-preview-col">' +
+          '<div class="ic-preview-label">Original</div>' +
+          '<div class="ic-preview-box ic-preview-orig" data-src="' + img.origDataUrl + '" title="Click to enlarge">' +
+          '<img src="' + img.origDataUrl + '" class="ic-preview-img" alt="original"/>' +
+          '<div class="ic-preview-dim">' + img.origW + '\u00d7' + img.origH + '</div>' +
+          '<div class="ic-preview-size">' + origSize + '</div>' +
           '</div>' +
-          '<div class="ic-item-info">' +
+          '</div>' +
+
+          (img.convertedDataUrl ?
+            '<div class="ic-preview-arrow">' +
+            '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#00c8b4" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>' +
+            '<div class="ic-preview-arrow-label">' + _activeExt.toUpperCase() + '</div>' +
+            '</div>' +
+            '<div class="ic-preview-col">' +
+            '<div class="ic-preview-label">Converted</div>' +
+            '<div class="ic-preview-box ic-preview-conv" data-src="' + img.convertedDataUrl + '" title="Click to enlarge">' +
+            '<img src="' + img.convertedDataUrl + '" class="ic-preview-img" alt="converted"/>' +
+            '<div class="ic-preview-dim">' + (img.convertedW || img.origW) + '\u00d7' + (img.convertedH || img.origH) + '</div>' +
+            '<div class="ic-preview-size">' + convSize + '</div>' +
+            '</div>' +
+            '</div>'
+          : '<div class="ic-preview-placeholder"><div class="ic-preview-placeholder-inner">Convert to see preview</div></div>') +
+
+          '</div>' +
+
+          // ── Info + actions ──
+          '<div class="ic-item-body">' +
           '<div class="ic-item-name">' + img.file.name.replace(/</g,'&lt;') + '</div>' +
-          '<div class="ic-item-meta">' +
-          img.origW + '\u00d7' + img.origH + ' \u00b7 ' + origSize +
-          (img.convertedW ? ' \u2192 ' + img.convertedW + '\u00d7' + img.convertedH + ' \u00b7 ' + convSize : '') +
-          '</div>' +
+          '<div class="ic-item-meta">' + img.file.type + '</div>' +
           '<div class="ic-item-status ' + statusClass + '">' + statusText + '</div>' +
-          '</div>' +
           '<div class="ic-item-actions">' +
-          (img.status === 'done' ? '<button class="dh-btn primary ic-action-btn ic-dl-btn" data-id="' + img.id + '">Download</button>' : '') +
+          (img.status === 'done' ?
+            '<button class="dh-btn primary ic-action-btn ic-dl-btn" data-id="' + img.id + '">' +
+            '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+            ' Download</button>' : '') +
           '<button class="dh-btn danger ic-action-btn ic-remove-btn" data-id="' + img.id + '">\u2715</button>' +
           '</div>' +
+          '</div>' +
+
           '</div>';
       }).join('');
+
+      // Click to enlarge preview
+      items.querySelectorAll('.ic-preview-box').forEach(function(box) {
+        box.addEventListener('click', function() {
+          var src = box.dataset.src;
+          if (!src) return;
+          var overlay = document.createElement('div');
+          overlay.className = 'ic-lightbox';
+          overlay.innerHTML = '<div class="ic-lightbox-inner"><img src="' + src + '" class="ic-lightbox-img"/><button class="ic-lightbox-close">\u2715</button></div>';
+          document.body.appendChild(overlay);
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay || e.target.classList.contains('ic-lightbox-close')) {
+              document.body.removeChild(overlay);
+            }
+          });
+        });
+      });
 
       items.querySelectorAll('.ic-dl-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
