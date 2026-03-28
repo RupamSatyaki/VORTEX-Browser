@@ -10,6 +10,7 @@ const DevHub = (() => {
     RegexTesterTool,
     Base64Tool,
     UrlEncoderTool,
+    HashTool,
   ];
 
   let _open       = false;
