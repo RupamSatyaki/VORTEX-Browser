@@ -10,13 +10,40 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v260',
-    version: 'v2.6.0',
+    id: 'v261',
+    version: 'v2.6.1',
     badge: 'latest',
-    name: 'Hash Generator Tool',
+    name: 'Hash Generator — Advanced Features',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { new: 8 },
+    categories: [
+      {
+        label: 'New Features',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+        features: [
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`, label:'Password Strength Checker', desc:'Entropy bits, charset size, crack time estimate (GPU-speed), 7 requirement checks, common password detection. Live as you type.', howto:'Hash \u2192 Advanced \u2192 Password tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`, label:'Hash Format Detector', desc:'Paste any hash \u2192 auto-detects MD5, SHA-1, SHA-256, SHA-384, SHA-512, bcrypt, CRC32, NTLM by length and pattern.', howto:'Hash \u2192 Advanced \u2192 Detector tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`, label:'Salted Hash Generator', desc:'Text + salt (random or manual) \u2192 salted hash. 3 output formats: $salt$hash, salt:hash, JSON. Supports SHA-256, SHA-512, MD5.', howto:'Hash \u2192 Advanced \u2192 Salted Hash tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`, label:'PBKDF2 Key Derivation', desc:'Password + salt + iterations + key length \u2192 derived key via Web Crypto PBKDF2. Output in hex and Base64. Configurable hash algorithm.', howto:'Hash \u2192 Advanced \u2192 PBKDF2 tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>`, label:'Checksum Verifier', desc:'Drop any file \u2192 computes MD5/SHA-1/SHA-256/SHA-512. Paste expected checksum \u2192 instantly shows which algorithm matches. Green highlight on match.', howto:'Hash \u2192 Advanced \u2192 Checksum tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`, label:'Multiple Output Formats', desc:'Hash in 7 formats: hex lowercase, hex uppercase, 0x prefix, colon-separated, Base64, Base64URL, binary. Copy any format individually.', howto:'Hash \u2192 Formats & Export \u2192 Formats tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`, label:'Hash Visualization', desc:'Identicon-style symmetric color grid generated from any hash. Configurable grid size (8x8, 10x10, 12x12). Download as PNG.', howto:'Hash \u2192 Formats & Export \u2192 Visualize tab' },
+          { type:'new', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>`, label:'Batch Export (JSON/CSV)', desc:'Hash multiple strings with multiple algorithms at once. Export as JSON or CSV file, or copy JSON. Preview first 3 results inline.', howto:'Hash \u2192 Formats & Export \u2192 Export tab' },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v260',
+    version: 'v2.6.0',
+    badge: 'stable',
+    name: 'Hash Generator Tool',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 1 },
     categories: [
       {
