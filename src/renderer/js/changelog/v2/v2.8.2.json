@@ -1,0 +1,55 @@
+{
+    "id": "v282",
+    "version": "v2.8.2",
+    "badge": "latest",
+    "name": "Image Editor — Filters, Layers, Shortcuts, Aspect Ratio",
+    "date": "March 2026",
+    "isCurrent": true,
+    "open": true,
+    "counts": {
+        "new": 6
+    },
+    "categories": [
+        {
+            "label": "New Features",
+            "features": [
+                {
+                    "type": "new",
+                    "label": "Advanced Filters (Sharpen, Blur, Vignette, Noise, Grain)",
+                    "desc": "Sharpen via convolution matrix, Gaussian blur via CSS filter, radial vignette gradient, random noise, film grain. All with sliders + Apply button.",
+                    "howto": "Image Editor \u2192 Filters tool"
+                },
+                {
+                    "type": "new",
+                    "label": "Border / Frame Tool",
+                    "desc": "Add solid, double, shadow, or polaroid-style border. Configurable thickness and color.",
+                    "howto": "Image Editor \u2192 Border tool in toolbar"
+                },
+                {
+                    "type": "new",
+                    "label": "Layers Panel",
+                    "desc": "Text and image overlay items tracked as layers. Toggle visibility, reorder (up/down), set per-layer opacity, delete. Accessible via Layers tab in right panel.",
+                    "howto": "Image Editor \u2192 Layers tab (right panel)"
+                },
+                {
+                    "type": "new",
+                    "label": "Aspect Ratio Crop Presets",
+                    "desc": "Free, 1:1, 16:9, 4:3, 3:2, 9:16, 2:3, 3:4 presets. Locks crop handles to selected ratio.",
+                    "howto": "Image Editor \u2192 Crop tool \u2192 Aspect Ratio Presets"
+                },
+                {
+                    "type": "new",
+                    "label": "Before / After Toggle",
+                    "desc": "Press \\ or click B/A button to toggle between original and edited image. Badge shows current state.",
+                    "howto": "Press \\ or click B/A in header"
+                },
+                {
+                    "type": "new",
+                    "label": "Keyboard Shortcut Cheatsheet",
+                    "desc": "Press ? or click ? button to see all 24 keyboard shortcuts in a modal overlay.",
+                    "howto": "Press ? or click ? in header"
+                }
+            ]
+        }
+    ]
+}

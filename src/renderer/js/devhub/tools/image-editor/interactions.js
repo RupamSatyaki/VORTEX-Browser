@@ -6,6 +6,7 @@ var EditorInteractions = {
   _cropRect: null,   // { x,y,w,h } in canvas coords
   _cropHandle: null, // which handle is being dragged
   _cropDragStart: null,
+  _lockedAspect: null,
   _rotateAngle: 0,
   _rotateStart: null,
   _textItems: [],    // [{ text, x, y, opts, dragging }]
@@ -151,10 +152,15 @@ var EditorInteractions = {
       if (handle.includes('r')) { r.w += dx; }
       if (handle.includes('t')) { r.y += dy; r.h -= dy; }
       if (handle.includes('b')) { r.h += dy; }
-      if (handle === 'tm' || handle === 'bm') { /* only y */ }
-      if (handle === 'ml' || handle === 'mr') { /* only x */ }
     }
-    // Clamp
+    // Apply aspect ratio lock
+    if (this._lockedAspect && handle !== 'move') {
+      if (handle.includes('r') || handle.includes('l') || handle === 'tm' || handle === 'bm') {
+        r.h = Math.round(r.w / this._lockedAspect);
+      } else {
+        r.w = Math.round(r.h * this._lockedAspect);
+      }
+    }
     r.w = Math.max(minSize, r.w);
     r.h = Math.max(minSize, r.h);
     r.x = Math.max(0, Math.min(this._canvas.width  - r.w, r.x));
