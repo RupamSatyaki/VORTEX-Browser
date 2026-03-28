@@ -10,13 +10,34 @@
 
 const CHANGELOG_VERSIONS = [
   {
-    id: 'v270',
-    version: 'v2.7.0',
+    id: 'v271',
+    version: 'v2.7.1',
     badge: 'latest',
-    name: 'Image Converter Tool',
+    name: 'Image Converter — Preview & Download Fix',
     date: 'March 2026',
     isCurrent: true,
     open: true,
+    counts: { fix: 2, improve: 1 },
+    categories: [
+      {
+        label: 'Bug Fixes',
+        icon: `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>`,
+        features: [
+          { type:'fix', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg>`, label:'Download Button Fixed', desc:'Fixed Windows file:// URL format (triple-slash + forward slashes). IPC handler now uses safe filename sanitization. Fallback anchor download added if IPC unavailable.', },
+          { type:'fix', icon:`<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>`, label:'Image Preview Redesigned', desc:'Before/after preview side-by-side with dimensions and file size overlay. Click any preview to open full-size lightbox. Converted image shows target format badge.', },
+        ],
+      },
+    ],
+  },
+
+  {
+    id: 'v270',
+    version: 'v2.7.0',
+    badge: 'stable',
+    name: 'Image Converter Tool',
+    date: 'March 2026',
+    isCurrent: false,
+    open: false,
     counts: { new: 1 },
     categories: [
       {

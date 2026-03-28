@@ -110,19 +110,21 @@ function registerHandlers() {
   ipcMain.on('devhub:download', (e, { dataUrl, filename }) => {
     const win = _getWin(e);
     if (!win) return;
-    // Write to temp file then trigger download via webContents
-    const { app } = require('electron');
-    const fs = require('fs');
-    const os = require('os');
-    const tmpPath = require('path').join(os.tmpdir(), filename);
+    const fs   = require('fs');
+    const os   = require('os');
+    const path = require('path');
     try {
-      const base64 = dataUrl.split(',')[1];
-      const buf = Buffer.from(base64, 'base64');
+      const base64  = dataUrl.split(',')[1];
+      const buf     = Buffer.from(base64, 'base64');
+      // Use a safe temp filename (no spaces, no special chars)
+      const safeName = filename.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const tmpPath  = path.join(os.tmpdir(), safeName);
       fs.writeFileSync(tmpPath, buf);
-      win.webContents.downloadURL('file://' + tmpPath);
+      // Windows needs forward slashes and triple-slash for file:// URLs
+      const fileUrl = 'file:///' + tmpPath.replace(/\\/g, '/');
+      win.webContents.downloadURL(fileUrl);
     } catch(err) {
-      // fallback: just trigger via URL if file write fails
-      win.webContents.downloadURL(dataUrl);
+      console.error('devhub:download error:', err.message);
     }
   });
 

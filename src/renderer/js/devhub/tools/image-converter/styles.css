@@ -50,18 +50,37 @@
 .ic-action-btn { font-size: 11px !important; padding: 5px 11px !important; }
 
 /* Image item */
-.ic-item { display: flex; align-items: center; gap: 10px; background: #060e0e; border: 1px solid #1a3030; border-radius: 12px; padding: 10px 12px; transition: border-color 0.15s; animation: dh-tool-in 0.2s ease both; }
+.ic-item { display: flex; flex-direction: column; gap: 10px; background: #060e0e; border: 1px solid #1a3030; border-radius: 14px; padding: 12px; transition: border-color 0.15s; animation: dh-tool-in 0.2s ease both; }
 .ic-item:hover { border-color: rgba(0,200,180,0.2); }
-.ic-item-preview-wrap { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.ic-item-preview { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid #1a3030; }
-.ic-item-arrow { color: #2e6060; font-size: 16px; }
-.ic-item-converted { border-color: rgba(0,200,180,0.3); }
-.ic-item-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.ic-item-name { font-size: 12px; color: #c8e8e5; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ic-item-meta { font-size: 10.5px; color: #4a8080; font-family: monospace; }
-.ic-item-status { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; display: inline-block; }
+
+/* Preview section */
+.ic-item-previews { display: flex; align-items: center; gap: 10px; }
+.ic-preview-col { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.ic-preview-label { font-size: 9.5px; color: #4a8080; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
+.ic-preview-box { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid #1a3030; cursor: zoom-in; transition: border-color 0.15s, transform 0.15s; background: #0a1616; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; }
+.ic-preview-box:hover { border-color: rgba(0,200,180,0.35); transform: scale(1.02); }
+.ic-preview-img { max-width: 100%; max-height: 120px; object-fit: contain; display: block; }
+.ic-preview-dim { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); font-size: 9.5px; color: #c8e8e5; text-align: center; padding: 2px 4px; font-family: monospace; }
+.ic-preview-size { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); font-size: 9px; color: #4a8080; padding: 1px 5px; border-radius: 4px; }
+.ic-preview-arrow { display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0; }
+.ic-preview-arrow-label { font-size: 9px; color: #00c8b4; font-weight: 700; font-family: monospace; }
+.ic-preview-placeholder { flex: 1; display: flex; align-items: center; justify-content: center; }
+.ic-preview-placeholder-inner { font-size: 10.5px; color: #2e6060; text-align: center; padding: 20px; border: 1px dashed #1a3030; border-radius: 10px; }
+
+/* Item body */
+.ic-item-body { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ic-item-name { font-size: 12px; color: #c8e8e5; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.ic-item-meta { font-size: 10.5px; color: #4a8080; font-family: monospace; flex-shrink: 0; }
+.ic-item-status { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; display: inline-block; flex-shrink: 0; }
 .ic-status-ready      { background: rgba(74,128,128,0.1);  color: #4a8080; }
 .ic-status-converting { background: rgba(251,191,36,0.1);  color: #fbbf24; animation: ic-pulse 1s ease-in-out infinite; }
 .ic-status-done       { background: rgba(34,197,94,0.1);   color: #22c55e; }
 @keyframes ic-pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 .ic-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
+
+/* Lightbox */
+.ic-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; animation: dh-tool-in 0.15s ease both; cursor: zoom-out; }
+.ic-lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; }
+.ic-lightbox-img { max-width: 90vw; max-height: 85vh; border-radius: 12px; border: 1px solid rgba(0,200,180,0.2); display: block; }
+.ic-lightbox-close { position: absolute; top: -12px; right: -12px; width: 28px; height: 28px; border-radius: 50%; background: #ef4444; color: #fff; border: 2px solid #0d1f1f; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+.ic-lightbox-close:hover { transform: scale(1.15); }
