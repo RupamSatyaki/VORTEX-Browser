@@ -128,11 +128,33 @@ var ImageConverter = {
       '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
       ' Download All',
       '</button>',
+      '<button class="dh-btn ic-action-btn" id="ic-copy-all-btn" style="display:none" title="Copy all converted images to clipboard">',
+      '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+      ' Copy All',
+      '</button>',
       '<button class="dh-btn ic-action-btn" id="ic-add-more">+ Add More</button>',
+      '<span class="ic-reorder-hint" id="ic-reorder-hint" style="display:none">',
+      '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>',
+      ' Drag to reorder',
+      '</span>',
       '<button class="dh-btn danger ic-action-btn" id="ic-clear-all">Clear</button>',
       '</div>',
       '</div>',
       '<div id="ic-items"></div>',
+      '</div>',
+
+      // EXIF modal
+      '<div class="ic-exif-modal" id="ic-exif-modal" style="display:none">',
+      '<div class="ic-exif-inner">',
+      '<div class="ic-exif-header">',
+      '<div class="ic-exif-title">',
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00c8b4" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      ' Image Metadata',
+      '</div>',
+      '<button class="ic-exif-close" id="ic-exif-close">\u2715</button>',
+      '</div>',
+      '<div class="ic-exif-body" id="ic-exif-body"></div>',
+      '</div>',
       '</div>',
 
       '</div>'
@@ -356,6 +378,8 @@ var ImageConverter = {
       $('ic-convert-all').disabled = false;
       $('ic-convert-all').textContent = 'Convert All';
       $('ic-download-all').style.display = '';
+      $('ic-copy-all-btn').style.display = '';
+      $('ic-reorder-hint').style.display = '';
     }
 
     $('ic-convert-all').addEventListener('click', convertAll);
@@ -415,7 +439,12 @@ var ImageConverter = {
         var convSize = img.convertedDataUrl ? fmtBytes(Math.round(img.convertedDataUrl.length * 0.75)) : '';
         var origSize = fmtBytes(img.file.size);
 
-        return '<div class="ic-item" data-id="' + img.id + '">' +
+        return '<div class="ic-item" data-id="' + img.id + '" draggable="true">' +
+
+          // Drag handle
+          '<div class="ic-drag-handle" title="Drag to reorder">' +
+          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2e6060" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>' +
+          '</div>' +
 
           // ── Preview section ──
           '<div class="ic-item-previews">' +
@@ -454,7 +483,13 @@ var ImageConverter = {
           (img.status === 'done' ?
             '<button class="dh-btn primary ic-action-btn ic-dl-btn" data-id="' + img.id + '">' +
             '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-            ' Download</button>' : '') +
+            ' Download</button>' +
+            '<button class="dh-btn ic-action-btn ic-clip-btn" data-id="' + img.id + '" title="Copy to clipboard">' +
+            '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+            ' Copy</button>' : '') +
+          '<button class="dh-btn ic-action-btn ic-exif-btn" data-id="' + img.id + '" title="View metadata">' +
+          '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          ' Info</button>' +
           '<button class="dh-btn danger ic-action-btn ic-remove-btn" data-id="' + img.id + '">\u2715</button>' +
           '</div>' +
           '</div>' +
@@ -485,6 +520,78 @@ var ImageConverter = {
           if (img) downloadImage(img);
         });
       });
+
+      // ── Clipboard copy ──────────────────────────────────────────────────────
+      items.querySelectorAll('.ic-clip-btn').forEach(function(btn) {
+        btn.addEventListener('click', async function() {
+          var img = _images.find(function(i) { return i.id === +btn.dataset.id; });
+          if (!img || !img.convertedDataUrl) return;
+          try {
+            var res = await fetch(img.convertedDataUrl);
+            var blob = await res.blob();
+            // Clipboard API requires image/png
+            var pngBlob = blob;
+            if (blob.type !== 'image/png') {
+              var cv = document.createElement('canvas');
+              var imgEl = new Image();
+              await new Promise(function(resolve) {
+                imgEl.onload = resolve;
+                imgEl.src = img.convertedDataUrl;
+              });
+              cv.width = imgEl.naturalWidth; cv.height = imgEl.naturalHeight;
+              cv.getContext('2d').drawImage(imgEl, 0, 0);
+              pngBlob = await new Promise(function(resolve) { cv.toBlob(resolve, 'image/png'); });
+            }
+            await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+            btn.textContent = '\u2713 Copied!';
+            setTimeout(function() { btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 1500);
+          } catch(e) {
+            btn.textContent = '\u2717 Failed';
+            setTimeout(function() { btn.innerHTML = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy'; }, 1500);
+          }
+        });
+      });
+
+      // ── EXIF / Metadata ─────────────────────────────────────────────────────
+      items.querySelectorAll('.ic-exif-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var img = _images.find(function(i) { return i.id === +btn.dataset.id; });
+          if (img) showExif(img);
+        });
+      });
+
+      // ── Drag to reorder ─────────────────────────────────────────────────────
+      var _dragId = null;
+      items.querySelectorAll('.ic-item').forEach(function(item) {
+        item.addEventListener('dragstart', function(e) {
+          _dragId = +item.dataset.id;
+          item.classList.add('ic-dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        item.addEventListener('dragend', function() {
+          item.classList.remove('ic-dragging');
+          items.querySelectorAll('.ic-item').forEach(function(i) { i.classList.remove('ic-drag-over'); });
+        });
+        item.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          items.querySelectorAll('.ic-item').forEach(function(i) { i.classList.remove('ic-drag-over'); });
+          item.classList.add('ic-drag-over');
+        });
+        item.addEventListener('drop', function(e) {
+          e.preventDefault();
+          item.classList.remove('ic-drag-over');
+          var targetId = +item.dataset.id;
+          if (_dragId === null || _dragId === targetId) return;
+          var fromIdx = _images.findIndex(function(i) { return i.id === _dragId; });
+          var toIdx   = _images.findIndex(function(i) { return i.id === targetId; });
+          if (fromIdx === -1 || toIdx === -1) return;
+          var moved = _images.splice(fromIdx, 1)[0];
+          _images.splice(toIdx, 0, moved);
+          _dragId = null;
+          renderList();
+        });
+      });
       items.querySelectorAll('.ic-remove-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
           _images = _images.filter(function(i) { return i.id !== +btn.dataset.id; });
@@ -504,6 +611,171 @@ var ImageConverter = {
       $('ic-settings').style.display = 'none';
       $('ic-drop').style.display = '';
       $('ic-download-all').style.display = 'none';
+      $('ic-copy-all-btn').style.display = 'none';
+      $('ic-reorder-hint').style.display = 'none';
     });
+
+    // ── Copy All to clipboard ──────────────────────────────────────────────────
+    $('ic-copy-all-btn').addEventListener('click', async function() {
+      var done = _images.filter(function(i) { return i.status === 'done' && i.convertedDataUrl; });
+      if (!done.length) return;
+      // Copy first converted image (clipboard only supports one at a time)
+      try {
+        var img = done[0];
+        var res = await fetch(img.convertedDataUrl);
+        var blob = await res.blob();
+        if (blob.type !== 'image/png') {
+          var cv = document.createElement('canvas');
+          var imgEl = new Image();
+          await new Promise(function(resolve) { imgEl.onload = resolve; imgEl.src = img.convertedDataUrl; });
+          cv.width = imgEl.naturalWidth; cv.height = imgEl.naturalHeight;
+          cv.getContext('2d').drawImage(imgEl, 0, 0);
+          blob = await new Promise(function(resolve) { cv.toBlob(resolve, 'image/png'); });
+        }
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        var btn = $('ic-copy-all-btn');
+        btn.textContent = '\u2713 Copied!';
+        setTimeout(function() { btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy All'; }, 1500);
+      } catch(e) { /* ignore */ }
+    });
+
+    // ── EXIF / Metadata reader ─────────────────────────────────────────────────
+    function showExif(imgData) {
+      var body = $('ic-exif-body');
+      var modal = $('ic-exif-modal');
+
+      // Basic info always available
+      var rows = [
+        { label: 'Filename',   value: imgData.file.name },
+        { label: 'Type',       value: imgData.file.type || 'unknown' },
+        { label: 'Size',       value: fmtBytes(imgData.file.size) },
+        { label: 'Dimensions', value: imgData.origW + ' \u00d7 ' + imgData.origH + ' px' },
+        { label: 'Megapixels', value: ((imgData.origW * imgData.origH) / 1000000).toFixed(2) + ' MP' },
+        { label: 'Aspect Ratio', value: _gcd(imgData.origW, imgData.origH) },
+        { label: 'Modified',   value: new Date(imgData.file.lastModified).toLocaleString() },
+      ];
+
+      // Try to read EXIF from JPEG/TIFF
+      _readExif(imgData.file, function(exif) {
+        if (exif) {
+          var exifFields = [
+            { label: 'Camera Make',    key: 'Make' },
+            { label: 'Camera Model',   key: 'Model' },
+            { label: 'Date Taken',     key: 'DateTimeOriginal' },
+            { label: 'ISO',            key: 'ISOSpeedRatings' },
+            { label: 'Aperture',       key: 'FNumber' },
+            { label: 'Shutter Speed',  key: 'ExposureTime' },
+            { label: 'Focal Length',   key: 'FocalLength' },
+            { label: 'Flash',          key: 'Flash' },
+            { label: 'White Balance',  key: 'WhiteBalance' },
+            { label: 'Orientation',    key: 'Orientation' },
+            { label: 'Software',       key: 'Software' },
+            { label: 'GPS Latitude',   key: 'GPSLatitude' },
+            { label: 'GPS Longitude',  key: 'GPSLongitude' },
+          ];
+          exifFields.forEach(function(f) {
+            if (exif[f.key] !== undefined && exif[f.key] !== null) {
+              rows.push({ label: f.label, value: String(exif[f.key]), exif: true });
+            }
+          });
+        }
+
+        body.innerHTML = rows.map(function(r) {
+          return '<div class="ic-exif-row' + (r.exif ? ' ic-exif-camera' : '') + '">' +
+            '<span class="ic-exif-key">' + r.label + '</span>' +
+            '<span class="ic-exif-val">' + String(r.value).replace(/</g,'&lt;') + '</span>' +
+            '</div>';
+        }).join('');
+
+        modal.style.display = 'flex';
+      });
+    }
+
+    function _gcd(a, b) {
+      while (b) { var t = b; b = a % b; a = t; }
+      return a ? (16/a|0) + ':' + (16/a|0) : a + ':' + b; // simplified
+    }
+
+    // Minimal EXIF reader — reads JPEG APP1 segment
+    function _readExif(file, cb) {
+      if (!file.type.includes('jpeg') && !file.type.includes('jpg') && !file.type.includes('tiff')) {
+        return cb(null);
+      }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          var buf = e.target.result;
+          var view = new DataView(buf);
+          if (view.getUint16(0) !== 0xFFD8) return cb(null); // not JPEG
+          var offset = 2;
+          while (offset < buf.byteLength) {
+            var marker = view.getUint16(offset);
+            if (marker === 0xFFE1) { // APP1
+              var exif = _parseExifSegment(view, offset + 4);
+              return cb(exif);
+            }
+            if ((marker & 0xFF00) !== 0xFF00) break;
+            offset += 2 + view.getUint16(offset + 2);
+          }
+          cb(null);
+        } catch(e) { cb(null); }
+      };
+      reader.readAsArrayBuffer(file.slice(0, 65536)); // read first 64KB
+    }
+
+    function _parseExifSegment(view, start) {
+      try {
+        // Check for "Exif\0\0"
+        var exifHeader = String.fromCharCode(view.getUint8(start), view.getUint8(start+1), view.getUint8(start+2), view.getUint8(start+3));
+        if (exifHeader !== 'Exif') return null;
+        var tiffStart = start + 6;
+        var littleEndian = view.getUint16(tiffStart) === 0x4949;
+        var ifdOffset = view.getUint32(tiffStart + 4, littleEndian);
+        var result = {};
+        _readIFD(view, tiffStart, tiffStart + ifdOffset, littleEndian, result);
+        return result;
+      } catch(e) { return null; }
+    }
+
+    function _readIFD(view, tiffStart, ifdOffset, le, result) {
+      try {
+        var count = view.getUint16(ifdOffset, le);
+        var TAG_NAMES = {
+          0x010F:'Make', 0x0110:'Model', 0x0112:'Orientation',
+          0x9003:'DateTimeOriginal', 0x8827:'ISOSpeedRatings',
+          0x829D:'FNumber', 0x829A:'ExposureTime', 0x920A:'FocalLength',
+          0x9209:'Flash', 0xA403:'WhiteBalance', 0x0131:'Software',
+          0x8825:'GPSInfo',
+        };
+        for (var i = 0; i < count; i++) {
+          var entryOffset = ifdOffset + 2 + i * 12;
+          var tag  = view.getUint16(entryOffset, le);
+          var type = view.getUint16(entryOffset + 2, le);
+          var num  = view.getUint32(entryOffset + 4, le);
+          var name = TAG_NAMES[tag];
+          if (!name) continue;
+          try {
+            if (type === 2) { // ASCII
+              var strOffset = num > 4 ? tiffStart + view.getUint32(entryOffset + 8, le) : entryOffset + 8;
+              var str = '';
+              for (var j = 0; j < num - 1; j++) str += String.fromCharCode(view.getUint8(strOffset + j));
+              result[name] = str.trim();
+            } else if (type === 3) { // SHORT
+              result[name] = view.getUint16(entryOffset + 8, le);
+            } else if (type === 4) { // LONG
+              result[name] = view.getUint32(entryOffset + 8, le);
+            } else if (type === 5) { // RATIONAL
+              var rOff = tiffStart + view.getUint32(entryOffset + 8, le);
+              var num2 = view.getUint32(rOff, le);
+              var den  = view.getUint32(rOff + 4, le);
+              result[name] = den ? (num2 / den).toFixed(2) : num2;
+            }
+          } catch(e) {}
+        }
+      } catch(e) {}
+    }
+
+    $('ic-exif-close').addEventListener('click', function() { $('ic-exif-modal').style.display = 'none'; });
+    $('ic-exif-modal').addEventListener('click', function(e) { if (e.target === $('ic-exif-modal')) $('ic-exif-modal').style.display = 'none'; });
   },
 };
