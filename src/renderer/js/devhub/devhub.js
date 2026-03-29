@@ -13,6 +13,7 @@ const DevHub = (() => {
     HashTool,
     ImageConverterTool,
     ImageEditorTool,
+    NotepadTool,
   ];
 
   let _open       = false;
