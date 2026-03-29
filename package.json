@@ -1,6 +1,6 @@
 {
   "name": "vortex",
-  "version": "2.8.2",
+  "version": "2.9.0",
   "description": "Vortex Browser - Electron based browser",
   "main": "main.js",
   "author": "Vortex",
