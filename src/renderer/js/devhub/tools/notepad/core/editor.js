@@ -24,17 +24,31 @@ var NpEditor = {
   },
 
   _applySettings: function() {
-    var s = this._settings;
-    var ta = this._textarea;
-    ta.style.fontSize   = s.fontSize + 'px';
+    var s   = this._settings;
+    var ta  = this._textarea;
+    var hl  = this._highlight;
+    var ln  = this._lineNums;
+    var fs  = s.fontSize + 'px';
+
+    ta.style.fontSize   = fs;
     ta.style.whiteSpace = s.wordWrap ? 'pre-wrap' : 'pre';
     ta.style.overflowX  = s.wordWrap ? 'hidden' : 'auto';
-    if (this._highlight) {
-      this._highlight.style.fontSize   = s.fontSize + 'px';
-      this._highlight.style.whiteSpace = s.wordWrap ? 'pre-wrap' : 'pre';
+
+    if (hl) {
+      hl.style.fontSize   = fs;
+      hl.style.whiteSpace = s.wordWrap ? 'pre-wrap' : 'pre';
     }
-    this._container.querySelector('#np-editor-wrap').className =
-      'np-editor-wrap np-theme-' + (s.theme || 'dark') + (s.lineNumbers ? ' np-show-lines' : '');
+    if (ln) {
+      ln.style.fontSize = fs;
+    }
+
+    var wrap = this._container.querySelector('#np-editor-wrap');
+    if (wrap) {
+      wrap.className = 'np-editor-wrap np-theme-' + (s.theme || 'dark') + (s.lineNumbers ? ' np-show-lines' : '');
+      // Apply theme background to wrap
+      var themes = { dark:'#060e0e', light:'#f0fafa', monokai:'#272822', dracula:'#282a36' };
+      wrap.style.background = themes[s.theme] || themes.dark;
+    }
   },
 
   _bindEvents: function() {
@@ -52,7 +66,9 @@ var NpEditor = {
         self._highlight.scrollTop  = ta.scrollTop;
         self._highlight.scrollLeft = ta.scrollLeft;
       }
-      if (self._lineNums) self._lineNums.scrollTop = ta.scrollTop;
+      if (self._lineNums) {
+        self._lineNums.scrollTop = ta.scrollTop;
+      }
     });
 
     ta.addEventListener('keydown', function(e) {
