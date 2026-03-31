@@ -1,11 +1,11 @@
 {
   "id": "v300",
   "version": "v3.0.0",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Cookie Manager",
   "date": "March 2026",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 1 },
   "categories": [
     {
