@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   Panel.init();
   QuickLaunch.init();
   DevHub.init();
+  if (typeof PermissionManager !== 'undefined') PermissionManager.init();
 
   // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([

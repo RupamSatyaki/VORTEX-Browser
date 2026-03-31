@@ -254,6 +254,28 @@ const WebView = (() => {
       _hideTranslateBar();
     });
 
+    // ── Permission request from webview ──────────────────────────────────────
+    wv.addEventListener('permission-request', (e) => {
+      if (typeof PermissionPopup === 'undefined' || typeof PermissionManager === 'undefined') return;
+      try {
+        const url    = wv.getURL();
+        const domain = new URL(url).hostname.replace(/^www\./, '');
+        const permId = e.permission; // e.g. 'camera', 'microphone', 'notifications'
+        // Only auto-open if this is the active tab
+        if (activeId === tabId) {
+          PermissionPopup.onPermissionRequested(domain, permId);
+        } else {
+          PermissionManager.markRequested(domain, permId);
+        }
+        // Check stored decision
+        const stored = PermissionManager.getForDomain(domain)[permId];
+        if (stored === 'granted') { e.request.allow(); return; }
+        if (stored === 'denied')  { e.request.deny();  return; }
+        // No stored decision — deny by default, user can allow from popup
+        e.request.deny();
+      } catch { e.request.deny(); }
+    });
+
     wv.addEventListener('did-navigate-in-page', (e) => {
       if (activeId === tabId) Navigation.setURL(e.url);
       if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
