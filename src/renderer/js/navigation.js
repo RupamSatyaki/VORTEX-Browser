@@ -133,6 +133,12 @@ const Navigation = (() => {
     document.getElementById('nav-whatsapp')?.addEventListener('click', () => WhatsAppPanel.toggle());
     document.getElementById('nav-devhub')?.addEventListener('click', () => DevHub.toggle());
 
+    // Inject permission icon into address bar
+    if (typeof PermissionPopup !== 'undefined') {
+      PermissionPopup.injectIcon();
+      PermissionPopup.initShortcut();
+    }
+
     // Zoom buttons
     document.getElementById('zoom-in-btn').addEventListener('click', () => WebView.zoomIn());
     document.getElementById('zoom-out-btn').addEventListener('click', () => WebView.zoomOut());
@@ -303,6 +309,13 @@ const Navigation = (() => {
     updateSecurityIcon(url);
     // Update bookmark icon state
     if (window._updateBookmarkIcon) window._updateBookmarkIcon();
+    // Update permission badge
+    if (typeof PermissionPopup !== 'undefined') {
+      try {
+        const domain = url && url.startsWith('http') ? new URL(url).hostname.replace(/^www\./, '') : '';
+        PermissionPopup.updateBadge(domain);
+      } catch {}
+    }
   }
 
   let _progressTimer = null;

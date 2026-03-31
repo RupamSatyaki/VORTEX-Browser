@@ -806,6 +806,10 @@
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="8" cy="10" r="1.5" fill="currentColor" stroke="none"/><circle cx="14" cy="8" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1" fill="currentColor" stroke="none"/></svg>
             Cookie Manager
         </div>
+        <div class="nav-item" data-section="permissions">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Site Permissions
+        </div>
         <div class="nav-item" data-section="performance">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Performance
@@ -1155,6 +1159,10 @@
 
         <!-- Cookie Manager -->
         <div class="section" id="sec-cookies">
+        </div>
+
+        <!-- Site Permissions -->
+        <div class="section" id="sec-permissions">
         </div>
 
         <!-- Performance -->
@@ -3450,6 +3458,33 @@
     <script src="js/changelog/index.js"></script>
     <script src="js/faq.js"></script>
     <script src="js/cookieManager.js"></script>
+    <script src="js/permissions/index.js"></script>
+    <script>
+        // ── Site Permissions lazy init ────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const permContainer = document.getElementById('sec-permissions');
+            if (!permContainer) return;
+            const navItem = document.querySelector('[data-section="permissions"]');
+            if (navItem) {
+                navItem.addEventListener('click', () => {
+                    if (!permContainer._pmRendered) {
+                        permContainer._pmRendered = true;
+                        // Inject styles link
+                        if (!document.getElementById('perm-settings-css')) {
+                            const link = document.createElement('link');
+                            link.id = 'perm-settings-css';
+                            link.rel = 'stylesheet';
+                            link.href = 'js/permissions/styles.css';
+                            document.head.appendChild(link);
+                        }
+                        // Add section title
+                        permContainer.innerHTML = '<div class="section-title">Site Permissions</div><div id="perm-settings-body"></div>';
+                        PermissionManager.render(document.getElementById('perm-settings-body'));
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
