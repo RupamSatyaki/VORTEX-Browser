@@ -1,0 +1,418 @@
+/* ── Permission Manager Styles ── */
+
+/* Address bar permission icon badge */
+#btn-permissions {
+  position: relative;
+  cursor: pointer;
+}
+#btn-permissions .perm-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--bg-surface, #22383a);
+  pointer-events: none;
+}
+#btn-permissions .perm-badge.granted { background: #22c55e; }
+#btn-permissions .perm-badge.blocked { background: #ef4444; }
+#btn-permissions .perm-badge.mixed  { background: #f97316; }
+
+/* ── Permission Popup ── */
+#perm-popup {
+  position: fixed;
+  z-index: 99998;
+  background: var(--bg-base, #1a2e2e);
+  border: 1px solid var(--bg-border, #2e4a4c);
+  border-radius: 12px;
+  width: 300px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.96) translateY(-4px);
+  transform-origin: top center;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  overflow: hidden;
+}
+#perm-popup.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1) translateY(0);
+}
+
+.perm-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--bg-border2, #1e3838);
+  background: var(--bg-panel, #0f2222);
+}
+.perm-popup-favicon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.perm-popup-domain {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main, #c8e8e5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.perm-popup-close {
+  background: none;
+  border: none;
+  color: var(--text-dim, #4a8080);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+.perm-popup-close:hover { color: #c86060; }
+
+.perm-popup-body {
+  padding: 6px 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.perm-popup-body::-webkit-scrollbar { width: 4px; }
+.perm-popup-body::-webkit-scrollbar-thumb { background: var(--bg-border, #2e4a4c); border-radius: 2px; }
+
+.perm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  transition: background 0.1s;
+}
+.perm-row:hover { background: var(--bg-hover, #253f40); }
+
+/* Highlighted row — new permission request */
+.perm-row-highlight {
+  background: rgba(0,200,180,0.07);
+  border-left: 3px solid var(--accent, #00c8b4);
+  padding-left: 11px;
+  animation: perm-pulse 1.8s ease 2;
+}
+@keyframes perm-pulse {
+  0%,100% { background: rgba(0,200,180,0.07); }
+  50%      { background: rgba(0,200,180,0.16); }
+}
+
+.perm-new-badge {
+  display: inline-block;
+  background: var(--accent, #00c8b4);
+  color: #001a18;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin-left: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.perm-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.perm-icon svg { pointer-events: none; }
+.perm-icon.granted { background: rgba(34,197,94,0.12); color: #22c55e; }
+.perm-icon.denied  { background: rgba(239,68,68,0.12);  color: #ef4444; }
+.perm-icon.default { background: var(--bg-surface, #22383a); color: var(--text-dim, #4a8080); }
+
+.perm-info { flex: 1; min-width: 0; }
+.perm-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main, #c8e8e5);
+}
+.perm-status {
+  font-size: 10px;
+  margin-top: 1px;
+}
+.perm-status.granted { color: #22c55e; }
+.perm-status.denied  { color: #ef4444; }
+.perm-status.default { color: var(--text-dim, #4a8080); }
+
+/* 3-state toggle: Allow / Ask / Block */
+.perm-toggle-wrap {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-panel, #0f2222);
+  border: 1px solid var(--bg-border, #2e4a4c);
+  border-radius: 7px;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.perm-toggle-btn {
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 7px;
+  cursor: pointer;
+  color: var(--text-dim, #4a8080);
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+.perm-toggle-btn:hover { color: var(--text-main, #c8e8e5); }
+.perm-toggle-btn.active-allow { background: rgba(34,197,94,0.18); color: #22c55e; }
+.perm-toggle-btn.active-block { background: rgba(239,68,68,0.18); color: #ef4444; }
+.perm-toggle-btn.active-ask   { background: var(--bg-hover, #253f40); color: var(--accent, #00c8b4); }
+
+.perm-popup-footer {
+  padding: 8px 14px;
+  border-top: 1px solid var(--bg-border2, #1e3838);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.perm-footer-link {
+  font-size: 11px;
+  color: var(--accent, #00c8b4);
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.12s;
+}
+.perm-footer-link:hover { opacity: 0.75; }
+.perm-reset-btn {
+  background: transparent;
+  border: 1px solid var(--bg-border, #2e4a4c);
+  border-radius: 6px;
+  color: var(--text-dim, #4a8080);
+  font-size: 11px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.perm-reset-btn:hover {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.perm-empty {
+  padding: 20px 14px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-dim, #4a8080);
+}
+
+/* ── Settings: Site Permissions Section ── */
+.sp-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #162828;
+  border: 1px solid #2e4a4c;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+.sp-search-wrap input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #c8e8e5;
+  font-size: 13px;
+}
+.sp-search-wrap input::placeholder { color: #3a6060; }
+
+.sp-stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.sp-stat {
+  flex: 1;
+  background: #0f2222;
+  border: 1px solid #1e3838;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.sp-stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent, #00c8b4);
+  line-height: 1;
+}
+.sp-stat-label {
+  font-size: 10px;
+  color: #4a8080;
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sp-site-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+.sp-site-list::-webkit-scrollbar { width: 4px; }
+.sp-site-list::-webkit-scrollbar-thumb { background: #1a4a4a; border-radius: 2px; }
+
+.sp-site-row {
+  background: #0f2222;
+  border: 1px solid #1e3838;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.sp-site-row:hover { border-color: #2e4a4c; }
+.sp-site-row.open { border-color: var(--accent, #00c8b4); }
+
+.sp-site-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+}
+.sp-site-favicon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+.sp-site-domain {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: #c8e8e5;
+}
+.sp-site-badges {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.sp-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.sp-badge.granted { background: rgba(34,197,94,0.15); color: #22c55e; }
+.sp-badge.denied  { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+.sp-site-chevron {
+  color: #4a8080;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.sp-site-row.open .sp-site-chevron { transform: rotate(90deg); }
+
+.sp-site-perms {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.25s ease;
+}
+.sp-site-row.open .sp-site-perms { max-height: 300px; }
+
+.sp-perm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 42px;
+  border-top: 1px solid #1a3030;
+}
+.sp-perm-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim, #4a8080);
+  flex-shrink: 0;
+}
+.sp-perm-name {
+  flex: 1;
+  font-size: 12px;
+  color: #7aadad;
+}
+.sp-perm-toggle-wrap {
+  display: flex;
+  gap: 2px;
+  background: #162828;
+  border: 1px solid #2e4a4c;
+  border-radius: 6px;
+  padding: 2px;
+}
+.sp-perm-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  cursor: pointer;
+  color: #4a8080;
+  transition: all 0.12s;
+}
+.sp-perm-btn:hover { color: #c8e8e5; }
+.sp-perm-btn.active-allow { background: rgba(34,197,94,0.18); color: #22c55e; }
+.sp-perm-btn.active-block { background: rgba(239,68,68,0.18); color: #ef4444; }
+
+.sp-site-del {
+  background: transparent;
+  border: none;
+  color: #4a8080;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s;
+  flex-shrink: 0;
+}
+.sp-site-del:hover { color: #ef4444; }
+
+.sp-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #2e5a5a;
+  font-size: 13px;
+}
+.sp-empty svg { opacity: 0.2; margin-bottom: 10px; }
+
+.sp-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+.sp-reset-all {
+  background: transparent;
+  border: 1px solid #3a2028;
+  border-radius: 7px;
+  color: #a07080;
+  font-size: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sp-reset-all:hover { border-color: #ef4444; color: #ef4444; }

@@ -17,6 +17,7 @@ const VERSION_GROUPS = [
     major: 3,
     label: 'Version 3',
     files: [
+      'v3/v3.3.0.json',
       'v3/v3.2.1.json',
       'v3/v3.2.0.json',
       'v3/v3.1.0.json',

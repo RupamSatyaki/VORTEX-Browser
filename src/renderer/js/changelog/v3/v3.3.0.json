@@ -1,0 +1,34 @@
+{
+  "id": "v3.3.0",
+  "version": "3.3.0",
+  "badge": "latest",
+  "name": "Site Permissions Manager",
+  "date": "2026-03-31",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 2, "improve": 1, "fix": 0 },
+  "categories": [
+    {
+      "label": "Privacy & Security",
+      "features": [
+        {
+          "type": "new",
+          "label": "Address Bar Permission Icon",
+          "desc": "Shield icon in address bar — click karo to see current site's Camera, Mic, Notifications, Location, Clipboard, MIDI permissions. 3-state toggle: Allow / Ask / Block. Color badge shows permission status at a glance.",
+          "howto": "Address bar mein shield icon click karo. Shortcut: Ctrl+Shift+I"
+        },
+        {
+          "type": "new",
+          "label": "Site Permissions Manager in Settings",
+          "desc": "Settings → Privacy & Performance → Site Permissions. Saari sites list with per-site accordion expand. Stats row (sites/allowed/blocked), search by domain, reset individual site or all.",
+          "howto": "Settings → Privacy & Performance → Site Permissions"
+        },
+        {
+          "type": "improve",
+          "label": "Electron permission handler integration",
+          "desc": "Permissions ab Electron session handlers se enforce hote hain — browser restart pe bhi apply rehte hain. Storage: permissions.json in %APPDATA%\\vortex\\storage\\"
+        }
+      ]
+    }
+  ]
+}

@@ -524,6 +524,181 @@ function registerHandlers() {
     } catch (_) { return null; }
   });
 
+  // ── Site Permissions ──────────────────────────────────────────────────────
+  const path_mod = require('path');
+  const { app: _app } = require('electron');
+  const PERM_FILE = () => path_mod.join(_app.getPath('userData'), 'vortex', 'storage', 'permissions.json');
+
+  function _readPermFile() {
+    try {
+      const fs = require('fs');
+      const f = PERM_FILE();
+      if (!fs.existsSync(f)) return {};
+      return JSON.parse(fs.readFileSync(f, 'utf8'));
+    } catch { return {}; }
+  }
+
+  function _writePermFile(data) {
+    try {
+      const fs = require('fs');
+      const f = PERM_FILE();
+      const dir = path_mod.dirname(f);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(f, JSON.stringify(data, null, 2));
+    } catch {}
+  }
+
+  ipcMain.handle('permissions:getAll', async () => {
+    return _readPermFile();
+  });
+
+  ipcMain.handle('permissions:saveAll', async (_e, data) => {
+    _writePermFile(data);
+    _applyPermissions(data);
+    return true;
+  });
+
+  function _applyPermissions(permData) {
+    // Electron permission name → our internal id
+    const ELECTRON_TO_ID = {
+      'media':          null, // handled specially (camera vs mic)
+      'notifications':  'notifications',
+      'geolocation':    'geolocation',
+      'clipboard-read': 'clipboard-read',
+      'midi':           'midi',
+      'midiSysex':      'midi',
+    };
+
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+      try {
+        const url = webContents.getURL();
+        const domain = new URL(url).hostname.replace(/^www\./, '');
+        const stored = permData[domain] || {};
+
+        // For media, check camera/microphone separately
+        if (permission === 'media') {
+          const wantsCam = details?.mediaTypes?.includes('video');
+          const wantsMic = details?.mediaTypes?.includes('audio');
+          const camStatus = wantsCam ? (stored['camera'] || 'ask') : 'granted';
+          const micStatus = wantsMic ? (stored['microphone'] || 'ask') : 'granted';
+
+          // If any is denied → deny all
+          if (camStatus === 'denied' || micStatus === 'denied') {
+            callback(false); return;
+          }
+          // If all are granted → allow
+          if (camStatus === 'granted' && micStatus === 'granted') {
+            callback(true); return;
+          }
+          // ask → show our custom prompt in renderer, deny for now
+          _sendPermissionRequest(webContents, domain, permission, details, callback, permData);
+          return;
+        }
+
+        const ourId = ELECTRON_TO_ID[permission] || permission;
+        const status = stored[ourId] || 'ask';
+
+        if (status === 'granted') { callback(true); return; }
+        if (status === 'denied')  { callback(false); return; }
+
+        // 'ask' → show custom prompt
+        _sendPermissionRequest(webContents, domain, permission, details, callback, permData);
+      } catch (e) {
+        // On error, deny safely
+        callback(false);
+      }
+    });
+
+    // Check handler — used by sites to check if they already have permission
+    session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+      try {
+        const domain = new URL(requestingOrigin).hostname.replace(/^www\./, '');
+        const stored = permData[domain] || {};
+
+        if (permission === 'media') {
+          const wantsCam = details?.mediaType === 'video';
+          const wantsMic = details?.mediaType === 'audio';
+          if (wantsCam) return (stored['camera'] || 'ask') === 'granted';
+          if (wantsMic) return (stored['microphone'] || 'ask') === 'granted';
+          return false;
+        }
+
+        const ELECTRON_TO_ID2 = {
+          'notifications': 'notifications',
+          'geolocation':   'geolocation',
+          'clipboard-read':'clipboard-read',
+          'midi':          'midi',
+          'midiSysex':     'midi',
+        };
+        const ourId = ELECTRON_TO_ID2[permission] || permission;
+        return (stored[ourId] || 'ask') === 'granted';
+      } catch { return false; }
+    });
+  }
+
+  // Send permission request to renderer — shows our custom popup
+  function _sendPermissionRequest(webContents, domain, permission, details, callback, permData) {
+    // Map Electron permission to our friendly name
+    const PERM_LABELS = {
+      'media':          'Camera / Microphone',
+      'notifications':  'Notifications',
+      'geolocation':    'Location',
+      'clipboard-read': 'Clipboard Read',
+      'midi':           'MIDI',
+      'midiSysex':      'MIDI SysEx',
+    };
+
+    // Find the main BrowserWindow
+    const win = BrowserWindow.getAllWindows().find(w => {
+      try { return !w.isDestroyed() && w.webContents.id !== webContents.id; } catch { return false; }
+    }) || BrowserWindow.getFocusedWindow();
+
+    if (!win || win.isDestroyed()) {
+      callback(false); return;
+    }
+
+    // Determine our internal perm ids to save
+    let permIds = [];
+    if (permission === 'media') {
+      if (details?.mediaTypes?.includes('video')) permIds.push('camera');
+      if (details?.mediaTypes?.includes('audio')) permIds.push('microphone');
+    } else {
+      const MAP = { 'notifications':'notifications','geolocation':'geolocation','clipboard-read':'clipboard-read','midi':'midi','midiSysex':'midi' };
+      if (MAP[permission]) permIds.push(MAP[permission]);
+    }
+
+    // Send to renderer — renderer shows the prompt
+    win.webContents.send('permission:request', {
+      domain,
+      permission,
+      label: PERM_LABELS[permission] || permission,
+      permIds,
+    });
+
+    // Listen for user response (one-time)
+    const responseChannel = `permission:response:${domain}:${permission}`;
+    ipcMain.once(responseChannel, (_e, granted) => {
+      // Save decision
+      if (permIds.length) {
+        if (!permData[domain]) permData[domain] = {};
+        permIds.forEach(id => { permData[domain][id] = granted ? 'granted' : 'denied'; });
+        _writePermFile(permData);
+        // Re-apply so future requests use stored value
+        _applyPermissions(permData);
+      }
+      callback(granted);
+    });
+
+    // Timeout after 30s — deny
+    setTimeout(() => {
+      try { ipcMain.removeAllListeners(responseChannel); } catch {}
+      callback(false);
+    }, 30000);
+  }
+
+  // Apply on startup
+  _applyPermissions(_readPermFile());
+
   // ── GitHub Updater ────────────────────────────────────────────────────────
   const GITHUB_REPO = 'RupamSatyaki/VORTEX-Browser';
   const GITHUB_BRANCH = 'main';
