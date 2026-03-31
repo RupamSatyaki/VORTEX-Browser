@@ -1,0 +1,23 @@
+{
+  "id": "v300",
+  "version": "v3.0.0",
+  "badge": "latest",
+  "name": "Cookie Manager",
+  "date": "March 2026",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 1 },
+  "categories": [
+    {
+      "label": "New Features",
+      "features": [
+        {
+          "type": "new",
+          "label": "Cookie Manager",
+          "desc": "Full cookie management in Settings. Overview tab: all cookies grouped by domain with expand/collapse, per-cookie delete, per-domain delete, delete all/expired. Browse tab: search by domain/name/value with live filter. Block tab: custom domain blocklist + 10 known tracker quick-block buttons. Export tab: JSON export/import, blocklist export. Stats row: total, domains, expired, session, secure counts. Domain cookies scrollable with max-height. Loading spinner.",
+          "howto": "Settings \u2192 Privacy & Performance \u2192 Cookie Manager"
+        }
+      ]
+    }
+  ]
+}
