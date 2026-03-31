@@ -392,6 +392,75 @@ function registerHandlers() {
     } catch (_) {}
   });
 
+  // ── Cookie Manager ────────────────────────────────────────────────────────
+  ipcMain.handle('cookies:getAll', async () => {
+    try { return await session.defaultSession.cookies.get({}); }
+    catch(e) { return []; }
+  });
+
+  ipcMain.handle('cookies:getForDomain', async (_e, domain) => {
+    try { return await session.defaultSession.cookies.get({ domain }); }
+    catch(e) { return []; }
+  });
+
+  ipcMain.handle('cookies:delete', async (_e, url, name) => {
+    try { await session.defaultSession.cookies.remove(url, name); return true; }
+    catch(e) { return false; }
+  });
+
+  ipcMain.handle('cookies:deleteAll', async () => {
+    try {
+      const all = await session.defaultSession.cookies.get({});
+      for (const c of all) {
+        const url = (c.secure ? 'https' : 'http') + '://' + c.domain.replace(/^\./, '') + (c.path || '/');
+        await session.defaultSession.cookies.remove(url, c.name);
+      }
+      return all.length;
+    } catch(e) { return 0; }
+  });
+
+  ipcMain.handle('cookies:deleteForDomain', async (_e, domain) => {
+    try {
+      const all = await session.defaultSession.cookies.get({ domain });
+      for (const c of all) {
+        const url = (c.secure ? 'https' : 'http') + '://' + c.domain.replace(/^\./, '') + (c.path || '/');
+        await session.defaultSession.cookies.remove(url, c.name);
+      }
+      return all.length;
+    } catch(e) { return 0; }
+  });
+
+  ipcMain.handle('cookies:deleteExpired', async () => {
+    try {
+      const now  = Date.now() / 1000;
+      const all  = await session.defaultSession.cookies.get({});
+      const exp  = all.filter(c => c.expirationDate && c.expirationDate < now);
+      for (const c of exp) {
+        const url = (c.secure ? 'https' : 'http') + '://' + c.domain.replace(/^\./, '') + (c.path || '/');
+        await session.defaultSession.cookies.remove(url, c.name);
+      }
+      return exp.length;
+    } catch(e) { return 0; }
+  });
+
+  ipcMain.handle('cookies:set', async (_e, cookieDetails) => {
+    try { await session.defaultSession.cookies.set(cookieDetails); return true; }
+    catch(e) { return false; }
+  });
+
+  ipcMain.handle('cookies:getStats', async () => {
+    try {
+      const all = await session.defaultSession.cookies.get({});
+      const now = Date.now() / 1000;
+      const domains = [...new Set(all.map(c => c.domain.replace(/^\./, '')))];
+      const expired = all.filter(c => c.expirationDate && c.expirationDate < now);
+      const session_ = all.filter(c => !c.expirationDate);
+      const secure   = all.filter(c => c.secure);
+      const httpOnly = all.filter(c => c.httpOnly);
+      return { total: all.length, domains: domains.length, expired: expired.length, session: session_.length, secure: secure.length, httpOnly: httpOnly.length };
+    } catch(e) { return {}; }
+  });
+
   // Mute/unmute a webview's audio by webContentsId
   ipcMain.handle('tab:setMuted', (_e, wcId, muted) => {
     try {

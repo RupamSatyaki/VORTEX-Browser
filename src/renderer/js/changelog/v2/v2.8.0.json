@@ -4,8 +4,8 @@
     "badge": "stable",
     "name": "Image Editor Tool",
     "date": "March 2026",
-    "isCurrent": true,
-    "open": true,
+    "isCurrent": false,
+    "open": false,
     "counts": {
         "new": 1
     },

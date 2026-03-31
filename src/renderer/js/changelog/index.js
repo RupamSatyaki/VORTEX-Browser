@@ -14,9 +14,17 @@
 // ── Version file manifest ─────────────────────────────────────────────────────
 const VERSION_GROUPS = [
   {
+    major: 3,
+    label: 'Version 3',
+    files: [
+      'v3/v3.0.0.json',
+    ],
+  },
+  {
     major: 2,
     label: 'Version 2',
     files: [
+      'v2/v2.9.1.json',
       'v2/v2.9.0.json',
       'v2/v2.8.2.json',
       'v2/v2.8.1.json',
