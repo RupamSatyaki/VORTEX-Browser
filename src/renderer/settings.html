@@ -1,11 +1,18 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8" />
     <meta name="color-scheme" content="dark" />
-    <title>Settings — Vortex</title>
+    <title>Settings � Vortex</title>
     <style>
+        :root {
+            --accent: #00c8b4;
+            --accent-dim: rgba(0,200,180,0.15);
+            --accent-glow: rgba(0,200,180,0.25);
+            --accent-10: rgba(0,200,180,0.10);
+            --accent-20: rgba(0,200,180,0.20);
+        }
         * {
             margin: 0;
             padding: 0;
@@ -29,7 +36,7 @@
             inset: 0;
         }
 
-        /* ── Sidebar ── */
+        /* -- Sidebar -- */
         #sidebar {
             width: 220px;
             flex-shrink: 0;
@@ -64,7 +71,7 @@
             width: 32px;
             height: 32px;
             border-radius: 8px;
-            background: linear-gradient(135deg, #00c8b4, #1a6a6a);
+            background: linear-gradient(135deg, var(--accent), #1a6a6a);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -101,8 +108,8 @@
 
         .nav-item.active {
             background: #1a3838;
-            color: #00c8b4;
-            border-left-color: #00c8b4;
+            color: var(--accent);
+            border-left-color: var(--accent);
         }
 
         .nav-item svg {
@@ -130,7 +137,7 @@
             user-select: none;
         }
 
-        /* ── Main content ── */
+        /* -- Main content -- */
         #content {
             flex: 1;
             overflow-y: auto;
@@ -149,7 +156,7 @@
         }
 
         #content::-webkit-scrollbar-thumb:hover {
-            background: #00c8b4;
+            background: var(--accent);
         }
 
         .section {
@@ -167,7 +174,7 @@
             margin-bottom: 24px;
         }
 
-        /* ── Cards ── */
+        /* -- Cards -- */
         .card {
             background: #122222;
             border: 1px solid #1e3838;
@@ -201,7 +208,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #00c8b4;
+            color: var(--accent);
             flex-shrink: 0;
         }
 
@@ -245,7 +252,7 @@
         }
 
         .toggle input:checked+.toggle-track {
-            background: #00c8b4;
+            background: var(--accent);
         }
 
         .toggle-track::after {
@@ -264,6 +271,170 @@
             transform: translateX(18px);
         }
 
+        /* Accent swatches */
+        .accent-swatch.active {
+            border-color: #fff !important;
+            box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+            transform: scale(1.15);
+        }
+        .accent-swatch:hover {
+            transform: scale(1.1);
+            border-color: rgba(255,255,255,0.5) !important;
+        }
+        #accent-custom-preview:hover {
+            border-color: #fff !important;
+        }
+
+        /* Background theme accordion */
+        .bg-theme-accordion {
+            border-bottom: 1px solid #1e3838;
+        }
+        .bg-theme-accordion:last-child { border-bottom: none; }
+
+        .bg-theme-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+        .bg-theme-header:hover { background: rgba(0,200,180,0.04); }
+
+        .bg-theme-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .bg-theme-header-preview {
+            width: 48px;
+            height: 32px;
+            border-radius: 7px;
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: border-color 0.2s;
+        }
+        .bg-theme-header:hover .bg-theme-header-preview {
+            border-color: var(--accent);
+        }
+        .bg-theme-header-bar {
+            height: 5px;
+            border-radius: 2px;
+            opacity: 0.85;
+        }
+        .bg-theme-header-bar2 {
+            height: 4px;
+            border-radius: 2px;
+            width: 60%;
+            opacity: 0.45;
+        }
+        .bg-theme-header-info { flex: 1; }
+        .bg-theme-header-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #c8e8e5;
+        }
+        .bg-theme-header-desc {
+            font-size: 11px;
+            color: #4a8080;
+            margin-top: 2px;
+        }
+        .bg-theme-chevron {
+            color: #4a8080;
+            transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+            flex-shrink: 0;
+        }
+        .bg-theme-accordion.open .bg-theme-chevron {
+            transform: rotate(90deg);
+        }
+
+        /* Expandable panel */
+        .bg-theme-panel {
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1), opacity 0.22s ease;
+            opacity: 0;
+        }
+        .bg-theme-accordion.open .bg-theme-panel {
+            max-height: 600px;
+            opacity: 1;
+        }
+        .bg-theme-panel-inner {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 4px 20px 18px;
+        }
+
+        /* Theme cards inside panel */
+        .bg-theme-card {
+            border-radius: 10px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.18s;
+            background: #0f2222;
+        }
+        .bg-theme-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+            border-color: rgba(255,255,255,0.12);
+        }
+        .bg-theme-card.active {
+            border-color: var(--accent) !important;
+            box-shadow: 0 0 0 3px rgba(0,200,180,0.18);
+        }
+        .bg-theme-card-preview {
+            height: 56px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 8px 8px 6px;
+            position: relative;
+        }
+        .bg-theme-card-bar {
+            height: 7px;
+            border-radius: 3px;
+            opacity: 0.75;
+        }
+        .bg-theme-card-bar2 {
+            height: 5px;
+            border-radius: 3px;
+            width: 65%;
+            opacity: 0.4;
+        }
+        .bg-theme-card-dot {
+            position: absolute;
+            bottom: 7px;
+            right: 8px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+        .bg-theme-card-label {
+            padding: 5px 8px 7px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .bg-theme-card.active .bg-theme-card-label::after {
+            content: '✓';
+            color: var(--accent);
+            font-size: 10px;
+        }
+
         /* Select */
         .setting-select {
             background: #1a3838;
@@ -278,7 +449,7 @@
         }
 
         .setting-select:focus {
-            border-color: #00c8b4;
+            border-color: var(--accent);
         }
 
         /* Input */
@@ -295,7 +466,7 @@
         }
 
         .setting-input:focus {
-            border-color: #00c8b4;
+            border-color: var(--accent);
         }
 
         /* Button */
@@ -303,7 +474,7 @@
             background: rgba(0, 200, 180, 0.1);
             border: 1px solid #2e6a65;
             border-radius: 7px;
-            color: #00c8b4;
+            color: var(--accent);
             font-size: 12px;
             padding: 6px 14px;
             cursor: pointer;
@@ -313,7 +484,7 @@
 
         .setting-btn:hover {
             background: rgba(0, 200, 180, 0.2);
-            border-color: #00c8b4;
+            border-color: var(--accent);
         }
 
         .setting-btn.danger {
@@ -383,7 +554,7 @@
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #00c8b4, #1a6a6a);
+            background: linear-gradient(135deg, var(--accent), #1a6a6a);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -418,7 +589,7 @@
             width: 22px;
             height: 22px;
             border-radius: 50%;
-            background: #00c8b4;
+            background: var(--accent);
             color: #fff;
             display: flex;
             align-items: center;
@@ -442,7 +613,7 @@
         }
 
         .profile-name-input:focus {
-            border-bottom-color: #00c8b4;
+            border-bottom-color: var(--accent);
         }
 
         /* Avatar picker grid */
@@ -478,13 +649,13 @@
         .avatar-opt:hover {
             transform: scale(1.12);
             background: rgba(0, 200, 180, 0.15);
-            color: #00c8b4;
+            color: var(--accent);
         }
 
         .avatar-opt.selected {
-            border-color: #00c8b4;
+            border-color: var(--accent);
             background: rgba(0, 200, 180, 0.15);
-            color: #00c8b4;
+            color: var(--accent);
             box-shadow: 0 0 0 3px rgba(0, 200, 180, 0.2);
         }
 
@@ -558,7 +729,7 @@
             width: 72px;
             height: 72px;
             border-radius: 20px;
-            background: linear-gradient(135deg, #00c8b4, #1a6a6a);
+            background: linear-gradient(135deg, var(--accent), #1a6a6a);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -779,7 +950,7 @@
                 </div>
                 <div class="card-row">
                     <div class="row-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00c8b4" stroke-width="2">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="2">
                             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
                         </svg>
                     </div>
@@ -790,6 +961,59 @@
                     <label class="toggle"><input type="checkbox" id="set-devhub-btn" checked />
                         <div class="toggle-track"></div>
                     </label>
+                </div>
+
+                <!-- Accent Color Row -->
+                <div class="card-row" style="align-items:flex-start;padding-top:14px;padding-bottom:14px;">
+                    <div class="row-icon" style="margin-top:2px;">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="13.5" cy="6.5" r="2.5" fill="#ef4444" stroke="none"/>
+                            <circle cx="17.5" cy="10.5" r="2.5" fill="#f97316" stroke="none"/>
+                            <circle cx="8.5" cy="7.5" r="2.5" fill="#3b82f6" stroke="none"/>
+                            <circle cx="6.5" cy="12.5" r="2.5" fill="#8b5cf6" stroke="none"/>
+                            <path d="M12 22a10 10 0 1 1 0-20 10 10 0 0 1 0 20z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-label">Accent Color</div>
+                        <div class="row-desc">Browser highlight and interactive color</div>
+                    </div>
+                    <div id="accent-picker-wrap" style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+                        <div id="accent-swatches" style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;"></div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-size:11px;color:#4a8080;">Custom</span>
+                            <div style="position:relative;width:32px;height:32px;">
+                                <input type="color" id="set-accent-custom" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:none;padding:0;" />
+                                <div id="accent-custom-preview" style="width:32px;height:32px;border-radius:8px;border:2px solid #2e4a4c;cursor:pointer;transition:border-color 0.2s;background:var(--accent);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Background Theme Row — Accordion -->
+                <div class="bg-theme-accordion" id="bg-theme-accordion">
+                    <div class="bg-theme-header" id="bg-theme-header">
+                        <div class="bg-theme-header-left">
+                            <div class="row-icon" style="flex-shrink:0;">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                                    <path d="M8 21h8M12 17v4"/>
+                                </svg>
+                            </div>
+                            <div class="row-text" style="flex:1;">
+                                <div class="row-label">Background Theme</div>
+                                <div class="row-desc" id="bg-theme-header-desc">Choose browser background color palette</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div class="bg-theme-header-preview" id="bg-theme-header-preview"></div>
+                            <span class="bg-theme-header-name" id="bg-theme-header-name" style="font-size:12px;color:#7aadad;font-weight:600;"></span>
+                            <svg class="bg-theme-chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                        </div>
+                    </div>
+                    <div class="bg-theme-panel" id="bg-theme-panel">
+                        <div class="bg-theme-panel-inner" id="bg-theme-panel-inner"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1082,7 +1306,7 @@
                         </svg></div>
                     <div class="row-text">
                         <div class="row-label">Ad Speed</div>
-                        <div class="row-desc">Playback speed for unskippable ads — higher = faster skip</div>
+                        <div class="row-desc">Playback speed for unskippable ads � higher = faster skip</div>
                     </div>
                     <select class="setting-select" id="yt-ad-speed" style="width:90px;">
                         <option value="4">4x</option>
@@ -1162,7 +1386,7 @@
                 <div class="profile-hero">
                     <div class="profile-avatar-wrap" id="avatar-wrap" title="Click to change avatar">
                         <div class="profile-avatar" id="prof-avatar-display">V</div>
-                        <div class="profile-avatar-edit">✎</div>
+                        <div class="profile-avatar-edit">?</div>
                     </div>
                     <input class="profile-name-input" id="prof-name" type="text" value="Vortex User" maxlength="24"
                         placeholder="Your name" />
@@ -1264,7 +1488,7 @@
                     </tr>
                     <tr>
                         <td>Zoom Out</td>
-                        <td><span class="kbd">Ctrl</span> + <span class="kbd">−</span></td>
+                        <td><span class="kbd">Ctrl</span> + <span class="kbd">-</span></td>
                     </tr>
                     <tr>
                         <td>Reset Zoom</td>
@@ -1376,7 +1600,7 @@
                     <input type="file" id="file-import-settings" accept=".json" style="display:none" />
                 </div>
             </div>
-            <div id="sync-status" style="font-size:12px;color:#00c8b4;padding:6px 4px;min-height:20px;"></div>
+            <div id="sync-status" style="font-size:12px;color:var(--accent);padding:6px 4px;min-height:20px;"></div>
         </div>
 
         <!-- Notifications -->
@@ -1456,16 +1680,16 @@
                     </div>
                     <select class="setting-select" id="set-lang">
                         <option value="en">English</option>
-                        <option value="hi">Hindi (हिन्दी)</option>
-                        <option value="es">Spanish (Español)</option>
-                        <option value="fr">French (Français)</option>
+                        <option value="hi">Hindi (??????)</option>
+                        <option value="es">Spanish (Espa�ol)</option>
+                        <option value="fr">French (Fran�ais)</option>
                         <option value="de">German (Deutsch)</option>
-                        <option value="ja">Japanese (日本語)</option>
-                        <option value="zh">Chinese (中文)</option>
-                        <option value="ar">Arabic (العربية)</option>
-                        <option value="pt">Portuguese (Português)</option>
-                        <option value="ru">Russian (Русский)</option>
-                        <option value="ko">Korean (한국어)</option>
+                        <option value="ja">Japanese (???)</option>
+                        <option value="zh">Chinese (??)</option>
+                        <option value="ar">Arabic (???????)</option>
+                        <option value="pt">Portuguese (Portugu�s)</option>
+                        <option value="ru">Russian (???????)</option>
+                        <option value="ko">Korean (???)</option>
                         <option value="it">Italian (Italiano)</option>
                     </select>
                 </div>
@@ -1546,7 +1770,7 @@
                 </div>
             </div>
 
-            <div id="upd-status" style="font-size:12px;color:#00c8b4;padding:6px 4px;min-height:20px;"></div>
+            <div id="upd-status" style="font-size:12px;color:var(--accent);padding:6px 4px;min-height:20px;"></div>
 
             <!-- Retry note -->
             <div
@@ -1558,7 +1782,7 @@
                     <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
                 <span style="font-size:11.5px;color:#4a8080;line-height:1.5;">If commits fail to load or update gets
-                    stuck, try <strong style="color:#7aadad;">2–3 more times</strong> — it's usually a network hiccup.
+                    stuck, try <strong style="color:#7aadad;">2�3 more times</strong> � it's usually a network hiccup.
                     If it keeps failing, wait a few minutes and try again.</span>
             </div>
 
@@ -1573,7 +1797,7 @@
                     <div class="card-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
                         <div style="display:flex;align-items:center;gap:10px;width:100%;">
                             <div class="row-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#00c8b4"
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent)"
                                     stroke-width="2">
                                     <polyline points="1 4 1 10 7 10" />
                                     <polyline points="23 20 23 14 17 14" />
@@ -1587,7 +1811,7 @@
                         </div>
                         <div style="width:100%;height:4px;background:#1a3838;border-radius:2px;overflow:hidden;">
                             <div id="upd-progress-bar"
-                                style="height:100%;background:#00c8b4;width:0%;transition:width 0.3s ease;border-radius:2px;">
+                                style="height:100%;background:var(--accent);width:0%;transition:width 0.3s ease;border-radius:2px;">
                             </div>
                         </div>
                     </div>
@@ -1602,10 +1826,10 @@
                 <div class="about-hero">
                     <div class="about-logo">V</div>
                     <div class="about-name">Vortex Browser</div>
-                    <div class="about-ver" id="about-ver">Version —</div>
+                    <div class="about-ver" id="about-ver">Version �</div>
                     <div id="about-commit" style="font-size:12px;color:#2e6060;font-family:monospace;display:none;">
                         <span id="about-commit-sha"
-                            style="background:#0d2a2a;padding:2px 8px;border-radius:4px;color:#00c8b4;"></span>
+                            style="background:#0d2a2a;padding:2px 8px;border-radius:4px;color:var(--accent);"></span>
                         <span id="about-commit-source"
                             style="color:#4a8080;margin-left:6px;font-family:sans-serif;font-size:11px;"></span>
                     </div>
@@ -1641,12 +1865,12 @@
             </div>
         </div>
 
-        <!-- What's New / Changelog — content injected by changelog.js -->
+        <!-- What's New / Changelog � content injected by changelog.js -->
         <div class="section" id="sec-changelog">
 
         </div>
 
-        <!-- Help & FAQ — content injected by faq.js -->
+        <!-- Help & FAQ � content injected by faq.js -->
         <div class="section" id="sec-faq">
 
         </div>
@@ -1654,7 +1878,7 @@
     </div><!-- #content -->
 
     <style>
-        /* ── Changelog Section ── */
+        /* -- Changelog Section -- */
         .cl-hero {
             text-align: center;
             padding: 28px 20px 20px;
@@ -1670,7 +1894,7 @@
             border-radius: 20px;
             padding: 5px 14px;
             font-size: 11px;
-            color: #00c8b4;
+            color: var(--accent);
             margin-bottom: 10px;
             letter-spacing: 0.5px;
         }
@@ -1745,14 +1969,14 @@
         }
 
         .cl-ver-badge.latest {
-            background: linear-gradient(135deg, #00c8b4, #007a6e);
+            background: linear-gradient(135deg, var(--accent), #007a6e);
             color: #fff;
             box-shadow: 0 2px 8px rgba(0, 200, 180, 0.3);
         }
 
         .cl-ver-badge.stable {
             background: rgba(0, 200, 180, 0.12);
-            color: #00c8b4;
+            color: var(--accent);
             border: 1px solid rgba(0, 200, 180, 0.25);
         }
 
@@ -1837,7 +2061,7 @@
 
         .cl-feat-icon.new {
             background: rgba(0, 200, 180, 0.12);
-            color: #00c8b4;
+            color: var(--accent);
         }
 
         .cl-feat-icon.fix {
@@ -1886,7 +2110,7 @@
 
         .cl-feat-tag.new {
             background: rgba(0, 200, 180, 0.15);
-            color: #00c8b4;
+            color: var(--accent);
         }
 
         .cl-feat-tag.fix {
@@ -1904,7 +2128,7 @@
             color: #a855f7;
         }
 
-        /* ── Changelog: new layout elements ── */
+        /* -- Changelog: new layout elements -- */
         .cl-hero {
             position: relative;
             overflow: hidden;
@@ -1945,7 +2169,7 @@
         .cl-stat-num {
             font-size: 22px;
             font-weight: 800;
-            color: #00c8b4;
+            color: var(--accent);
             line-height: 1;
         }
 
@@ -1988,7 +2212,7 @@
         }
 
         .cl-leg-item.new .cl-leg-dot {
-            background: #00c8b4;
+            background: var(--accent);
         }
 
         .cl-leg-item.fix .cl-leg-dot {
@@ -2033,7 +2257,7 @@
 
         .cl-count.new {
             background: rgba(0, 200, 180, 0.12);
-            color: #00c8b4;
+            color: var(--accent);
         }
 
         .cl-count.fix {
@@ -2090,7 +2314,7 @@
             border-radius: 0 4px 4px 0;
         }
 
-        /* ── Major version group ── */
+        /* -- Major version group -- */
         .cl-group {
             margin-bottom: 12px;
             border-radius: 16px;
@@ -2120,9 +2344,9 @@
         .cl-group-major {
             font-size: 22px;
             font-weight: 900;
-            color: #00c8b4;
+            color: var(--accent);
             font-family: -apple-system, sans-serif;
-            background: linear-gradient(135deg, #00c8b4, #007a6e);
+            background: linear-gradient(135deg, var(--accent), #007a6e);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -2136,7 +2360,7 @@
             transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
             flex-shrink: 0;
         }
-        .cl-group.open .cl-group-arrow { transform: rotate(180deg); color: #00c8b4; }
+        .cl-group.open .cl-group-arrow { transform: rotate(180deg); color: var(--accent); }
         .cl-group-body {
             max-height: 0;
             overflow: hidden;
@@ -2155,7 +2379,7 @@
         }
         .cl-group-body .cl-version-block:last-child { margin-bottom: 0; }
 
-        /* ── Cookie Manager ── */
+        /* -- Cookie Manager -- */
         .cm-wrap { display:flex; flex-direction:column; gap:0; }
 
         /* Header */
@@ -2166,7 +2390,7 @@
         .cm-subtitle { font-size:11px; color:#4a8080; margin-top:2px; }
         .cm-header-right { display:flex; align-items:center; gap:8px; }
         .cm-status { font-size:11.5px; min-width:120px; text-align:right; transition:opacity 0.3s; }
-        .cm-refresh-btn { background:rgba(0,200,180,0.08); border:1px solid rgba(0,200,180,0.2); border-radius:8px; color:#00c8b4; cursor:pointer; padding:6px 10px; display:flex; align-items:center; transition:all 0.15s; }
+        .cm-refresh-btn { background:rgba(0,200,180,0.08); border:1px solid rgba(0,200,180,0.2); border-radius:8px; color:var(--accent); cursor:pointer; padding:6px 10px; display:flex; align-items:center; transition:all 0.15s; }
         .cm-refresh-btn:hover { background:rgba(0,200,180,0.18); }
         @keyframes cm-spin { to { transform:rotate(360deg); } }
 
@@ -2174,7 +2398,7 @@
         .cm-stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
         .cm-stat-card { background:#0d1a1a; border:1px solid #1e3838; border-radius:11px; padding:12px 10px; text-align:center; transition:all 0.15s; cursor:default; }
         .cm-stat-card:hover { border-color:rgba(0,200,180,0.3); transform:translateY(-2px); }
-        .cm-stat-num { font-size:22px; font-weight:800; color:#00c8b4; line-height:1; font-family:-apple-system,sans-serif; }
+        .cm-stat-num { font-size:22px; font-weight:800; color:var(--accent); line-height:1; font-family:-apple-system,sans-serif; }
         .cm-stat-label { font-size:9.5px; color:#4a8080; margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
         .cm-stat-warn .cm-stat-num { color:#ef4444; }
         .cm-stat-secure .cm-stat-num { color:#22c55e; }
@@ -2183,7 +2407,7 @@
         .cm-tabs { display:flex; gap:2px; background:#060e0e; border:1px solid #1a3030; border-radius:10px; padding:3px; margin-bottom:12px; }
         .cm-tab { flex:1; display:inline-flex; align-items:center; justify-content:center; gap:5px; background:none; border:none; border-radius:7px; color:#4a8080; font-size:11.5px; padding:7px 8px; cursor:pointer; transition:all 0.15s; font-weight:500; }
         .cm-tab:hover { color:#c8e8e5; background:rgba(255,255,255,0.04); }
-        .cm-tab.active { background:#122222; color:#00c8b4; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+        .cm-tab.active { background:#122222; color:var(--accent); box-shadow:0 1px 4px rgba(0,0,0,0.3); }
 
         /* Overview actions */
         .cm-overview-actions { display:flex; gap:8px; margin-bottom:12px; }
@@ -2202,10 +2426,10 @@
         .cm-domain-header:hover { background:rgba(0,200,180,0.05); }
         .cm-domain-left { display:flex; align-items:center; gap:8px; flex:1; min-width:0; }
         .cm-chevron { color:#2e6060; transition:transform 0.2s; flex-shrink:0; }
-        .cm-domain-row.open .cm-chevron { transform:rotate(90deg); color:#00c8b4; }
+        .cm-domain-row.open .cm-chevron { transform:rotate(90deg); color:var(--accent); }
         .cm-domain-favicon { width:16px; height:16px; flex-shrink:0; display:flex; align-items:center; }
         .cm-domain-name { font-size:12.5px; font-weight:600; color:#c8e8e5; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .cm-domain-count { font-size:10px; background:rgba(0,200,180,0.1); color:#00c8b4; border-radius:10px; padding:1px 7px; flex-shrink:0; font-weight:700; }
+        .cm-domain-count { font-size:10px; background:rgba(0,200,180,0.1); color:var(--accent); border-radius:10px; padding:1px 7px; flex-shrink:0; font-weight:700; }
         .cm-badge-expired { font-size:9.5px; background:rgba(239,68,68,0.1); color:#ef4444; border-radius:8px; padding:1px 6px; flex-shrink:0; }
         .cm-badge-secure  { font-size:9.5px; background:rgba(34,197,94,0.1);  color:#22c55e; border-radius:8px; padding:1px 6px; flex-shrink:0; }
         .cm-del-domain { background:none; border:none; color:#2e6060; cursor:pointer; padding:4px 6px; border-radius:6px; transition:all 0.12s; display:flex; align-items:center; flex-shrink:0; }
@@ -2236,7 +2460,7 @@
 
         /* Loading state */
         .cm-loading { display:flex; flex-direction:column; align-items:center; gap:10px; padding:32px; color:#4a8080; font-size:12px; }
-        .cm-loading-spinner { width:24px; height:24px; border:2px solid #1e3838; border-top-color:#00c8b4; border-radius:50%; animation:cm-spin 0.7s linear infinite; }
+        .cm-loading-spinner { width:24px; height:24px; border:2px solid #1e3838; border-top-color:var(--accent); border-radius:50%; animation:cm-spin 0.7s linear infinite; }
 
         /* Browse tab */
         .cm-browse-search { display:flex; align-items:center; gap:8px; background:#0d1a1a; border:1px solid #1e3838; border-radius:10px; padding:9px 13px; margin-bottom:10px; transition:border-color 0.2s; }
@@ -2251,7 +2475,7 @@
         /* Block tab */
         .cm-block-info { display:flex; align-items:center; gap:6px; font-size:11.5px; color:#4a8080; background:#0d1a1a; border:1px solid #1a3030; border-radius:8px; padding:8px 12px; margin-bottom:10px; }
         .cm-block-add-row { display:flex; gap:8px; margin-bottom:10px; }
-        .cm-add-btn { background:rgba(0,200,180,0.12); border:1px solid rgba(0,200,180,0.3); border-radius:8px; color:#00c8b4; font-size:11.5px; padding:7px 14px; cursor:pointer; transition:all 0.15s; white-space:nowrap; font-weight:600; }
+        .cm-add-btn { background:rgba(0,200,180,0.12); border:1px solid rgba(0,200,180,0.3); border-radius:8px; color:var(--accent); font-size:11.5px; padding:7px 14px; cursor:pointer; transition:all 0.15s; white-space:nowrap; font-weight:600; }
         .cm-add-btn:hover { background:rgba(0,200,180,0.22); }
         .cm-block-list { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; max-height:180px; overflow-y:auto; }
         .cm-block-list::-webkit-scrollbar { width:4px; }
@@ -2277,7 +2501,7 @@
         .cm-export-card-info { flex:1; }
         .cm-export-card-title { font-size:13px; font-weight:600; color:#c8e8e5; }
         .cm-export-card-desc  { font-size:11px; color:#4a8080; margin-top:2px; }
-        .cm-export-btn { background:rgba(0,200,180,0.1); border:1px solid rgba(0,200,180,0.25); border-radius:8px; color:#00c8b4; font-size:11.5px; padding:7px 14px; cursor:pointer; transition:all 0.15s; white-space:nowrap; font-weight:600; }
+        .cm-export-btn { background:rgba(0,200,180,0.1); border:1px solid rgba(0,200,180,0.25); border-radius:8px; color:var(--accent); font-size:11.5px; padding:7px 14px; cursor:pointer; transition:all 0.15s; white-space:nowrap; font-weight:600; }
         .cm-export-btn:hover { background:rgba(0,200,180,0.2); }
         .cm-import-label { cursor:pointer; }
 
@@ -2286,7 +2510,7 @@
     </style>
 
     <script>
-        // ── Navigation ──────────────────────────────────────────────────────────────
+        // -- Navigation --------------------------------------------------------------
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -2296,14 +2520,16 @@
             });
         });
 
-        // ── Changelog toggle ────────────────────────────────────────────────────────
+        // -- Changelog toggle --------------------------------------------------------
         function clToggle(id) {
             document.getElementById(id).classList.toggle('open');
         }
 
-        // ── Settings storage ────────────────────────────────────────────────────────
+        // -- Settings storage --------------------------------------------------------
         const DEFAULTS = {
             theme: 'dark', fontsize: 'medium', tabpreview: true, bookmarksbar: false, whatsappBtn: true, devhubBtn: true,
+            accentColor: 'var(--accent)',
+            bgTheme: 'teal',
             startup: 'session', homepage: 'https://www.google.com',
             engine: 'google', suggestions: true,
             trackers: true, https: false, dnt: false,
@@ -2320,7 +2546,7 @@
         const PROFILE_DEFAULTS = { name: 'Vortex User', avatar: 'V', avatarType: 'emoji', status: 'online', bio: '' };
         let profile = { ...PROFILE_DEFAULTS };
 
-        // Avatar icons — SVG based, each has id + svg string
+        // Avatar icons � SVG based, each has id + svg string
         const AVATAR_ICONS = [
             { id: 'fox', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6 2 3 7 3 12c0 3 1.5 5.5 4 7l1-3h8l1 3c2.5-1.5 4-4 4-7 0-5-3-10-9-10z"/><circle cx="9" cy="11" r="1" fill="currentColor"/><circle cx="15" cy="11" r="1" fill="currentColor"/><path d="M3 4 L6 9M21 4 L18 9"/></svg>` },
             { id: 'rocket', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>` },
@@ -2403,6 +2629,8 @@
             set('set-tabpreview', s.tabpreview); set('set-bookmarksbar', s.bookmarksbar);
             set('set-whatsapp-btn', s.whatsappBtn !== false);
             set('set-devhub-btn', s.devhubBtn !== false);
+            // Apply accent color
+            _applyAccentUI(s.accentColor || 'var(--accent)');
             set('set-startup', s.startup); set('set-homepage', s.homepage);
             set('set-engine', s.engine); set('set-suggestions', s.suggestions);
             set('set-trackers', s.trackers); set('set-https', s.https); set('set-dnt', s.dnt);
@@ -2425,13 +2653,254 @@
 
         let settings = { ...DEFAULTS };
 
+        // -- Accent Color -------------------------------------------------------------
+        const ACCENT_PRESETS = [
+            { name: 'Teal',   color: 'var(--accent)' },
+            { name: 'Blue',   color: '#3b82f6' },
+            { name: 'Purple', color: '#8b5cf6' },
+            { name: 'Pink',   color: '#ec4899' },
+            { name: 'Orange', color: '#f97316' },
+            { name: 'Red',    color: '#ef4444' },
+            { name: 'Green',  color: '#22c55e' },
+            { name: 'Yellow', color: '#eab308' },
+        ];
+
+        function _hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1,3),16);
+            const g = parseInt(hex.slice(3,5),16);
+            const b = parseInt(hex.slice(5,7),16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        function _applyAccentUI(hex) {
+            // Update CSS vars on settings page itself
+            document.documentElement.style.setProperty('--accent', hex);
+            document.documentElement.style.setProperty('--accent-dim', _hexToRgba(hex, 0.15));
+            document.documentElement.style.setProperty('--accent-glow', _hexToRgba(hex, 0.25));
+            document.documentElement.style.setProperty('--accent-10', _hexToRgba(hex, 0.10));
+            document.documentElement.style.setProperty('--accent-20', _hexToRgba(hex, 0.20));
+            // Update custom preview swatch
+            const preview = document.getElementById('accent-custom-preview');
+            if (preview) preview.style.background = hex;
+            // Update custom input value
+            const inp = document.getElementById('set-accent-custom');
+            if (inp) inp.value = hex;
+            // Update swatch active state
+            document.querySelectorAll('.accent-swatch').forEach(sw => {
+                sw.classList.toggle('active', sw.dataset.color === hex);
+            });
+        }
+
+        function _initAccentSwatches() {
+            const wrap = document.getElementById('accent-swatches');
+            if (!wrap) return;
+            wrap.innerHTML = ACCENT_PRESETS.map(p => `
+                <button class="accent-swatch" data-color="${p.color}" title="${p.name}"
+                    style="width:26px;height:26px;border-radius:50%;background:${p.color};border:2px solid transparent;cursor:pointer;transition:all 0.15s;flex-shrink:0;outline:none;">
+                </button>`).join('');
+            wrap.querySelectorAll('.accent-swatch').forEach(sw => {
+                sw.addEventListener('click', () => {
+                    settings.accentColor = sw.dataset.color;
+                    _applyAccentUI(sw.dataset.color);
+                    // Notify parent immediately
+                    window.parent.postMessage({ __vortexAction: true, channel: 'accent:changed', payload: sw.dataset.color }, '*');
+                    save(settings);
+                });
+            });
+            // Custom color input
+            const inp = document.getElementById('set-accent-custom');
+            if (inp) {
+                inp.addEventListener('input', () => {
+                    settings.accentColor = inp.value;
+                    _applyAccentUI(inp.value);
+                    window.parent.postMessage({ __vortexAction: true, channel: 'accent:changed', payload: inp.value }, '*');
+                    save(settings);
+                });
+                // Click on preview div triggers color picker
+                const preview = document.getElementById('accent-custom-preview');
+                if (preview) preview.addEventListener('click', () => inp.click());
+            }
+        }
+
+        // ── Background Themes ────────────────────────────────────────────────────────
+        const BG_THEMES = [
+            {
+                id: 'teal', name: 'Teal', desc: 'Classic dark teal — default',
+                vars: {
+                    '--bg-base':'#1a2e2e','--bg-surface':'#22383a','--bg-tab':'#1c2f30',
+                    '--bg-tab-active':'#36676c','--bg-hover':'#253f40','--bg-panel':'#0f2222',
+                    '--bg-deep':'#0d1f1f','--bg-input':'#22383a','--bg-border':'#2e4a4c',
+                    '--bg-border2':'#1e3838','--text-main':'#c8e8e5','--text-muted':'#7aadad','--text-dim':'#4a8080',
+                },
+                preview: { base:'#1a2e2e', surface:'#22383a', bar:'#36676c', text:'#7aadad' }
+            },
+            {
+                id: 'teal-mist', name: 'Teal Mist', desc: 'Softer, lighter teal tones',
+                vars: {
+                    '--bg-base':'#162828','--bg-surface':'#1e3434','--bg-tab':'#182c2c',
+                    '--bg-tab-active':'#2e5a5e','--bg-hover':'#203838','--bg-panel':'#0e1e1e',
+                    '--bg-deep':'#0b1a1a','--bg-input':'#1e3434','--bg-border':'#264444',
+                    '--bg-border2':'#1a3030','--text-main':'#b8dede','--text-muted':'#6a9e9e','--text-dim':'#3e7070',
+                },
+                preview: { base:'#162828', surface:'#1e3434', bar:'#2e5a5e', text:'#6a9e9e' }
+            },
+            {
+                id: 'midnight', name: 'Midnight', desc: 'Deep blue-black night theme',
+                vars: {
+                    '--bg-base':'#0f1117','--bg-surface':'#1a1d27','--bg-tab':'#13161f',
+                    '--bg-tab-active':'#2a3050','--bg-hover':'#1e2235','--bg-panel':'#0a0c14',
+                    '--bg-deep':'#080a10','--bg-input':'#1a1d27','--bg-border':'#252840',
+                    '--bg-border2':'#181b2e','--text-main':'#d0d4f0','--text-muted':'#7880b0','--text-dim':'#454870',
+                },
+                preview: { base:'#0f1117', surface:'#1a1d27', bar:'#2a3050', text:'#7880b0' }
+            },
+            {
+                id: 'slate', name: 'Slate', desc: 'Cool blue-grey professional',
+                vars: {
+                    '--bg-base':'#141820','--bg-surface':'#1c2130','--bg-tab':'#161b28',
+                    '--bg-tab-active':'#2c3a5a','--bg-hover':'#202840','--bg-panel':'#0e1118',
+                    '--bg-deep':'#0b0e15','--bg-input':'#1c2130','--bg-border':'#28304a',
+                    '--bg-border2':'#1a2038','--text-main':'#c8d0e8','--text-muted':'#7080a8','--text-dim':'#404870',
+                },
+                preview: { base:'#141820', surface:'#1c2130', bar:'#2c3a5a', text:'#7080a8' }
+            },
+            {
+                id: 'forest', name: 'Forest', desc: 'Natural deep green tones',
+                vars: {
+                    '--bg-base':'#141e14','--bg-surface':'#1c2a1c','--bg-tab':'#162018',
+                    '--bg-tab-active':'#2a4a2e','--bg-hover':'#1e3020','--bg-panel':'#0e160e',
+                    '--bg-deep':'#0a1208','--bg-input':'#1c2a1c','--bg-border':'#264028',
+                    '--bg-border2':'#1a2e1c','--text-main':'#c0dcc0','--text-muted':'#6a9a6a','--text-dim':'#3e6040',
+                },
+                preview: { base:'#141e14', surface:'#1c2a1c', bar:'#2a4a2e', text:'#6a9a6a' }
+            },
+            {
+                id: 'crimson', name: 'Crimson', desc: 'Dark red dramatic palette',
+                vars: {
+                    '--bg-base':'#1e1214','--bg-surface':'#2a1a1e','--bg-tab':'#201416',
+                    '--bg-tab-active':'#4a2030','--bg-hover':'#2e1820','--bg-panel':'#160e10',
+                    '--bg-deep':'#120a0c','--bg-input':'#2a1a1e','--bg-border':'#3a2028',
+                    '--bg-border2':'#281418','--text-main':'#e8c8cc','--text-muted':'#a07080','--text-dim':'#6a4050',
+                },
+                preview: { base:'#1e1214', surface:'#2a1a1e', bar:'#4a2030', text:'#a07080' }
+            },
+            {
+                id: 'ocean', name: 'Ocean', desc: 'Deep sea blue atmosphere',
+                vars: {
+                    '--bg-base':'#0d1e2e','--bg-surface':'#142436','--bg-tab':'#101c2a',
+                    '--bg-tab-active':'#1e4060','--bg-hover':'#182a40','--bg-panel':'#091420',
+                    '--bg-deep':'#060e18','--bg-input':'#142436','--bg-border':'#1e3450',
+                    '--bg-border2':'#122038','--text-main':'#c0d8f0','--text-muted':'#6090b8','--text-dim':'#385878',
+                },
+                preview: { base:'#0d1e2e', surface:'#142436', bar:'#1e4060', text:'#6090b8' }
+            },
+            {
+                id: 'aurora', name: 'Aurora', desc: 'Purple-teal northern lights',
+                vars: {
+                    '--bg-base':'#141020','--bg-surface':'#1e1830','--bg-tab':'#181428',
+                    '--bg-tab-active':'#342858','--bg-hover':'#221e38','--bg-panel':'#0e0c18',
+                    '--bg-deep':'#0a0810','--bg-input':'#1e1830','--bg-border':'#2e2448',
+                    '--bg-border2':'#1e1a34','--text-main':'#d4c8f0','--text-muted':'#8878b8','--text-dim':'#504878',
+                },
+                preview: { base:'#141020', surface:'#1e1830', bar:'#342858', text:'#8878b8' }
+            },
+            {
+                id: 'amber', name: 'Amber', desc: 'Warm golden dark theme',
+                vars: {
+                    '--bg-base':'#1e1a0e','--bg-surface':'#2a2414','--bg-tab':'#201e10',
+                    '--bg-tab-active':'#4a3c18','--bg-hover':'#2e2818','--bg-panel':'#141008',
+                    '--bg-deep':'#100c06','--bg-input':'#2a2414','--bg-border':'#3a3020',
+                    '--bg-border2':'#282010','--text-main':'#f0e0b0','--text-muted':'#b09060','--text-dim':'#706040',
+                },
+                preview: { base:'#1e1a0e', surface:'#2a2414', bar:'#4a3c18', text:'#b09060' }
+            },
+            {
+                id: 'obsidian', name: 'Obsidian', desc: 'Pure near-black minimal',
+                vars: {
+                    '--bg-base':'#0e0e10','--bg-surface':'#161618','--bg-tab':'#121214',
+                    '--bg-tab-active':'#242430','--bg-hover':'#1a1a20','--bg-panel':'#080810',
+                    '--bg-deep':'#050508','--bg-input':'#161618','--bg-border':'#222228',
+                    '--bg-border2':'#181820','--text-main':'#d8d8e8','--text-muted':'#7878a0','--text-dim':'#484860',
+                },
+                preview: { base:'#0e0e10', surface:'#161618', bar:'#242430', text:'#7878a0' }
+            },
+        ];
+
+        function _applyBgTheme(themeId) {
+            const theme = BG_THEMES.find(t => t.id === themeId);
+            if (!theme) return;
+            const root = document.documentElement;
+            Object.entries(theme.vars).forEach(([k, v]) => root.style.setProperty(k, v));
+            // Update header preview
+            _updateHeader(theme);
+            // Update active card
+            document.querySelectorAll('.bg-theme-card').forEach(c => {
+                c.classList.toggle('active', c.dataset.theme === themeId);
+            });
+        }
+
+        function _updateHeader(theme) {
+            const preview = document.getElementById('bg-theme-header-preview');
+            const name    = document.getElementById('bg-theme-header-name');
+            if (preview) {
+                preview.style.background = theme.preview.base;
+                preview.innerHTML = `
+                    <div class="bg-theme-header-bar" style="background:${theme.preview.surface};"></div>
+                    <div class="bg-theme-header-bar" style="background:${theme.preview.bar};width:75%;"></div>
+                    <div class="bg-theme-header-bar2" style="background:${theme.preview.text};"></div>`;
+            }
+            if (name) name.textContent = theme.name;
+        }
+
+        function _initBgThemes(currentId) {
+            const accordion = document.getElementById('bg-theme-accordion');
+            const header    = document.getElementById('bg-theme-header');
+            const inner     = document.getElementById('bg-theme-panel-inner');
+            if (!accordion || !header || !inner) return;
+
+            // Set initial header
+            const current = BG_THEMES.find(t => t.id === currentId) || BG_THEMES[0];
+            _updateHeader(current);
+
+            // Build grid cards
+            inner.innerHTML = BG_THEMES.map(t => `
+                <div class="bg-theme-card ${t.id === currentId ? 'active' : ''}" data-theme="${t.id}">
+                    <div class="bg-theme-card-preview" style="background:${t.preview.base};">
+                        <div class="bg-theme-card-bar" style="background:${t.preview.surface};"></div>
+                        <div class="bg-theme-card-bar" style="background:${t.preview.bar};width:80%;"></div>
+                        <div class="bg-theme-card-bar2" style="background:${t.preview.text};"></div>
+                        <div class="bg-theme-card-dot" style="background:var(--accent);"></div>
+                    </div>
+                    <div class="bg-theme-card-label" style="background:${t.preview.surface};color:${t.preview.text};">${t.name}</div>
+                </div>`).join('');
+
+            // Toggle accordion
+            header.addEventListener('click', () => {
+                accordion.classList.toggle('open');
+            });
+
+            // Card click
+            inner.querySelectorAll('.bg-theme-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const id = card.dataset.theme;
+                    settings.bgTheme = id;
+                    _applyBgTheme(id);
+                    window.parent.postMessage({ __vortexAction: true, channel: 'bgTheme:changed', payload: id }, '*');
+                    save(settings);
+                });
+            });
+        }
+
         // Load async then apply to UI
         load().then(s => {
             settings = s;
             applyToUI(settings);
+            _initAccentSwatches();
+            _applyBgTheme(s.bgTheme || 'teal');
+            _initBgThemes(s.bgTheme || 'teal');
         });
 
-        // ── Profile ──────────────────────────────────────────────────────────────────
+        // -- Profile ------------------------------------------------------------------
         async function loadProfile() {
             try {
                 const stored = await _invoke('storage:read', 'profile');
@@ -2561,7 +3030,7 @@
         // Auto-save on any settings change (exclude profile inputs)
         document.querySelectorAll('select[id^="set-"], input[id^="set-"]').forEach(el => {
             el.addEventListener('change', () => {
-                // Convert hyphenated id to camelCase key (e.g. set-tabsleep-minutes → tabsleepMinutes)
+                // Convert hyphenated id to camelCase key (e.g. set-tabsleep-minutes ? tabsleepMinutes)
                 const raw = el.id.replace('set-', '');
                 const key = raw.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
                 settings[key] = el.type === 'checkbox' ? el.checked : el.value;
@@ -2579,13 +3048,13 @@
             save(settings);
         });
 
-        // ── Buttons ─────────────────────────────────────────────────────────────────
+        // -- Buttons -----------------------------------------------------------------
         document.getElementById('btn-clear-data').addEventListener('click', () => {
             if (confirm('Clear all browsing data? This cannot be undone.')) {
                 _send('browser:clearData');
                 localStorage.removeItem('browser_session');
                 localStorage.removeItem('vortex_session_sync');
-                document.getElementById('btn-clear-data').textContent = 'Cleared ✓';
+                document.getElementById('btn-clear-data').textContent = 'Cleared ?';
                 setTimeout(() => document.getElementById('btn-clear-data').textContent = 'Clear Now', 2000);
             }
         });
@@ -2606,7 +3075,7 @@
             _send('settings:pickDownloadFolder');
         });
 
-        // ── Version & Commit ─────────────────────────────────────────────────────────
+        // -- Version & Commit ---------------------------------------------------------
         Promise.all([
             _invoke('app:version'),
             _invoke('updater:localSha'),
@@ -2622,9 +3091,9 @@
                 if (commitEl && shaEl && sha) {
                     shaEl.textContent = sha.slice(0, 7);
                     if (srcEl) {
-                        srcEl.textContent = source === 'update' ? '· updated build'
-                            : source === 'build' ? '· original build'
-                                : '· dev';
+                        srcEl.textContent = source === 'update' ? '� updated build'
+                            : source === 'build' ? '� original build'
+                                : '� dev';
                     }
                     commitEl.style.display = 'flex';
                     commitEl.style.alignItems = 'center';
@@ -2638,7 +3107,7 @@
             if (verEl) verEl.textContent = 'Version 1.0.1';
         });
 
-        // ── Notification Sites ───────────────────────────────────────────────────────
+        // -- Notification Sites -------------------------------------------------------
         function _renderNotifSites(sites) {
             const list = document.getElementById('notif-sites-list');
             if (!list) return;
@@ -2651,7 +3120,7 @@
                 <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1a3030;">
                     <span style="flex:1;font-size:12px;color:#c8e8e5;">${site}</span>
                     <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${perm === 'allow' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'};color:${perm === 'allow' ? '#22c55e' : '#ef4444'};">${perm}</span>
-                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-site="${site}">✕</button>
+                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-site="${site}">?</button>
                 </div>
             `).join('');
             list.querySelectorAll('button[data-site]').forEach(btn => {
@@ -2683,20 +3152,20 @@
             _renderNotifSites({});
         });
 
-        // ── PiP Allowed Sites ────────────────────────────────────────────────────────
+        // -- PiP Allowed Sites --------------------------------------------------------
         function _renderPipSites(sites) {
             const list = document.getElementById('pip-sites-list');
             if (!list) return;
             if (!sites || !sites.length) {
-                list.innerHTML = '<div style="font-size:12px;color:#4a8080;padding:4px 0;">No restrictions — PiP works on all sites.</div>';
+                list.innerHTML = '<div style="font-size:12px;color:#4a8080;padding:4px 0;">No restrictions � PiP works on all sites.</div>';
                 return;
             }
             list.innerHTML = sites.map((site, i) => `
                 <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #1a3030;" data-idx="${i}">
                     <img src="https://www.google.com/s2/favicons?domain=${site}&sz=16" width="14" height="14" style="border-radius:2px;flex-shrink:0;" onerror="this.style.display='none'" />
                     <span class="pip-site-label" style="flex:1;font-size:12px;color:#c8e8e5;" data-idx="${i}">${site}</span>
-                    <button class="setting-btn" style="padding:3px 8px;font-size:11px;" data-edit="${i}" title="Edit">✎</button>
-                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-del="${i}" title="Remove">✕</button>
+                    <button class="setting-btn" style="padding:3px 8px;font-size:11px;" data-edit="${i}" title="Edit">?</button>
+                    <button class="setting-btn danger" style="padding:3px 8px;font-size:11px;" data-del="${i}" title="Remove">?</button>
                 </div>
             `).join('');
 
@@ -2740,12 +3209,12 @@
             if (e.key === 'Enter') document.getElementById('btn-pip-add').click();
         });
 
-        // ── Sync & Backup ────────────────────────────────────────────────────────────
+        // -- Sync & Backup ------------------------------------------------------------
         function _showSyncStatus(msg, isError) {
             const el = document.getElementById('sync-status');
             if (!el) return;
             el.textContent = msg;
-            el.style.color = isError ? '#c86060' : '#00c8b4';
+            el.style.color = isError ? '#c86060' : 'var(--accent)';
             clearTimeout(el._t);
             el._t = setTimeout(() => { el.textContent = ''; }, 3000);
         }
@@ -2780,7 +3249,7 @@
                 if (!Array.isArray(data)) throw new Error('Invalid format');
                 await _invoke('storage:write', 'bookmarks', data);
                 _showSyncStatus(`Imported ${data.length} bookmarks.`);
-            } catch { _showSyncStatus('Import failed — invalid JSON.', true); }
+            } catch { _showSyncStatus('Import failed � invalid JSON.', true); }
             e.target.value = '';
         });
 
@@ -2817,11 +3286,11 @@
                 await save(settings);
                 applyToUI(settings);
                 _showSyncStatus('Settings restored successfully.');
-            } catch { _showSyncStatus('Import failed — invalid file.', true); }
+            } catch { _showSyncStatus('Import failed � invalid file.', true); }
             e.target.value = '';
         });
 
-        // ── Hash navigation (vortex://settings#shortcuts etc.) ──────────────────────
+        // -- Hash navigation (vortex://settings#shortcuts etc.) ----------------------
         function goToHash() {
             const hash = location.hash.replace('#', '');
             if (!hash) return;
@@ -2831,7 +3300,7 @@
         goToHash();
         window.addEventListener('hashchange', goToHash);
 
-        // ── Updates ──────────────────────────────────────────────────────────────────
+        // -- Updates ------------------------------------------------------------------
         let _commits = [];
         let _localSha = null;
 
@@ -2839,7 +3308,7 @@
             const el = document.getElementById('upd-status');
             if (!el) return;
             el.textContent = msg;
-            el.style.color = isError ? '#c86060' : '#00c8b4';
+            el.style.color = isError ? '#c86060' : 'var(--accent)';
         }
 
         function _formatDate(iso) {
@@ -2864,15 +3333,15 @@
                 return `
                 <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid #1a3030;${i === commits.length - 1 ? 'border-bottom:none;' : ''}">
                     <div style="flex-shrink:0;margin-top:2px;">
-                        <div style="width:8px;height:8px;border-radius:50%;background:${isCurrent ? '#00c8b4' : '#2e4a4c'};margin-top:4px;${isCurrent ? 'box-shadow:0 0 6px #00c8b4;' : ''}"></div>
+                        <div style="width:8px;height:8px;border-radius:50%;background:${isCurrent ? 'var(--accent)' : '#2e4a4c'};margin-top:4px;${isCurrent ? 'box-shadow:0 0 6px var(--accent);' : ''}"></div>
                     </div>
                     <div style="flex:1;min-width:0;">
                         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                            <code style="font-size:11px;color:#00c8b4;background:#0d2a2a;padding:2px 6px;border-radius:4px;font-family:monospace;">${c.shortSha}</code>
-                            ${isCurrent ? '<span style="font-size:10px;background:rgba(0,200,180,0.15);color:#00c8b4;padding:2px 7px;border-radius:10px;border:1px solid #00c8b4;">Current</span>' : ''}
+                            <code style="font-size:11px;color:var(--accent);background:#0d2a2a;padding:2px 6px;border-radius:4px;font-family:monospace;">${c.shortSha}</code>
+                            ${isCurrent ? '<span style="font-size:10px;background:rgba(0,200,180,0.15);color:var(--accent);padding:2px 7px;border-radius:10px;border:1px solid var(--accent);">Current</span>' : ''}
                         </div>
                         <div style="font-size:13px;color:#c8e8e5;margin-top:4px;word-break:break-word;">${c.message}</div>
-                        <div style="font-size:11px;color:#4a8080;margin-top:3px;">${c.author} · ${_formatDate(c.date)}</div>
+                        <div style="font-size:11px;color:#4a8080;margin-top:3px;">${c.author} � ${_formatDate(c.date)}</div>
                     </div>
                     <div style="flex-shrink:0;">
                         ${isCurrent

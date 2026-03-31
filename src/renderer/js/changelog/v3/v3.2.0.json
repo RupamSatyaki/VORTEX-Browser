@@ -1,0 +1,28 @@
+{
+  "id": "v3.2.0",
+  "version": "3.2.0",
+  "badge": "stable",
+  "name": "Background Theme Accordion",
+  "date": "2026-03-31",
+  "isCurrent": false,
+  "open": false,
+  "counts": { "new": 0, "improve": 2, "fix": 0 },
+  "categories": [
+    {
+      "label": "Appearance",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Background Theme — Accordion UI",
+          "desc": "Background Theme section ab ek collapsible accordion hai. Header click karo toh expand hota hai, andar saare theme cards grid mein dikhte hain with mini preview. Selected theme ka preview header mein dikhta hai.",
+          "howto": "Settings → Appearance → Background Theme row click karo to expand."
+        },
+        {
+          "type": "improve",
+          "label": "4 new background themes",
+          "desc": "Ocean (deep sea blue), Aurora (purple-teal), Amber (warm golden), Obsidian (pure near-black) — total 10 themes."
+        }
+      ]
+    }
+  ]
+}
