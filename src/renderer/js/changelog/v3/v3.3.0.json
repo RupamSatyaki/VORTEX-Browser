@@ -1,11 +1,11 @@
 {
   "id": "v3.3.0",
   "version": "3.3.0",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Site Permissions Manager",
   "date": "2026-03-31",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 2, "improve": 1, "fix": 0 },
   "categories": [
     {

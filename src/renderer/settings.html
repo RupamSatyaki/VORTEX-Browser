@@ -1751,65 +1751,125 @@
         <!-- Updates -->
         <div class="section" id="sec-updates">
             <div class="section-title">Updates</div>
-            <div class="card">
-                <div class="card-row">
+
+            <!-- Version Status Card -->
+            <div class="card" style="margin-bottom:12px;">
+                <!-- Row 1: Current version + check button -->
+                <div class="card-row" style="flex-wrap:wrap;gap:10px;">
                     <div class="row-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path
-                                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         </svg>
                     </div>
                     <div class="row-text">
-                        <div class="row-label">Repository</div>
-                        <div class="row-desc" id="upd-repo-label">RupamSatyaki/VORTEX-Browser</div>
+                        <div class="row-label">Current Version</div>
+                        <div class="row-desc" id="upd-current-ver">Loading...</div>
                     </div>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <span id="upd-local-sha" style="font-size:11px;color:#4a8080;font-family:monospace;"></span>
-                        <button class="setting-btn" id="btn-upd-refresh">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor"
-                                stroke-width="2" style="margin-right:4px;vertical-align:middle">
-                                <path d="M23 4v6h-6" />
-                                <path d="M20.49 15a9 9 0 1 1-2-8.83" />
+                    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">
+                        <button class="setting-btn" id="btn-upd-check">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle">
+                                <path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/>
                             </svg>
-                            Fetch Commits
+                            Check for Updates
                         </button>
+                    </div>
+                </div>
+                <!-- Row 2: What's installed indicator -->
+                <div id="upd-installed-indicator" style="display:none;padding:8px 16px 10px;border-top:1px solid #1a3030;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div id="upd-installed-dot" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#4a8080;"></div>
+                        <span id="upd-installed-label" style="font-size:11.5px;color:#7aadad;"></span>
+                    </div>
+                </div>
+                <!-- Row 3: Last checked -->
+                <div id="upd-last-checked-row" style="display:none;padding:6px 16px 10px;border-top:1px solid #1a3030;">
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#2e5a5a" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span style="font-size:11px;color:#2e5a5a;">Last checked: </span>
+                        <span id="upd-last-checked-text" style="font-size:11px;color:#4a8080;"></span>
                     </div>
                 </div>
             </div>
 
-            <div id="upd-status" style="font-size:12px;color:var(--accent);padding:6px 4px;min-height:20px;"></div>
-
-            <!-- Retry note -->
-            <div
-                style="margin:0 0 10px;padding:8px 12px;background:#0a1a1a;border-radius:8px;border-left:3px solid #2e4a4c;display:flex;align-items:flex-start;gap:8px;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a8080" stroke-width="2"
-                    style="flex-shrink:0;margin-top:1px">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span style="font-size:11.5px;color:#4a8080;line-height:1.5;">If commits fail to load or update gets
-                    stuck, try <strong style="color:#7aadad;">2�3 more times</strong> � it's usually a network hiccup.
-                    If it keeps failing, wait a few minutes and try again.</span>
+            <!-- Status message -->
+            <div id="upd-status" style="font-size:12px;color:var(--accent);padding:4px 2px;min-height:18px;display:flex;align-items:center;justify-content:space-between;">
+                <span id="upd-status-text"></span>
+                <a href="https://github.com/RupamSatyaki/VORTEX-Browser/releases" id="upd-all-releases"
+                   style="font-size:11px;color:#4a8080;text-decoration:none;display:flex;align-items:center;gap:4px;transition:color 0.15s;flex-shrink:0;"
+                   onmouseenter="this.style.color='var(--accent)'" onmouseleave="this.style.color='#4a8080'"
+                   target="_blank">
+                    <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+                    All Releases ↗
+                </a>
             </div>
 
-            <!-- Commits list -->
-            <div class="card" id="upd-commits-card" style="display:none;">
-                <div id="upd-commits-list"></div>
+            <!-- Release info card — shown when update found or up to date -->
+            <div class="card" id="upd-release-card" style="display:none;margin-bottom:12px;">
+                <!-- Up to date state -->
+                <div id="upd-uptodate" style="display:none;padding:18px 16px;text-align:center;">
+                    <div style="font-size:28px;margin-bottom:8px;">✅</div>
+                    <div style="font-size:14px;font-weight:700;color:#22c55e;">You are up to date!</div>
+                    <div style="font-size:12px;color:#4a8080;margin-top:4px;" id="upd-latest-label"></div>
+                </div>
+
+                <!-- Update available state -->
+                <div id="upd-available" style="display:none;">
+                    <!-- Header -->
+                    <div style="display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid #1e3838;">
+                        <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13px;font-weight:700;color:#c8e8e5;">New version available!</div>
+                            <div style="font-size:12px;color:var(--accent);margin-top:2px;" id="upd-new-tag"></div>
+                        </div>
+                    </div>
+
+                    <!-- Release notes -->
+                    <div style="padding:12px 16px;border-bottom:1px solid #1e3838;">
+                        <div style="font-size:11px;color:#4a8080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Release Notes</div>
+                        <div id="upd-release-notes" style="font-size:12px;color:#7aadad;line-height:1.7;max-height:140px;overflow-y:auto;padding-right:4px;"></div>
+                    </div>
+
+                    <!-- Download section -->
+                    <div style="padding:12px 16px;" id="upd-download-section">
+                        <div id="upd-asset-wrap" style="display:none;">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a8080" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                <span id="upd-asset-name" style="font-size:12px;color:#7aadad;flex:1;"></span>
+                                <span id="upd-asset-size" style="font-size:11px;color:#4a8080;"></span>
+                            </div>
+                            <button class="setting-btn" id="btn-upd-download" style="width:100%;justify-content:center;padding:10px;font-size:13px;font-weight:600;background:rgba(0,200,180,0.12);border-color:rgba(0,200,180,0.3);color:var(--accent);">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;vertical-align:middle">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                                Download Installer
+                            </button>
+                        </div>
+                        <div id="upd-no-asset" style="display:none;font-size:12px;color:#4a8080;text-align:center;padding:8px 0;">
+                            No installer found in this release.
+                            <a id="upd-manual-link" href="#" style="color:var(--accent);text-decoration:none;" target="_blank">Download manually ↗</a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Apply progress -->
-            <div id="upd-progress" style="display:none;margin-top:12px;">
+            <!-- Apply progress (existing commit apply) -->
+            <div id="upd-progress" style="display:none;margin-bottom:12px;">
                 <div class="card">
                     <div class="card-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
                         <div style="display:flex;align-items:center;gap:10px;width:100%;">
                             <div class="row-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent)"
-                                    stroke-width="2">
-                                    <polyline points="1 4 1 10 7 10" />
-                                    <polyline points="23 20 23 14 17 14" />
-                                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--accent)" stroke-width="2">
+                                    <polyline points="1 4 1 10 7 10"/>
+                                    <polyline points="23 20 23 14 17 14"/>
+                                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15"/>
                                 </svg>
                             </div>
                             <div class="row-text">
@@ -1818,10 +1878,66 @@
                             </div>
                         </div>
                         <div style="width:100%;height:4px;background:#1a3838;border-radius:2px;overflow:hidden;">
-                            <div id="upd-progress-bar"
-                                style="height:100%;background:var(--accent);width:0%;transition:width 0.3s ease;border-radius:2px;">
-                            </div>
+                            <div id="upd-progress-bar" style="height:100%;background:var(--accent);width:0%;transition:width 0.3s ease;border-radius:2px;"></div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Releases list -->
+            <div class="card" id="upd-releases-list-card" style="display:none;margin-bottom:12px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #1e3838;">
+                    <span style="font-size:12px;font-weight:700;color:#7aadad;">All Releases</span>
+                    <span id="upd-releases-count" style="font-size:11px;color:#4a8080;"></span>
+                </div>
+                <div id="upd-releases-list" style="max-height:360px;overflow-y:auto;">
+                </div>
+            </div>
+
+            <!-- Delete applied commits shortcut -->
+            <div class="card" id="upd-delete-card" style="display:none;margin-bottom:12px;">
+                <div class="card-row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#ef4444" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                            <path d="M10 11v6M14 11v6"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-label" style="color:#ef4444;">Delete Applied Commits</div>
+                        <div class="row-desc" id="upd-applied-sha-label">Revert to bundled version</div>
+                    </div>
+                    <button class="setting-btn" id="btn-upd-delete-applied" style="border-color:rgba(239,68,68,0.3);color:#ef4444;background:rgba(239,68,68,0.08);">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle">
+                            <polyline points="3 6 5 6 21 6"/>
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                        </svg>
+                        Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Advanced: Commit-based updater (collapsible) -->
+            <div style="border:1px solid #1e3838;border-radius:10px;overflow:hidden;">
+                <div id="upd-advanced-toggle" style="display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none;transition:background 0.15s;" onmouseenter="this.style.background='#162828'" onmouseleave="this.style.background=''">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a8080" stroke-width="2">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                    </svg>
+                    <span style="font-size:12px;font-weight:600;color:#7aadad;flex:1;">Advanced — Commit-based Update</span>
+                    <span id="upd-local-sha" style="font-size:10px;color:#4a8080;font-family:monospace;"></span>
+                    <svg id="upd-adv-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#4a8080" stroke-width="2.5" style="transition:transform 0.2s;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+                </div>
+                <div id="upd-advanced-body" style="display:none;border-top:1px solid #1e3838;">
+                    <div style="padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #1a3030;">
+                        <span style="font-size:11.5px;color:#4a8080;flex:1;">Apply any commit directly from GitHub repository</span>
+                        <button class="setting-btn" id="btn-upd-refresh" style="font-size:11px;padding:5px 12px;">
+                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+                            Fetch Commits
+                        </button>
+                    </div>
+                    <div class="card" id="upd-commits-card" style="display:none;border-radius:0;border:none;border-top:1px solid #1a3030;">
+                        <div id="upd-commits-list"></div>
                     </div>
                 </div>
             </div>
@@ -2401,6 +2517,7 @@
         .cm-refresh-btn { background:rgba(0,200,180,0.08); border:1px solid rgba(0,200,180,0.2); border-radius:8px; color:var(--accent); cursor:pointer; padding:6px 10px; display:flex; align-items:center; transition:all 0.15s; }
         .cm-refresh-btn:hover { background:rgba(0,200,180,0.18); }
         @keyframes cm-spin { to { transform:rotate(360deg); } }
+        @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
 
         /* Stats row */
         .cm-stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
@@ -2589,6 +2706,9 @@
 
         // Use postMessage to parent (cross-origin safe) for both invoke and send
         function _invoke(channel, ...args) {
+            // Long-running channels get extended timeout
+            const LONG_CHANNELS = ['updater:applyCommit', 'updater:fetchCommits', 'updater:fetchLatestRelease'];
+            const timeout = LONG_CHANNELS.includes(channel) ? 120000 : 5000;
             return new Promise((resolve) => {
                 const reqId = '__inv_' + Date.now() + '_' + Math.random();
                 function handler(ev) {
@@ -2597,7 +2717,7 @@
                     resolve(ev.data.result);
                 }
                 window.addEventListener('message', handler);
-                setTimeout(() => { window.removeEventListener('message', handler); resolve(null); }, 5000);
+                setTimeout(() => { window.removeEventListener('message', handler); resolve(null); }, timeout);
                 window.parent.postMessage({ __vortexAction: true, channel: '__invoke', payload: { reqId, channel, args } }, '*');
             });
         }
@@ -3313,7 +3433,7 @@
         let _localSha = null;
 
         function _updStatus(msg, isError) {
-            const el = document.getElementById('upd-status');
+            const el = document.getElementById('upd-status-text');
             if (!el) return;
             el.textContent = msg;
             el.style.color = isError ? '#c86060' : 'var(--accent)';
@@ -3397,32 +3517,44 @@
         async function applyCommit(btn) {
             const sha = btn.dataset.sha;
             const msg = btn.dataset.msg;
-            if (!confirm(`Apply commit "${msg}"?\n\nThis will download ALL source files from this commit snapshot and restart the app.\nThis may take 30-60 seconds.`)) return;
+            if (!confirm(`Apply commit "${msg}"?\n\nThis will download ALL source files from this commit snapshot.\nThis may take 30-60 seconds.`)) return;
 
-            // Show progress
             const progress = document.getElementById('upd-progress');
             const progressBar = document.getElementById('upd-progress-bar');
             const progressTitle = document.getElementById('upd-progress-title');
             const progressDesc = document.getElementById('upd-progress-desc');
             if (progress) progress.style.display = 'block';
             if (progressTitle) progressTitle.textContent = 'Applying commit ' + sha.slice(0, 7) + '...';
-            if (progressDesc) progressDesc.textContent = 'Downloading all source files from GitHub...';
-            if (progressBar) progressBar.style.width = '30%';
+            if (progressDesc) progressDesc.textContent = 'Downloading source files from GitHub...';
+            if (progressBar) progressBar.style.width = '20%';
 
-            // Disable all apply buttons
             document.querySelectorAll('[data-sha]').forEach(b => b.disabled = true);
             _updStatus('Applying commit ' + sha.slice(0, 7) + '...');
 
-            try {
-                if (progressBar) progressBar.style.width = '60%';
-                const result = await _invoke('updater:applyCommit', sha);
+            // Animate progress bar while waiting
+            let _pct = 20;
+            const _pTimer = setInterval(() => {
+                if (_pct < 85) { _pct += 3; if (progressBar) progressBar.style.width = _pct + '%'; }
+            }, 800);
 
+            try {
+                const result = await _invoke('updater:applyCommit', sha);
+                clearInterval(_pTimer);
                 if (progressBar) progressBar.style.width = '100%';
 
-                if (!result || !result.success) {
-                    _updStatus('Update failed: ' + (result && result.error || 'Unknown error'), true);
+                // result can be null if IPC timed out
+                if (result === null || result === undefined) {
+                    _updStatus('Update timed out — GitHub may be slow. Try again.', true);
+                    if (progressTitle) progressTitle.textContent = 'Timed out';
+                    if (progressDesc) progressDesc.textContent = 'The request took too long. Check your internet and retry.';
+                    return;
+                }
+
+                if (!result.success) {
+                    const errMsg = result.error || 'Unknown error';
+                    _updStatus('Update failed: ' + errMsg, true);
                     if (progressTitle) progressTitle.textContent = 'Update failed';
-                    if (progressDesc) progressDesc.textContent = result && result.error || '';
+                    if (progressDesc) progressDesc.textContent = errMsg;
                     return;
                 }
 
@@ -3431,7 +3563,6 @@
                 if (progressDesc) progressDesc.textContent = 'Restart the app to apply changes.';
                 _updStatus(`Done! ${updCount} file(s) updated. Please restart Vortex.`);
 
-                // Show restart button
                 const restartBtn = document.createElement('button');
                 restartBtn.className = 'setting-btn';
                 restartBtn.style.cssText = 'margin-top:10px;';
@@ -3440,6 +3571,7 @@
                 progress.appendChild(restartBtn);
 
             } catch (e) {
+                clearInterval(_pTimer);
                 _updStatus('Error: ' + e.message, true);
                 if (progressTitle) progressTitle.textContent = 'Error';
                 if (progressDesc) progressDesc.textContent = e.message;
@@ -3450,9 +3582,384 @@
 
         document.getElementById('btn-upd-refresh').addEventListener('click', fetchCommits);
 
-        // Auto-fetch when Updates section is opened
+        // ── Release-based updater ─────────────────────────────────────────────
+        function _compareVersions(a, b) {
+            const pa = a.replace(/^v/, '').split('.').map(Number);
+            const pb = b.replace(/^v/, '').split('.').map(Number);
+            for (let i = 0; i < 3; i++) {
+                const na = pa[i] || 0, nb = pb[i] || 0;
+                if (na > nb) return 1;
+                if (na < nb) return -1;
+            }
+            return 0;
+        }
+
+        function _formatBytes(bytes) {
+            if (!bytes) return '';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function _renderReleaseNotes(body) {
+            if (!body) return '<span style="color:#4a8080;">No release notes.</span>';
+            return body
+                .replace(/^### (.+)$/gm, '<div style="font-size:11px;font-weight:700;color:#c8e8e5;margin:8px 0 4px;text-transform:uppercase;letter-spacing:0.5px;">$1</div>')
+                .replace(/^## (.+)$/gm, '<div style="font-size:12px;font-weight:700;color:#c8e8e5;margin:8px 0 4px;">$1</div>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#c8e8e5;">$1</strong>')
+                .replace(/^[-*] (.+)$/gm, '<div style="display:flex;gap:6px;margin:2px 0;"><span style="color:var(--accent);flex-shrink:0;">•</span><span>$1</span></div>')
+                .replace(/\n\n/g, '<br/>');
+        }
+
+        function _makeDownloadBtn(asset, tag, isCurrent) {
+            if (isCurrent) return `<div style="font-size:11px;color:var(--accent);padding:4px 0;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> This is your current version</div>`;
+
+            const dlBtn = asset ? `
+                <button class="setting-btn upd-dl-btn" data-url="${asset.downloadUrl}" data-tag="${tag}"
+                    style="flex:1;justify-content:center;padding:8px 6px;font-size:12px;">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download .exe${asset.size ? ' · ' + _formatBytes(asset.size) : ''}
+                </button>` : '';
+
+            const installBtn = asset ? `
+                <button class="setting-btn upd-install-btn" data-url="${asset.downloadUrl}" data-tag="${tag}"
+                    style="flex:1;justify-content:center;padding:8px 6px;font-size:12px;font-weight:700;
+                    background:rgba(0,200,180,0.14);border-color:rgba(0,200,180,0.35);color:var(--accent);">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle">
+                        <path d="M12 2v12M8 10l4 4 4-4"/>
+                        <path d="M20 16v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2"/>
+                    </svg>
+                    Install ${tag}
+                </button>` : '';
+
+            const noAsset = !asset ? `<div style="font-size:11px;color:#4a8080;padding:4px 0;">No installer for this release.</div>` : '';
+
+            const progress = `
+                <div class="upd-install-progress" style="display:none;margin-top:10px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+                        <span style="font-size:11px;color:#7aadad;" id="upd-install-info">Preparing...</span>
+                        <span style="font-size:11px;color:var(--accent);font-weight:700;" id="upd-install-pct">0%</span>
+                    </div>
+                    <div style="height:5px;background:#1a3838;border-radius:3px;overflow:hidden;">
+                        <div id="upd-install-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#36e8d4);border-radius:3px;transition:width 0.3s ease;"></div>
+                    </div>
+                    <div style="font-size:10px;color:#4a8080;margin-top:5px;">App will close and installer will launch automatically.</div>
+                </div>`;
+
+            return `
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    ${dlBtn}
+                    ${installBtn}
+                    ${noAsset}
+                </div>
+                ${progress}`;
+        }
+
+        let _allReleases = [];
+        let _currentVer = '0.0.0';
+        let _lastChecked = null;
+
+        function _timeAgo(ts) {
+            if (!ts) return 'Never';
+            const diff = Math.floor((Date.now() - ts) / 1000);
+            if (diff < 60)  return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + ' min ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' hour' + (Math.floor(diff/3600) > 1 ? 's' : '') + ' ago';
+            return Math.floor(diff / 86400) + ' day' + (Math.floor(diff/86400) > 1 ? 's' : '') + ' ago';
+        }
+
+        function _updateLastChecked() {
+            _lastChecked = Date.now();
+            localStorage.setItem('vx_upd_last_checked', _lastChecked);
+            const el = document.getElementById('upd-last-checked-text');
+            const row = document.getElementById('upd-last-checked-row');
+            if (el) el.textContent = _timeAgo(_lastChecked);
+            if (row) row.style.display = 'block';
+        }
+
+        function _loadLastChecked() {
+            const saved = localStorage.getItem('vx_upd_last_checked');
+            if (saved) {
+                _lastChecked = parseInt(saved, 10);
+                const el = document.getElementById('upd-last-checked-text');
+                const row = document.getElementById('upd-last-checked-row');
+                if (el) el.textContent = _timeAgo(_lastChecked);
+                if (row) row.style.display = 'block';
+            }
+        }
+
+        async function _showInstalledIndicator(currentVer) {
+            const indicator = document.getElementById('upd-installed-indicator');
+            const dot       = document.getElementById('upd-installed-dot');
+            const label     = document.getElementById('upd-installed-label');
+            if (!indicator) return;
+
+            const shaObj = await _invoke('updater:localSha');
+            indicator.style.display = 'block';
+
+            if (shaObj && shaObj.source === 'update') {
+                // Running applied commit
+                const sha = shaObj.sha ? shaObj.sha.slice(0, 7) : '?';
+                if (dot) dot.style.background = '#f59e0b';
+                if (label) label.textContent = `Running applied commit ${sha} — not a release build`;
+                // Show delete card
+                const delCard = document.getElementById('upd-delete-card');
+                const delLabel = document.getElementById('upd-applied-sha-label');
+                if (delCard) delCard.style.display = 'block';
+                if (delLabel) delLabel.textContent = `Applied commit: ${sha} — click to revert to bundled version`;
+            } else if (shaObj && shaObj.source === 'git') {
+                // Dev mode
+                const sha = shaObj.sha ? shaObj.sha.slice(0, 7) : '?';
+                if (dot) dot.style.background = '#8b5cf6';
+                if (label) label.textContent = `Dev mode — running from source (commit ${sha})`;
+            } else {
+                // Release build
+                if (dot) dot.style.background = '#22c55e';
+                if (label) label.textContent = `Running release v${currentVer}`;
+            }
+        }
+
+        async function checkForUpdates() {
+            const btn = document.getElementById('btn-upd-check');
+            const relCard = document.getElementById('upd-release-card');
+            const relListCard = document.getElementById('upd-releases-list-card');
+            const uptodate = document.getElementById('upd-uptodate');
+            const available = document.getElementById('upd-available');
+
+            if (btn) { btn.disabled = true; btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle;animation:spin 0.8s linear infinite"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>Checking...'; }
+            _updStatus('Fetching releases from GitHub...');
+
+            try {
+                _currentVer = await _invoke('app:version') || '0.0.0';
+                document.getElementById('upd-current-ver').textContent = 'v' + _currentVer;
+
+                const releases = await _invoke('updater:fetchAllReleases');
+                if (!releases || releases.error) {
+                    _updStatus('Failed: ' + (releases?.error || 'Network error'), true);
+                    return;
+                }
+
+                _allReleases = releases;
+                const latest = releases[0];
+                if (!latest) { _updStatus('No releases found.', true); return; }
+
+                const cmp = _compareVersions(_currentVer, latest.tag);
+
+                // Show latest release card
+                relCard.style.display = 'block';
+                if (cmp >= 0) {
+                    uptodate.style.display = 'block';
+                    available.style.display = 'none';
+                    document.getElementById('upd-latest-label').textContent = 'Latest: ' + latest.tag + ' — ' + latest.name;
+                } else {
+                    uptodate.style.display = 'none';
+                    available.style.display = 'block';
+                    document.getElementById('upd-new-tag').textContent = latest.tag + ' — ' + latest.name;
+                    document.getElementById('upd-release-notes').innerHTML = _renderReleaseNotes(latest.body);
+
+                    // Download button for latest
+                    const dlSection = document.getElementById('upd-download-section');
+                    dlSection.innerHTML = _makeDownloadBtn(latest.asset, latest.tag, false);
+                    dlSection.querySelector('.upd-dl-btn')?.addEventListener('click', function() {
+                        _triggerDownload(this.dataset.url, this.dataset.tag, this);
+                    });
+                    dlSection.querySelector('.upd-install-btn')?.addEventListener('click', async function() {
+                        const url = this.dataset.url;
+                        const tag = this.dataset.tag;
+                        if (!url) return;
+                        const isOlder = _compareVersions(_currentVer, tag) > 0;
+                        const confirmMsg = isOlder
+                            ? `⚠️ Rollback to ${tag}?\n\nThis is an OLDER version than your current v${_currentVer}.\n\nThe app will close and the installer will launch.`
+                            : `Install ${tag}?\n\nThe app will close and the installer will launch automatically.`;
+                        if (!confirm(confirmMsg)) return;
+                        const progressEl = dlSection.querySelector('.upd-install-progress');
+                        if (progressEl) progressEl.style.display = 'block';
+                        dlSection.querySelectorAll('button').forEach(b => b.disabled = true);
+                        _updStatus('Downloading installer for ' + tag + '...');
+                        const result = await _invoke('updater:installRelease', url, tag);
+                        if (!result?.success) {
+                            _updStatus('Install failed: ' + (result?.error || 'Unknown'), true);
+                            if (progressEl) progressEl.style.display = 'none';
+                            dlSection.querySelectorAll('button').forEach(b => b.disabled = false);
+                        }
+                    });
+                }
+
+                // Render all releases list
+                _renderAllReleases(releases, _currentVer);
+                relListCard.style.display = 'block';
+                document.getElementById('upd-releases-count').textContent = releases.length + ' releases';
+
+                // Update last checked timestamp
+                _updateLastChecked();
+                // Show what's installed
+                _showInstalledIndicator(_currentVer);
+
+                _updStatus('');
+            } catch (e) {
+                _updStatus('Error: ' + e.message, true);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:middle"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>Check for Updates';
+                }
+            }
+        }
+
+        function _renderAllReleases(releases, currentVer) {
+            const list = document.getElementById('upd-releases-list');
+            if (!list) return;
+            list.innerHTML = releases.map((r, i) => {
+                const isCurrent = _compareVersions(currentVer, r.tag) === 0;
+                const isNewer   = _compareVersions(currentVer, r.tag) < 0;
+                const tagColor  = isCurrent ? 'var(--accent)' : isNewer ? '#22c55e' : '#4a8080';
+                const tagBg     = isCurrent ? 'rgba(0,200,180,0.12)' : isNewer ? 'rgba(34,197,94,0.1)' : '#0f2222';
+                const tagBorder = isCurrent ? 'rgba(0,200,180,0.3)' : isNewer ? 'rgba(34,197,94,0.25)' : '#1e3838';
+
+                return `
+                <div style="border-bottom:1px solid #1a3030;${i === releases.length-1 ? 'border-bottom:none;' : ''}">
+                    <!-- Release header row -->
+                    <div class="upd-rel-toggle" data-idx="${i}" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background 0.12s;"
+                        onmouseenter="this.style.background='#162828'" onmouseleave="this.style.background=''">
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                                <span style="font-size:12px;font-weight:700;color:${tagColor};background:${tagBg};border:1px solid ${tagBorder};padding:2px 8px;border-radius:6px;">${r.tag}</span>
+                                ${isCurrent ? '<span style="font-size:10px;color:var(--accent);background:rgba(0,200,180,0.1);border:1px solid rgba(0,200,180,0.2);padding:1px 6px;border-radius:4px;">Current</span>' : ''}
+                                ${r.prerelease ? '<span style="font-size:10px;color:#f59e0b;background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);padding:1px 6px;border-radius:4px;">Pre-release</span>' : ''}
+                                <span style="font-size:11px;color:#4a8080;">${r.name !== r.tag ? r.name : ''}</span>
+                            </div>
+                            <!-- Summary line + size (visible before expand) -->
+                            <div style="display:flex;align-items:center;gap:10px;margin-top:4px;flex-wrap:wrap;">
+                                <span style="font-size:10px;color:#2e5a5a;">${r.publishedAt ? new Date(r.publishedAt).toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : ''}</span>
+                                ${r.asset ? `<span style="font-size:10px;color:#2e5a5a;display:flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>${_formatBytes(r.asset.size)}</span>` : ''}
+                                ${r.body ? `<span style="font-size:10px;color:#3a6060;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">${r.body.split('\n').find(l => l.trim() && !l.startsWith('#')) || ''}</span>` : ''}
+                            </div>
+                        </div>
+                        <svg class="upd-rel-chevron" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#4a8080" stroke-width="2.5" style="transition:transform 0.2s;flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                    <!-- Expandable body -->
+                    <div class="upd-rel-body" data-idx="${i}" style="display:none;padding:0 14px 12px;">
+                        ${r.body ? `<div style="font-size:11.5px;color:#7aadad;line-height:1.7;margin-bottom:10px;max-height:120px;overflow-y:auto;">${_renderReleaseNotes(r.body)}</div>` : ''}
+                        ${_makeDownloadBtn(r.asset, r.tag, isCurrent)}
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Accordion toggle
+            list.querySelectorAll('.upd-rel-toggle').forEach(row => {
+                row.addEventListener('click', () => {
+                    const idx = row.dataset.idx;
+                    const body = list.querySelector(`.upd-rel-body[data-idx="${idx}"]`);
+                    const chevron = row.querySelector('.upd-rel-chevron');
+                    const open = body.style.display === 'block';
+                    body.style.display = open ? 'none' : 'block';
+                    if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+                });
+            });
+
+            // Download .exe → Downloads panel
+            list.querySelectorAll('.upd-dl-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    _triggerDownload(this.dataset.url, this.dataset.tag, this);
+                });
+            });
+
+            // Install → download to temp + run + quit
+            list.querySelectorAll('.upd-install-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const url = this.dataset.url;
+                    const tag = this.dataset.tag;
+                    if (!url) return;
+
+                    // Rollback protection — warn if older version
+                    const isOlder = _compareVersions(_currentVer, tag) > 0;
+                    const confirmMsg = isOlder
+                        ? `⚠️ Rollback to ${tag}?\n\nThis is an OLDER version than your current v${_currentVer}.\nYou may lose features or fixes.\n\nThe app will close and the installer will launch.`
+                        : `Install ${tag}?\n\nThe app will close and the installer will launch automatically.`;
+
+                    if (!confirm(confirmMsg)) return;
+
+                    // Show inline progress
+                    const body = this.closest('.upd-rel-body');
+                    const progressEl = body?.querySelector('.upd-install-progress');
+                    if (progressEl) progressEl.style.display = 'block';
+
+                    // Disable all install buttons
+                    list.querySelectorAll('.upd-install-btn, .upd-dl-btn').forEach(b => b.disabled = true);
+                    _updStatus('Downloading installer for ' + tag + '...');
+
+                    const result = await _invoke('updater:installRelease', url, tag);
+                    if (!result || !result.success) {
+                        _updStatus('Install failed: ' + (result?.error || 'Unknown error'), true);
+                        if (progressEl) progressEl.style.display = 'none';
+                        list.querySelectorAll('.upd-install-btn, .upd-dl-btn').forEach(b => b.disabled = false);
+                    }
+                    // On success app will quit automatically
+                });
+            });
+        }
+
+        async function _triggerDownload(url, tag, btn) {
+            if (!url) return;
+            if (btn) { btn.disabled = true; btn.innerHTML = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:5px;vertical-align:middle;animation:spin 0.8s linear infinite"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>Starting...'; }
+            const ok = await _invoke('updater:downloadExe', url);
+            if (ok) {
+                _updStatus('Download started — check Downloads panel.');
+                if (btn) btn.innerHTML = '✅ Download started — check Downloads panel';
+            } else {
+                _updStatus('Download failed to start.', true);
+                if (btn) { btn.disabled = false; btn.innerHTML = 'Download ' + tag; }
+            }
+        }
+
+        // Delete applied commits
+        document.getElementById('btn-upd-delete-applied')?.addEventListener('click', async () => {
+            if (!confirm('Delete all applied commits?\n\nThis will revert to the bundled version. App will restart.')) return;
+            const btn = document.getElementById('btn-upd-delete-applied');
+            if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+            const result = await _invoke('updater:deleteApplied');
+            if (result?.success) {
+                _updStatus('Applied commits deleted. Restarting...');
+                setTimeout(() => _send('app:relaunch'), 1500);
+            } else {
+                _updStatus('Delete failed: ' + (result?.error || 'Unknown'), true);
+                if (btn) { btn.disabled = false; btn.textContent = 'Delete'; }
+            }
+        });
+
+        document.getElementById('btn-upd-check').addEventListener('click', checkForUpdates);
+
+        // Advanced accordion toggle
+        document.getElementById('upd-advanced-toggle').addEventListener('click', () => {
+            const body = document.getElementById('upd-advanced-body');
+            const chevron = document.getElementById('upd-adv-chevron');
+            const open = body.style.display === 'block';
+            body.style.display = open ? 'none' : 'block';
+            if (chevron) chevron.style.transform = open ? '' : 'rotate(90deg)';
+        });
+
+        // Auto-check when Updates section is opened
         document.querySelector('.nav-item[data-section="updates"]').addEventListener('click', () => {
-            if (!_commits.length) fetchCommits();
+            _loadLastChecked();
+            checkForUpdates();
+            if (!_commits.length) {
+                // Pre-load local sha for advanced section
+                _invoke('updater:localSha').then(shaObj => {
+                    const sha = shaObj && typeof shaObj === 'object' ? shaObj.sha : shaObj;
+                    const el = document.getElementById('upd-local-sha');
+                    if (el && sha) el.textContent = sha.slice(0, 7);
+                    // Show delete card only if applied commits exist
+                    if (shaObj && shaObj.source === 'update') {
+                        const delCard = document.getElementById('upd-delete-card');
+                        const delLabel = document.getElementById('upd-applied-sha-label');
+                        if (delCard) delCard.style.display = 'block';
+                        if (delLabel && sha) delLabel.textContent = 'Applied commit: ' + sha.slice(0, 7) + ' — click to revert to bundled version';
+                    }
+                });
+            }
         });
     </script>
     <script src="js/changelog/index.js"></script>
