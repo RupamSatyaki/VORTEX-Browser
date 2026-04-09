@@ -2707,8 +2707,9 @@
         // Use postMessage to parent (cross-origin safe) for both invoke and send
         function _invoke(channel, ...args) {
             // Long-running channels get extended timeout
-            const LONG_CHANNELS = ['updater:applyCommit', 'updater:fetchCommits', 'updater:fetchLatestRelease'];
-            const timeout = LONG_CHANNELS.includes(channel) ? 120000 : 5000;
+            const LONG_CHANNELS = ['updater:applyCommit', 'updater:fetchCommits', 'updater:fetchLatestRelease', 'updater:fetchAllReleases'];
+            const NO_TIMEOUT = ['updater:installRelease']; // download can take minutes
+            const timeout = NO_TIMEOUT.includes(channel) ? 600000 : LONG_CHANNELS.includes(channel) ? 120000 : 5000;
             return new Promise((resolve) => {
                 const reqId = '__inv_' + Date.now() + '_' + Math.random();
                 function handler(ev) {
@@ -3781,7 +3782,10 @@
                         _updStatus('Downloading installer for ' + tag + '...');
                         const result = await _invoke('updater:installRelease', url, tag);
                         if (!result?.success) {
-                            _updStatus('Install failed: ' + (result?.error || 'Unknown'), true);
+                            const errMsg = result === null
+                                ? 'Request timed out — download may still be running.'
+                                : (result?.error || 'Unknown error');
+                            _updStatus('Install failed: ' + errMsg, true);
                             if (progressEl) progressEl.style.display = 'none';
                             dlSection.querySelectorAll('button').forEach(b => b.disabled = false);
                         }
@@ -3893,7 +3897,10 @@
 
                     const result = await _invoke('updater:installRelease', url, tag);
                     if (!result || !result.success) {
-                        _updStatus('Install failed: ' + (result?.error || 'Unknown error'), true);
+                        const errMsg = result === null
+                            ? 'Request timed out — download may still be running. Check task manager.'
+                            : (result?.error || 'Unknown error');
+                        _updStatus('Install failed: ' + errMsg, true);
                         if (progressEl) progressEl.style.display = 'none';
                         list.querySelectorAll('.upd-install-btn, .upd-dl-btn').forEach(b => b.disabled = false);
                     }
@@ -3931,6 +3938,28 @@
         });
 
         document.getElementById('btn-upd-check').addEventListener('click', checkForUpdates);
+
+        // ── Receive install progress from parent window (iframe bridge) ────────
+        window.addEventListener('message', (e) => {
+            if (!e.data || !e.data.__vortexIPC) return;
+            if (e.data.channel === 'updater:installProgress') {
+                const data = e.data.data;
+                const bar  = document.getElementById('upd-install-bar');
+                const pct  = document.getElementById('upd-install-pct');
+                const info = document.getElementById('upd-install-info');
+                if (bar)  bar.style.width = (data.pct || 0) + '%';
+                if (pct)  pct.textContent = (data.pct || 0) + '%';
+                if (info) {
+                    if (data.done) {
+                        info.textContent = 'Launching installer...';
+                    } else if (data.totalMB && data.totalMB !== '?') {
+                        info.textContent = `${data.receivedMB} MB / ${data.totalMB} MB`;
+                    } else {
+                        info.textContent = `${data.receivedMB || 0} MB downloaded...`;
+                    }
+                }
+            }
+        });
 
         // Advanced accordion toggle
         document.getElementById('upd-advanced-toggle').addEventListener('click', () => {

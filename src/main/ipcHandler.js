@@ -598,8 +598,16 @@ function registerHandlers() {
       const path   = require('path');
       const { app, shell } = require('electron');
 
-      const safeName = `Vortex-Setup-${tag.replace(/^v/, '')}.exe`;
+      const safeName = `Vortex-Setup-${tag.replace(/^v/, '')}-${Date.now()}.exe`;
       const destPath = path.join(os.tmpdir(), safeName);
+
+      // Delete any old setup files to avoid conflicts
+      try {
+        const tmpFiles = fs.readdirSync(os.tmpdir());
+        tmpFiles.filter(f => f.startsWith('Vortex-Setup-') && f.endsWith('.exe')).forEach(f => {
+          try { fs.unlinkSync(path.join(os.tmpdir(), f)); } catch (_) {}
+        });
+      } catch (_) {}
 
       // Helper: follow redirects and download
       function downloadFile(url, dest) {
@@ -628,7 +636,10 @@ function registerHandlers() {
                   totalMB:    (total    / 1048576).toFixed(1),
                 });
               });
-              res.on('end', () => { file.end(); resolve({ received, total }); });
+              res.on('end', () => {
+                file.end();
+                file.once('finish', () => resolve({ received, total }));
+              });
               res.on('error', reject);
               file.on('error', reject);
             });
@@ -645,11 +656,14 @@ function registerHandlers() {
 
       // Run installer
       pushToRenderer('updater:installProgress', { pct: 100, done: true });
-      await new Promise(r => setTimeout(r, 500));
-      shell.openPath(destPath);
+      await new Promise(r => setTimeout(r, 1000));
+      const openErr = await shell.openPath(destPath);
+      if (openErr) return { success: false, error: 'Could not launch installer: ' + openErr };
 
-      // Quit after short delay so installer can start
-      setTimeout(() => app.quit(), 1500);
+      // Give installer time to start, then force exit
+      setTimeout(() => {
+        app.exit(0);
+      }, 2500);
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };

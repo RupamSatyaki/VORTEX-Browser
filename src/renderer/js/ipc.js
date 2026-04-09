@@ -392,6 +392,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // ── Updater install progress ──────────────────────────────────────────────
   IPC.on('updater:installProgress', (data) => {
+    // Forward to settings iframe if open
+    const frame = document.getElementById('panel-frame');
+    if (frame && frame.contentWindow) {
+      try {
+        frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'updater:installProgress', data }, '*');
+      } catch (_) {}
+    }
+    // Also update directly if settings is in same window
+    _applyInstallProgress(data);
+  });
+
+  function _applyInstallProgress(data) {
     const bar  = document.getElementById('upd-install-bar');
     const pct  = document.getElementById('upd-install-pct');
     const info = document.getElementById('upd-install-info');
@@ -406,7 +418,7 @@ window.addEventListener('DOMContentLoaded', () => {
         info.textContent = `${data.receivedMB} MB downloaded...`;
       }
     }
-  });
+  }
 
   // ── Menu accelerator events (fired from menuManager.js) ──────────────────
   IPC.on('menu:newTab',    () => QuickLaunch.open());
