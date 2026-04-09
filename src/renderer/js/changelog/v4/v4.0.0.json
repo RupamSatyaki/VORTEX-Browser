@@ -1,0 +1,93 @@
+{
+  "id": "v4.0.0",
+  "version": "4.0.0",
+  "badge": "latest",
+  "name": "Permissions + Themes + Updater",
+  "date": "2026-04-09",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 5, "improve": 6, "fix": 2 },
+  "categories": [
+    {
+      "label": "Privacy & Security",
+      "features": [
+        {
+          "type": "new",
+          "label": "Site Permissions Manager",
+          "desc": "Address bar mein shield icon — Camera, Mic, Notifications, Location, Clipboard, MIDI aur 25+ permissions. Allow/Ask/Block 3-state toggle. Remember my decision checkbox. 30s auto-deny timer.",
+          "howto": "Address bar mein shield icon click karo. Shortcut: Ctrl+Shift+I"
+        },
+        {
+          "type": "new",
+          "label": "Permission Request Prompt",
+          "desc": "Jab koi site permission maange toh custom prompt dikhta hai — permission-specific icon aur color, Remember checkbox, Block/Allow buttons, 30s countdown timer bar.",
+          "howto": "Kisi bhi site pe camera/mic/location use karo — prompt automatically aayega."
+        },
+        {
+          "type": "new",
+          "label": "Site Permissions in Settings",
+          "desc": "Settings → Privacy → Site Permissions. Saari sites accordion list, search by domain, stats (sites/allowed/blocked), reset individual site ya all.",
+          "howto": "Settings → Privacy & Performance → Site Permissions"
+        }
+      ]
+    },
+    {
+      "label": "Appearance",
+      "features": [
+        {
+          "type": "new",
+          "label": "Background Themes",
+          "desc": "10 background color palettes — Teal, Teal Mist, Midnight, Slate, Forest, Crimson, Ocean, Aurora, Amber, Obsidian. Accordion UI in Settings. Live apply, persists across sessions.",
+          "howto": "Settings → Appearance → Background Theme"
+        },
+        {
+          "type": "new",
+          "label": "Custom Accent Color",
+          "desc": "8 preset swatches + custom color picker. Poora browser UI live update — tabs, toolbar, address bar, toggles, badges sab.",
+          "howto": "Settings → Appearance → Accent Color"
+        },
+        {
+          "type": "improve",
+          "label": "Full CSS Variable System",
+          "desc": "Saare browser UI elements ab CSS variables se control hote hain — --bg-base, --bg-surface, --accent etc. Theme switch instant hota hai."
+        }
+      ]
+    },
+    {
+      "label": "Updates",
+      "features": [
+        {
+          "type": "new",
+          "label": "GitHub Releases Updater",
+          "desc": "Settings → Updates mein saari releases list — version, date, size, changelog preview. Download .exe ya Install directly (app closes, installer launches). Rollback protection for older versions.",
+          "howto": "Settings → System → Updates → Check for Updates"
+        },
+        {
+          "type": "improve",
+          "label": "Last Checked Timestamp",
+          "desc": "\"Last checked: 2 hours ago\" — user ko pata chale kab check hua tha. localStorage mein persist hota hai."
+        },
+        {
+          "type": "improve",
+          "label": "What's Installed Indicator",
+          "desc": "Version card mein colored dot — Green (release build), Amber (applied commit), Purple (dev mode). Applied commit SHA bhi dikhta hai."
+        },
+        {
+          "type": "improve",
+          "label": "Delete Applied Commits",
+          "desc": "Agar commit-based update applied hai toh ek click se delete karo aur bundled version pe revert karo."
+        },
+        {
+          "type": "fix",
+          "label": "Updater timeout fix",
+          "desc": "applyCommit aur fetchCommits ke liye timeout 5s se 120s kiya — GitHub slow hone pe Unknown error nahi aayega."
+        },
+        {
+          "type": "fix",
+          "label": "Network error fix",
+          "desc": "GitHub Releases API ke liye proper User-Agent aur Accept headers add kiye — Network error resolve hua."
+        }
+      ]
+    }
+  ]
+}

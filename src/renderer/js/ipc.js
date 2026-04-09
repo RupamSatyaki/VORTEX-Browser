@@ -390,6 +390,24 @@ window.addEventListener('DOMContentLoaded', () => {
     _showPermissionPrompt(data);
   });
 
+  // ── Updater install progress ──────────────────────────────────────────────
+  IPC.on('updater:installProgress', (data) => {
+    const bar  = document.getElementById('upd-install-bar');
+    const pct  = document.getElementById('upd-install-pct');
+    const info = document.getElementById('upd-install-info');
+    if (bar)  bar.style.width = data.pct + '%';
+    if (pct)  pct.textContent = data.pct + '%';
+    if (info) {
+      if (data.done) {
+        info.textContent = 'Launching installer...';
+      } else if (data.totalMB && data.totalMB !== '?') {
+        info.textContent = `${data.receivedMB} MB / ${data.totalMB} MB`;
+      } else {
+        info.textContent = `${data.receivedMB} MB downloaded...`;
+      }
+    }
+  });
+
   // ── Menu accelerator events (fired from menuManager.js) ──────────────────
   IPC.on('menu:newTab',    () => QuickLaunch.open());
   IPC.on('menu:newWindow', () => window.vortexAPI.send('window:new'));
