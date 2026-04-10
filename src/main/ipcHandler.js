@@ -524,6 +524,194 @@ function registerHandlers() {
     } catch (_) { return null; }
   });
 
+  // ── Password Manager ──────────────────────────────────────────────────────
+  const _pwPath = () => {
+    const { app } = require('electron');
+    return require('path').join(app.getPath('userData'), 'vortex', 'storage', 'passwords.json');
+  };
+
+  const _pwImportedPath = () => {
+    const { app } = require('electron');
+    return require('path').join(app.getPath('userData'), 'vortex', 'storage', 'passwords_imported.json');
+  };
+
+  function _readJson(filePath) {
+    try {
+      const fs = require('fs');
+      if (!fs.existsSync(filePath)) return null;
+      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch { return null; }
+  }
+
+  function _writeJson(filePath, data) {
+    try {
+      const fs = require('fs');
+      const dir = require('path').dirname(filePath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+      return true;
+    } catch { return false; }
+  }
+
+  ipcMain.handle('passwords:read', () => _readJson(_pwPath()));
+  ipcMain.handle('passwords:write', (_e, data) => _writeJson(_pwPath(), data));
+
+  // Imported passwords — plain JSON array (not encrypted)
+  ipcMain.handle('passwords:readImported', () => _readJson(_pwImportedPath()) || []);
+  ipcMain.handle('passwords:writeImported', (_e, data) => _writeJson(_pwImportedPath(), data));
+
+
+  // Addresses
+  const _addrPath = () => {
+    const { app } = require('electron');
+    return require('path').join(app.getPath('userData'), 'vortex', 'storage', 'addresses.json');
+  };
+  ipcMain.handle('addresses:read',  () => _readJson(_addrPath()) || []);
+  ipcMain.handle('addresses:write', (_e, data) => _writeJson(_addrPath(), data));
+
+  // ── Site Permissions ──────────────────────────────────────────────────────
+  const _permPath = () => {
+    const { app } = require('electron');
+    return require('path').join(app.getPath('userData'), 'vortex', 'storage', 'permissions.json');
+  };
+
+  function _readPermFile() {
+    try {
+      const fs = require('fs');
+      const f = _permPath();
+      if (!fs.existsSync(f)) return {};
+      return JSON.parse(fs.readFileSync(f, 'utf8'));
+    } catch { return {}; }
+  }
+
+  function _writePermFile(data) {
+    try {
+      const fs = require('fs');
+      const f = _permPath();
+      const dir = require('path').dirname(f);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(f, JSON.stringify(data, null, 2));
+    } catch {}
+  }
+
+  ipcMain.handle('permissions:getAll', () => _readPermFile());
+
+  ipcMain.handle('permissions:saveAll', (_e, data) => {
+    _writePermFile(data);
+    _applyPermissions(data);
+    return true;
+  });
+
+  function _applyPermissions(permData) {
+    const ELECTRON_TO_ID = {
+      'media': null, 'notifications': 'notifications',
+      'geolocation': 'geolocation', 'clipboard-read': 'clipboard-read',
+      'midi': 'midi', 'midiSysex': 'midi',
+    };
+
+    session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+      try {
+        const url = webContents.getURL();
+        if (!url || url === 'about:blank' || url.startsWith('file://') || url.startsWith('vortex-app://')) {
+          callback(true); return;
+        }
+
+        let domain = '';
+        try { domain = new URL(url).hostname.replace(/^www\./, ''); } catch { callback(true); return; }
+
+        const stored = permData[domain] || {};
+
+        if (permission === 'media') {
+          const wantsCam = details?.mediaTypes?.includes('video');
+          const wantsMic = details?.mediaTypes?.includes('audio');
+          const camStatus = wantsCam ? (stored['camera'] || 'ask') : 'ask';
+          const micStatus = wantsMic ? (stored['microphone'] || 'ask') : 'ask';
+          if (camStatus === 'denied' || micStatus === 'denied') { callback(false); return; }
+          if (camStatus === 'granted' && micStatus === 'granted') { callback(true); return; }
+          // ask → show prompt only if domain is known, else allow
+          if (domain) {
+            _sendPermissionRequest(webContents, domain, permission, details, callback, permData);
+          } else {
+            callback(true);
+          }
+          return;
+        }
+
+        const ourId = ELECTRON_TO_ID[permission] || permission;
+        const status = stored[ourId] || 'ask';
+        if (status === 'denied')  { callback(false); return; }
+        if (status === 'granted') { callback(true);  return; }
+        // ask → show prompt only for sensitive permissions, allow rest
+        const SENSITIVE = ['media', 'geolocation', 'notifications'];
+        if (SENSITIVE.includes(permission)) {
+          _sendPermissionRequest(webContents, domain, permission, details, callback, permData);
+        } else {
+          callback(true); // non-sensitive — allow by default
+        }
+      } catch { callback(true); } // on any error — allow, don't block
+    });
+
+    session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details) => {
+      try {
+        if (!requestingOrigin) return true;
+        const domain = new URL(requestingOrigin).hostname.replace(/^www\./, '');
+        const stored = permData[domain] || {};
+        if (permission === 'media') {
+          const wantsCam = details?.mediaType === 'video';
+          const wantsMic = details?.mediaType === 'audio';
+          if (wantsCam) return (stored['camera'] || 'ask') !== 'denied';
+          if (wantsMic) return (stored['microphone'] || 'ask') !== 'denied';
+          return true;
+        }
+        const MAP = { 'notifications':'notifications','geolocation':'geolocation','clipboard-read':'clipboard-read','midi':'midi','midiSysex':'midi' };
+        const ourId = MAP[permission] || permission;
+        // Only block if explicitly denied — allow everything else
+        return (stored[ourId] || 'ask') !== 'denied';
+      } catch { return true; } // on parse error, allow
+    });
+  }
+
+  function _sendPermissionRequest(webContents, domain, permission, details, callback, permData) {
+    const PERM_LABELS = {
+      'media':'Camera / Microphone','notifications':'Notifications',
+      'geolocation':'Location','clipboard-read':'Clipboard Read',
+      'midi':'MIDI','midiSysex':'MIDI SysEx',
+    };
+    const win = BrowserWindow.getAllWindows().find(w => {
+      try { return !w.isDestroyed() && w.webContents.id !== webContents.id; } catch { return false; }
+    }) || BrowserWindow.getFocusedWindow();
+    if (!win || win.isDestroyed()) { callback(true); return; } // allow if no window found
+
+    let permIds = [];
+    if (permission === 'media') {
+      if (details?.mediaTypes?.includes('video')) permIds.push('camera');
+      if (details?.mediaTypes?.includes('audio')) permIds.push('microphone');
+    } else {
+      const MAP = {'notifications':'notifications','geolocation':'geolocation','clipboard-read':'clipboard-read','midi':'midi','midiSysex':'midi'};
+      if (MAP[permission]) permIds.push(MAP[permission]);
+    }
+
+    win.webContents.send('permission:request', {
+      domain, permission, label: PERM_LABELS[permission] || permission, permIds,
+    });
+
+    const responseChannel = `permission:response:${domain}:${permission}`;
+    ipcMain.once(responseChannel, (_e, granted) => {
+      if (permIds.length) {
+        if (!permData[domain]) permData[domain] = {};
+        permIds.forEach(id => { permData[domain][id] = granted ? 'granted' : 'denied'; });
+        _writePermFile(permData);
+        _applyPermissions(permData);
+      }
+      callback(granted);
+    });
+    // Timeout — allow by default so page doesn't hang
+    setTimeout(() => { try { ipcMain.removeAllListeners(responseChannel); } catch {} callback(true); }, 30000);
+  }
+
+  // Apply on startup
+  _applyPermissions(_readPermFile());
+
   // ── GitHub Updater ────────────────────────────────────────────────────────
   const GITHUB_REPO = 'RupamSatyaki/VORTEX-Browser';
   const GITHUB_BRANCH = 'main';

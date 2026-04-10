@@ -810,6 +810,10 @@
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             Site Permissions
         </div>
+        <div class="nav-item" data-section="passwords">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Password Manager
+        </div>
         <div class="nav-item" data-section="performance">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Performance
@@ -1163,6 +1167,10 @@
 
         <!-- Site Permissions -->
         <div class="section" id="sec-permissions">
+        </div>
+
+        <!-- Password Manager -->
+        <div class="section" id="sec-passwords" style="padding:0;">
         </div>
 
         <!-- Performance -->
@@ -2653,7 +2661,7 @@
         // -- Settings storage --------------------------------------------------------
         const DEFAULTS = {
             theme: 'dark', fontsize: 'medium', tabpreview: true, bookmarksbar: false, whatsappBtn: true, devhubBtn: true,
-            accentColor: 'var(--accent)',
+            accentColor: '#00c8b4',
             bgTheme: 'teal',
             startup: 'session', homepage: 'https://www.google.com',
             engine: 'google', suggestions: true,
@@ -2759,7 +2767,7 @@
             set('set-whatsapp-btn', s.whatsappBtn !== false);
             set('set-devhub-btn', s.devhubBtn !== false);
             // Apply accent color
-            _applyAccentUI(s.accentColor || 'var(--accent)');
+            _applyAccentUI(s.accentColor || '#00c8b4');
             set('set-startup', s.startup); set('set-homepage', s.homepage);
             set('set-engine', s.engine); set('set-suggestions', s.suggestions);
             set('set-trackers', s.trackers); set('set-https', s.https); set('set-dnt', s.dnt);
@@ -3995,6 +4003,10 @@
     <script src="js/faq.js"></script>
     <script src="js/cookieManager.js"></script>
     <script src="js/permissions/index.js"></script>
+    <script src="js/passwords/crypto.js"></script>
+    <script src="js/passwords/generator.js"></script>
+    <script src="js/passwords/importer.js"></script>
+    <script src="js/passwords/index.js"></script>
     <script>
         // ── Site Permissions lazy init ────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
@@ -4016,6 +4028,21 @@
                         // Add section title
                         permContainer.innerHTML = '<div class="section-title">Site Permissions</div><div id="perm-settings-body"></div>';
                         PermissionManager.render(document.getElementById('perm-settings-body'));
+                    }
+                });
+            }
+        });
+
+        // ── Password Manager lazy init ────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const pwContainer = document.getElementById('sec-passwords');
+            if (!pwContainer) return;
+            const navItem = document.querySelector('[data-section="passwords"]');
+            if (navItem) {
+                navItem.addEventListener('click', () => {
+                    if (!pwContainer._pmRendered) {
+                        pwContainer._pmRendered = true;
+                        PasswordManager.render(pwContainer);
                     }
                 });
             }
