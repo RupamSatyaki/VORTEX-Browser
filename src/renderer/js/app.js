@@ -124,6 +124,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   QuickLaunch.init();
   DevHub.init();
   if (typeof PermissionManager !== 'undefined') PermissionManager.init();
+  // Init password autofill (loads imported + tries cached vault session)
+  if (typeof PasswordManager !== 'undefined') {
+    PasswordManager.initAutofill().catch(() => {});
+  }
+  // Load addresses for autofill
+  if (typeof AddressManager !== 'undefined') {
+    AddressManager.load().catch(() => {});
+  }
 
   // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([

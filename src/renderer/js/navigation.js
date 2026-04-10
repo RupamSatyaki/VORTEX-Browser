@@ -138,6 +138,10 @@ const Navigation = (() => {
       PermissionPopup.injectIcon();
       PermissionPopup.initShortcut();
     }
+    // Inject autofill icon
+    if (typeof PasswordAutofill !== 'undefined') {
+      PasswordAutofill.init();
+    }
 
     // Zoom buttons
     document.getElementById('zoom-in-btn').addEventListener('click', () => WebView.zoomIn());
@@ -314,6 +318,7 @@ const Navigation = (() => {
       try {
         const domain = url && url.startsWith('http') ? new URL(url).hostname.replace(/^www\./, '') : '';
         PermissionPopup.updateBadge(domain);
+        if (typeof PasswordAutofill !== 'undefined') PasswordAutofill.updateBadge(domain);
       } catch {}
     }
   }

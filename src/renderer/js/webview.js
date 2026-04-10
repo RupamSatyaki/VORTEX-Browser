@@ -279,6 +279,10 @@ const WebView = (() => {
     wv.addEventListener('did-navigate-in-page', (e) => {
       if (activeId === tabId) Navigation.setURL(e.url);
       if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
+      // Detect post-login navigation for save password prompt
+      if (activeId === tabId && typeof PasswordAutofill !== 'undefined') {
+        PasswordAutofill.onNavigate(e.url, wv.src);
+      }
     });
 
     // Single did-finish-load handler — merged all logic here
@@ -296,8 +300,14 @@ const WebView = (() => {
       const currentUrl = wv.src;
       clearTimeout(_translateDetectTimer);
       _translateDetectTimer = setTimeout(() => _detectAndShowBar(tabId, currentUrl), 1200);
-      // Network stats — only for active tab
-      // (did-stop-loading already handles this; skip duplicate call)
+      // Autofill — trigger on active tab page load
+      if (activeId === tabId && typeof PasswordAutofill !== 'undefined') {
+        PasswordAutofill.onPageLoad(currentUrl);
+      }
+      // Address autofill check
+      if (activeId === tabId && typeof AddressManager !== 'undefined') {
+        AddressManager.checkPageForAddressForm();
+      }
     });
 
     wv.addEventListener('page-title-updated', (e) => {

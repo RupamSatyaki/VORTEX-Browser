@@ -1,0 +1,78 @@
+{
+  "id": "v4.1.0",
+  "version": "4.1.0",
+  "badge": "latest",
+  "name": "Built-in Password Manager",
+  "date": "2026-04-10",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 6, "improve": 4, "fix": 3 },
+  "categories": [
+    {
+      "label": "Password Manager",
+      "features": [
+        {
+          "type": "new",
+          "label": "Built-in Password Manager",
+          "desc": "Full AES-256-GCM encrypted vault with master password. Vault, Generator, Import/Export, Addresses tabs. Settings → Privacy → Password Manager.",
+          "howto": "Settings → Privacy & Performance → Password Manager"
+        },
+        {
+          "type": "new",
+          "label": "Autofill — Username + Password",
+          "desc": "Address bar mein key icon. Page load pe password form detect karo → auto-fill. Multiple accounts → selection banner. Works across all paths of same domain.",
+          "howto": "Address bar mein key icon click karo ya page load pe automatic fill hoga."
+        },
+        {
+          "type": "new",
+          "label": "Save Password Popup",
+          "desc": "Login/signup ke baad credentials capture → editable popup (right side slide-in). Favicon, strength bar, eye toggle, Never/Not now/Save buttons.",
+          "howto": "Kisi bhi site pe login karo — popup automatically aayega."
+        },
+        {
+          "type": "new",
+          "label": "Address Manager + Autofill",
+          "desc": "Full address book — Name, Email, Phone, Address, City, State, PIN/ZIP, Country, Company. Page pe address form detect → bottom-right banner → click to fill.",
+          "howto": "Settings → Password Manager → Addresses tab"
+        },
+        {
+          "type": "new",
+          "label": "Import from Chrome / Firefox",
+          "desc": "CSV export se passwords import karo. Separate passwords_imported.json mein store. Vault aur imported dono vault tab mein with source badge.",
+          "howto": "Password Manager → Import/Export tab → Import CSV"
+        },
+        {
+          "type": "new",
+          "label": "Password Generator",
+          "desc": "Length slider (8-64), uppercase/lowercase/numbers/symbols toggles, strength meter, copy button.",
+          "howto": "Password Manager → Generator tab"
+        }
+      ]
+    },
+    {
+      "label": "Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "HTTP/HTTPS sites rendering fix",
+          "desc": "Permission handler mein callback(false) default tha — ab callback(true). HTTP aur HTTPS dono properly render hoti hain."
+        },
+        {
+          "type": "fix",
+          "label": "Permission handler — no more blocking",
+          "desc": "Sirf explicitly denied permissions block hoti hain. Timeout pe allow. Window not found pe bhi allow."
+        },
+        {
+          "type": "fix",
+          "label": "Autofill domain-only matching",
+          "desc": "/signup pe save hua password /login pe bhi match karega. Path ignore, subdomain support."
+        },
+        {
+          "type": "improve",
+          "label": "Dual storage — vault + imported",
+          "desc": "Manually saved: AES-256 encrypted. Imported: plain JSON. Autofill dono sources se kaam karta hai bina unlock ke."
+        }
+      ]
+    }
+  ]
+}
