@@ -1,11 +1,11 @@
 {
   "id": "v4.1.0",
   "version": "4.1.0",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Built-in Password Manager",
   "date": "2026-04-10",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 6, "improve": 4, "fix": 3 },
   "categories": [
     {

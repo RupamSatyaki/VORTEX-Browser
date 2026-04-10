@@ -524,6 +524,21 @@ function registerHandlers() {
     } catch (_) { return null; }
   });
 
+  // ── Default Browser ───────────────────────────────────────────────────────
+  ipcMain.handle('browser:isDefault', () => {
+    try {
+      return app.isDefaultProtocolClient('https');
+    } catch { return false; }
+  });
+
+  ipcMain.on('browser:setDefault', () => {
+    try {
+      // Open Windows Default Apps settings
+      const { shell } = require('electron');
+      shell.openExternal('ms-settings:defaultapps');
+    } catch {}
+  });
+
   // ── Password Manager ──────────────────────────────────────────────────────
   const _pwPath = () => {
     const { app } = require('electron');

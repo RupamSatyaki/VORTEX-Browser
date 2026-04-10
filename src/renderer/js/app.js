@@ -165,9 +165,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     Session.initAutoSave();
   }
 
+  // Signal that app is fully ready — process any queued external URL
+  if (window._markAppReady) window._markAppReady();
+
   Navigation.initShortcuts();
   Navigation.initProfile();
-
   // Listen for settings changes from the settings panel
   IPC.on('settings:changed', (s) => {
     Navigation.applySettings(s);

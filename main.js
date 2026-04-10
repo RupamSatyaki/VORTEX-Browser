@@ -1,7 +1,38 @@
-const { app, protocol, net } = require('electron');
+const { app, protocol, net, BrowserWindow } = require('electron');
 const path = require('path');
 
 require('events').EventEmitter.defaultMaxListeners = 30;
+
+// ── Single instance lock + URL handling ──────────────────────────────────────
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', (_event, argv) => {
+    // Another instance tried to open — bring main window to front
+    const { getMainWindow } = require('./src/main/windowManager');
+    const win = getMainWindow();
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+    // Open URL from command line args in a new tab
+    const url = _extractUrlFromArgs(argv);
+    if (url && win) {
+      // Small delay to ensure window is focused and ready
+      setTimeout(() => win.webContents.send('open-url', url), 300);
+    }
+  });
+}
+
+// Extract URL from command line arguments
+function _extractUrlFromArgs(argv) {
+  for (const arg of argv.slice(1)) {
+    if (arg.startsWith('http://') || arg.startsWith('https://') || arg.startsWith('ftp://')) return arg;
+    if (arg.endsWith('.html') || arg.endsWith('.htm')) return 'file:///' + arg.replace(/\\/g, '/');
+  }
+  return null;
+}
 
 // Suppress noisy ERR_ABORTED (-3) from webview navigations (YouTube, SPAs, etc.)
 // Also suppress "Render frame was disposed" which fires on window visibility changes
@@ -124,6 +155,32 @@ app.whenReady().then(() => {
   WindowManager.createMainWindow();
   MenuManager.setupMenu();
   IpcHandler.registerHandlers();
+
+  // Register as default browser protocol handler
+  // This works in packaged builds — dev mode may not register properly
+  if (app.isPackaged) {
+    app.setAsDefaultProtocolClient('http');
+    app.setAsDefaultProtocolClient('https');
+    app.setAsDefaultProtocolClient('ftp');
+  }
+
+  // Handle URL passed via command line on startup (e.g. clicked link in another app)
+  const startUrl = _extractUrlFromArgs(process.argv);
+  if (startUrl) {
+    const { getMainWindow } = require('./src/main/windowManager');
+    const _sendWhenReady = () => {
+      const win = getMainWindow();
+      if (!win) return;
+      const wc = win.webContents;
+      const _send = () => setTimeout(() => wc.send('open-url', startUrl), 800);
+      if (wc.isLoading()) {
+        wc.once('did-finish-load', _send);
+      } else {
+        _send();
+      }
+    };
+    setTimeout(_sendWhenReady, 200);
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -134,4 +191,43 @@ app.on('activate', () => {
   if (WindowManager.getMainWindow() === null) {
     WindowManager.createMainWindow();
   }
+});
+
+// ── Intercept all new windows from webviews → open in new tab ────────────────
+app.on('web-contents-created', (_e, contents) => {
+  // Block new windows — open as new tab instead
+  contents.setWindowOpenHandler(({ url }) => {
+    if (url && url !== 'about:blank' && (url.startsWith('http') || url.startsWith('https') || url.startsWith('ftp'))) {
+      const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('open-url', url);
+      }
+    }
+    return { action: 'deny' };
+  });
+
+  // Intercept native dialogs — show custom UI in renderer
+  // This fires BEFORE the native OS dialog appears
+  contents.on('dialog', (_ev, dialogType, messageText, defaultPromptText, callback) => {
+    try {
+      const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+      if (!win || win.isDestroyed()) {
+        callback('', false);
+        return;
+      }
+      const origin = (() => { try { return new URL(contents.getURL()).hostname; } catch { return ''; } })();
+      win.webContents.send('dialog:show', {
+        type: dialogType,
+        message: messageText || '',
+        defaultValue: defaultPromptText || '',
+        origin,
+      });
+      // Respond immediately — custom UI is shown async
+      if (dialogType === 'alert')   callback('');
+      else if (dialogType === 'confirm') callback('', false);
+      else callback(defaultPromptText || '', false);
+    } catch {
+      callback('', false);
+    }
+  });
 });

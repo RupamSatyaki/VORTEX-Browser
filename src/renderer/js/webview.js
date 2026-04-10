@@ -338,11 +338,17 @@ const WebView = (() => {
         }));
       }
       if (e.channel === 'pip:request') {
-        // Native PiP failed in preload — try via main process with userGesture:true
         try {
           const wcId = wv.getWebContentsId();
           window.vortexAPI.invoke('pip:trigger', wcId).catch(() => {});
         } catch (_) {}
+      }
+      // Custom dialog from webview
+      if (e.channel === 'dialog:show') {
+        const d = e.args[0];
+        if (typeof VortexDialog !== 'undefined') {
+          VortexDialog.show(d.type, d.message, d.origin, d.defaultValue);
+        }
       }
     });
 
@@ -399,6 +405,7 @@ const WebView = (() => {
     const wv = document.createElement('webview');
     wv.src = url || 'https://www.google.com';
     wv.setAttribute('allowpopups', '');
+    wv.setAttribute('nodeintegration', '');
     if (webviewPreloadPath) {
       wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
     }

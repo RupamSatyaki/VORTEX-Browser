@@ -1995,6 +1995,28 @@
                     <button class="setting-btn danger" id="btn-reset">Reset</button>
                 </div>
             </div>
+
+            <!-- Default Browser Card -->
+            <div class="card" style="margin-top:12px;">
+                <div class="card-row">
+                    <div class="row-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                    </div>
+                    <div class="row-text">
+                        <div class="row-label">Default Browser</div>
+                        <div class="row-desc" id="default-browser-status">Checking...</div>
+                    </div>
+                    <button class="setting-btn" id="btn-set-default" style="display:none;">Set as Default</button>
+                    <div id="default-browser-badge" style="display:none;color:#22c55e;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Default
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- What's New / Changelog � content injected by changelog.js -->
@@ -3197,7 +3219,8 @@
         });
 
         document.getElementById('btn-github').addEventListener('click', () => {
-            _send('shell:openExternal', 'https://github.com/RupamSatyaki/VORTEX-Browser');
+            // Open in new tab in Vortex
+            window.parent.postMessage({ __vortexAction: true, channel: 'open-url-tab', payload: 'https://github.com/RupamSatyaki/VORTEX-Browser' }, '*');
         });
 
         document.getElementById('btn-reset').addEventListener('click', async () => {
@@ -3207,6 +3230,45 @@
                 applyToUI(settings);
             }
         });
+
+        // ── Default Browser ───────────────────────────────────────────────────────
+        async function _checkDefaultBrowser() {
+            const statusEl = document.getElementById('default-browser-status');
+            const setBtn   = document.getElementById('btn-set-default');
+            const badge    = document.getElementById('default-browser-badge');
+            if (!statusEl) return;
+
+            try {
+                const isDefault = await _invoke('browser:isDefault');
+                if (isDefault) {
+                    statusEl.textContent = 'Vortex is your default browser';
+                    statusEl.style.color = '#22c55e';
+                    if (setBtn)  setBtn.style.display  = 'none';
+                    if (badge)   badge.style.display   = 'flex';
+                } else {
+                    statusEl.textContent = 'Vortex is not the default browser';
+                    statusEl.style.color = '#4a8080';
+                    if (setBtn)  setBtn.style.display  = '';
+                    if (badge)   badge.style.display   = 'none';
+                }
+            } catch {
+                statusEl.textContent = 'Could not check default browser status';
+            }
+        }
+
+        document.getElementById('btn-set-default')?.addEventListener('click', () => {
+            _send('browser:setDefault');
+            // Re-check after a short delay
+            setTimeout(_checkDefaultBrowser, 2000);
+        });
+
+        // Check when About section is opened
+        document.querySelector('.nav-item[data-section="about"]')?.addEventListener('click', () => {
+            _checkDefaultBrowser();
+        });
+
+        // Also check on load
+        _checkDefaultBrowser();
 
         document.getElementById('btn-dl-path').addEventListener('click', () => {
             _send('settings:pickDownloadFolder');
