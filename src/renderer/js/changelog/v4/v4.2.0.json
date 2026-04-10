@@ -1,0 +1,55 @@
+{
+  "id": "v4.2.0",
+  "version": "4.2.0",
+  "badge": "latest",
+  "name": "Windows Default Browser + Alert UI",
+  "date": "2026-04-10",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 3, "improve": 2, "fix": 2 },
+  "categories": [
+    {
+      "label": "Browser Integration",
+      "features": [
+        {
+          "type": "new",
+          "label": "Windows Default Browser",
+          "desc": "Vortex ab Windows Default Apps mein register hota hai. Settings → About → Default Browser section mein status check karo aur Set as Default button se set karo.",
+          "howto": "Settings → System → About Vortex → Default Browser → Set as Default"
+        },
+        {
+          "type": "new",
+          "label": "External links open in new tab",
+          "desc": "Kisi bhi app se link click karne pe Vortex mein new tab mein open hoga. App band ho toh session restore ke baad URL tab add hoga aur active ho jaayega.",
+          "howto": "Vortex ko default browser set karo — phir kisi bhi app se link click karo."
+        },
+        {
+          "type": "fix",
+          "label": "about:blank links → new tab",
+          "desc": "target=_blank ya about:blank wale links ab new window ki jagah new tab mein open hote hain."
+        }
+      ]
+    },
+    {
+      "label": "UI Improvements",
+      "features": [
+        {
+          "type": "new",
+          "label": "Custom Alert / Confirm / Prompt UI",
+          "desc": "Native browser dialogs (alert, confirm, prompt) ab Vortex ke custom styled UI mein dikhte hain — dark theme, animated, site origin dikhata hai.",
+          "howto": "Kisi bhi site pe alert/confirm/prompt trigger karo — custom dialog dikhega."
+        },
+        {
+          "type": "improve",
+          "label": "Settings About — GitHub link in new tab",
+          "desc": "Settings → About mein GitHub button ab Vortex mein new tab mein open karta hai."
+        },
+        {
+          "type": "fix",
+          "label": "Single instance lock",
+          "desc": "Agar Vortex already open hai toh duplicate instance nahi khulega — existing window focus hoga."
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,29 @@ window.__vortexBridge = {
   sendToHost: (channel, data) => ipcRenderer.sendToHost(channel, data),
 };
 
+// ── Override alert/confirm/prompt with custom Vortex UI ───────────────────────
+(function patchDialogs() {
+  const _origin = (() => { try { return location.hostname; } catch { return ''; } })();
+
+  function _send(type, message, defaultValue) {
+    // sendToHost sends ipc-message event to the host webview element
+    try {
+      ipcRenderer.sendToHost('dialog:show', {
+        type,
+        message: String(message === undefined || message === null ? '' : message),
+        defaultValue: String(defaultValue === undefined || defaultValue === null ? '' : defaultValue),
+        origin: _origin,
+      });
+    } catch(e) {
+      // fallback — do nothing, just suppress native dialog
+    }
+  }
+
+  window.alert = function(msg) { _send('alert', msg, ''); };
+  window.confirm = function(msg) { _send('confirm', msg, ''); return false; };
+  window.prompt = function(msg, def) { _send('prompt', msg, def); return null; };
+})();
+
 // Forward Ctrl/Cmd shortcuts to host window so browser shortcuts work
 // even when a webview has focus
 window.addEventListener('keydown', (e) => {

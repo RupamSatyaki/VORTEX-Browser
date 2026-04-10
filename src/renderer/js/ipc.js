@@ -385,6 +385,48 @@ function _showPermissionPrompt({ domain, permission, label, permIds }) {
 window.addEventListener('DOMContentLoaded', () => {
   IPC.on('downloads:badge', (count) => Navigation.setDownloadBadge(count));
 
+  // ── Custom dialog from webview (alert/confirm/prompt) ─────────────────────
+  IPC.on('dialog:show', (data) => {
+    if (typeof VortexDialog !== 'undefined') {
+      VortexDialog.show(data.type, data.message, data.origin, data.defaultValue);
+    }
+  });
+
+  // ── Open URL from external app (default browser) ──────────────────────────
+  // Queued URL — may arrive before or after session restore
+  let _pendingExternalUrl = null;
+  let _appReady = false;
+
+  function _openExternalUrl(url) {
+    if (!url) return;
+    if (typeof Tabs !== 'undefined') {
+      Tabs.createTab(url); // createTab already sets it as active
+    } else if (typeof WebView !== 'undefined') {
+      WebView.loadURL(url);
+    }
+  }
+
+  IPC.on('open-url', (url) => {
+    if (!url) return;
+    if (_appReady) {
+      _openExternalUrl(url);
+    } else {
+      // Queue it — will be processed after app init completes
+      _pendingExternalUrl = url;
+    }
+  });
+
+  // Called from app.js after session restore + tab init is done
+  window._markAppReady = () => {
+    _appReady = true;
+    if (_pendingExternalUrl) {
+      const url = _pendingExternalUrl;
+      _pendingExternalUrl = null;
+      // Small delay so tabs are fully rendered
+      setTimeout(() => _openExternalUrl(url), 300);
+    }
+  };
+
   // ── Permission request from main process ─────────────────────────────────
   IPC.on('permission:request', (data) => {
     _showPermissionPrompt(data);
@@ -602,6 +644,11 @@ window.addEventListener('DOMContentLoaded', () => {
           { __vortexIPC: true, channel: 'history:data', data: { activeTabs, closedTabs } }, '*'
         );
       } catch (_) {}
+      return;
+    }
+    if (channel === 'open-url-tab') {
+      // Settings panel wants to open a URL in a new tab
+      if (typeof Tabs !== 'undefined' && payload) Tabs.createTab(payload);
       return;
     }
     IPC.send(channel, payload);
