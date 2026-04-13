@@ -132,6 +132,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof AddressManager !== 'undefined') {
     AddressManager.load().catch(() => {});
   }
+  // Init blocklist badge
+  if (typeof BlocklistBadge !== 'undefined') {
+    BlocklistBadge.init();
+  }
 
   // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([

@@ -297,7 +297,7 @@ body {
 
 .address-bar-icons {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -309,7 +309,7 @@ body {
   justify-content: center;
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.15s;
   color: #4a8080;
 }
 
@@ -324,14 +324,80 @@ body {
   stroke-width: 2;
 }
 
-/* Bookmark button — filled state when page is bookmarked */
+/* Hover-only icons — hidden by default, show on address bar hover */
+.addr-icon-hover {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.85);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.address-bar:hover .addr-icon-hover,
+.address-bar:focus-within .addr-icon-hover {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+
+/* Address bar — ALL icons hidden by default, show on hover */
+.address-bar-icons .address-icon,
+#btn-permissions,
+#btn-autofill,
+#btn-blocklist-badge {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.88);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.address-bar:hover .address-bar-icons .address-icon,
+.address-bar:focus-within .address-bar-icons .address-icon {
+  opacity: 1;
+  pointer-events: all;
+  transform: scale(1);
+}
+
+/* Bookmark — always show + fill when bookmarked */
+#btn-bookmark.bookmarked {
+  opacity: 1 !important;
+  pointer-events: all !important;
+  transform: scale(1) !important;
+  color: var(--accent);
+}
 #btn-bookmark.bookmarked svg {
   fill: var(--accent);
   stroke: var(--accent);
 }
 
-#btn-bookmark.bookmarked {
+/* Permission icon — distinct style */
+#btn-permissions {
+  position: relative;
+  color: #4a8080;
+}
+#btn-permissions svg {
+  stroke: currentColor;
+}
+#btn-permissions:hover {
+  color: #22c55e;
+  background: rgba(34,197,94,0.1);
+}
+#btn-permissions .perm-badge.granted { background: #22c55e; }
+#btn-permissions .perm-badge.blocked { background: #ef4444; }
+#btn-permissions .perm-badge.mixed   { background: #f59e0b; }
+
+/* Autofill key icon */
+#btn-autofill {
+  position: relative;
+  color: #4a8080;
+}
+#btn-autofill:hover {
   color: var(--accent);
+  background: var(--accent-10);
+}
+
+/* Blocklist badge icon */
+#btn-blocklist-badge {
+  position: relative;
 }
 
 /* AI Mode */
@@ -2535,7 +2601,22 @@ body.incognito-window #webview-container {
   border: none;
 }
 
-/* WhatsApp toolbar button active state */
-#nav-whatsapp.active { color: #25D366; }
-#nav-whatsapp { color: #25D366; opacity: 0.75; }
-#nav-whatsapp:hover { opacity: 1; }
+/* WhatsApp toolbar button */
+#nav-whatsapp {
+  color: #25D366;
+  opacity: 0.8;
+  position: relative;
+}
+#nav-whatsapp:hover {
+  opacity: 1;
+  background: rgba(37,211,102,0.12) !important;
+  color: #25D366 !important;
+}
+#nav-whatsapp.active {
+  opacity: 1;
+  background: rgba(37,211,102,0.15) !important;
+  color: #25D366;
+}
+#nav-whatsapp svg {
+  filter: drop-shadow(0 0 4px rgba(37,211,102,0.3));
+}

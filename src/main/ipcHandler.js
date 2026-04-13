@@ -524,6 +524,10 @@ function registerHandlers() {
     } catch (_) { return null; }
   });
 
+  // ── Blocklist Engine ──────────────────────────────────────────────────────
+  const BlocklistEngine = require('./blocklist/engine');
+  BlocklistEngine.registerHandlers();
+
   // ── Default Browser ───────────────────────────────────────────────────────
   ipcMain.handle('browser:isDefault', () => {
     try {
