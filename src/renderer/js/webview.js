@@ -308,6 +308,10 @@ const WebView = (() => {
       if (activeId === tabId && typeof AddressManager !== 'undefined') {
         AddressManager.checkPageForAddressForm();
       }
+      // Reset blocklist badge on new page load
+      if (activeId === tabId && typeof BlocklistBadge !== 'undefined') {
+        BlocklistBadge.onNavigate(tabId);
+      }
     });
 
     wv.addEventListener('page-title-updated', (e) => {
@@ -439,6 +443,8 @@ const WebView = (() => {
     _closeFindBar();
     // Hide translate bar when switching tabs
     _hideTranslateBar();
+    // Update blocklist badge for new active tab
+    if (typeof BlocklistBadge !== 'undefined') BlocklistBadge.onTabChange(tabId);
     Object.entries(webviews).forEach(([id, wv]) => {
       wv.classList.toggle('active', id === tabId);
     });

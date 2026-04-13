@@ -1,0 +1,200 @@
+/* ── Blocklist Manager Styles ── */
+
+.bl-wrap { display:flex; flex-direction:column; gap:0; }
+
+/* Stats card */
+.bl-stats-row {
+  display:flex; gap:10px; margin-bottom:14px;
+}
+.bl-stat {
+  flex:1; background:#0f2222; border:1px solid #1e3838;
+  border-radius:10px; padding:12px 14px; text-align:center;
+}
+.bl-stat-num {
+  font-size:22px; font-weight:700; color:var(--accent,#00c8b4); line-height:1;
+}
+.bl-stat-num.warn   { color:#f59e0b; }
+.bl-stat-num.secure { color:#22c55e; }
+.bl-stat-label {
+  font-size:10px; color:#4a8080; margin-top:4px;
+  text-transform:uppercase; letter-spacing:0.5px;
+}
+
+/* Update bar */
+.bl-update-bar {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; background:#0f2222;
+  border:1px solid #1e3838; border-radius:10px;
+  margin-bottom:14px;
+}
+.bl-update-bar-info { flex:1; min-width:0; }
+.bl-update-bar-title {
+  font-size:12px; font-weight:600; color:#c8e8e5;
+}
+.bl-update-bar-sub {
+  font-size:11px; color:#4a8080; margin-top:2px;
+}
+.bl-update-all-btn {
+  background:var(--accent,#00c8b4); border:none; border-radius:8px;
+  color:#001a18; font-size:12px; font-weight:700;
+  padding:7px 14px; cursor:pointer; flex-shrink:0;
+  transition:all 0.15s; display:flex; align-items:center; gap:6px;
+}
+.bl-update-all-btn:hover { filter:brightness(1.1); }
+.bl-update-all-btn:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* Section label */
+.bl-section-label {
+  font-size:10px; font-weight:700; color:#4a8080;
+  text-transform:uppercase; letter-spacing:0.6px;
+  padding:0 2px; margin-bottom:8px; margin-top:4px;
+}
+
+/* List cards */
+.bl-list-card {
+  background:#0f2222; border:1px solid #1e3838;
+  border-radius:10px; overflow:hidden; margin-bottom:8px;
+  transition:border-color 0.15s;
+}
+.bl-list-card:hover { border-color:#2e4a4c; }
+.bl-list-card.enabled { border-color:rgba(0,200,180,0.2); }
+
+.bl-list-header {
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
+}
+.bl-list-icon {
+  width:36px; height:36px; border-radius:9px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.bl-list-icon.ads      { background:rgba(239,68,68,0.12);  color:#ef4444; }
+.bl-list-icon.privacy  { background:rgba(139,92,246,0.12); color:#8b5cf6; }
+.bl-list-icon.mixed    { background:rgba(245,158,11,0.12); color:#f59e0b; }
+.bl-list-icon.security { background:rgba(34,197,94,0.12);  color:#22c55e; }
+
+.bl-list-info { flex:1; min-width:0; }
+.bl-list-name {
+  font-size:13px; font-weight:600; color:#c8e8e5;
+  display:flex; align-items:center; gap:8px;
+}
+.bl-list-badge {
+  font-size:10px; font-weight:700; padding:1px 6px;
+  border-radius:4px; flex-shrink:0;
+}
+.bl-list-badge.enabled  { background:rgba(0,200,180,0.12); color:var(--accent,#00c8b4); }
+.bl-list-badge.disabled { background:#1e3838; color:#4a8080; }
+
+.bl-list-meta {
+  font-size:11px; color:#4a8080; margin-top:3px;
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.bl-list-rules { color:#7aadad; font-weight:600; }
+
+.bl-list-actions {
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.bl-list-update-btn {
+  background:transparent; border:1px solid #2e4a4c; border-radius:7px;
+  color:#7aadad; font-size:11px; font-weight:600;
+  padding:5px 12px; cursor:pointer; transition:all 0.15s;
+  white-space:nowrap;
+}
+.bl-list-update-btn:hover { border-color:var(--accent,#00c8b4); color:var(--accent,#00c8b4); }
+.bl-list-update-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+/* Progress bar inside card */
+.bl-list-progress {
+  padding:0 14px 10px; display:none;
+}
+.bl-list-progress.visible { display:block; }
+.bl-list-progress-bar-bg {
+  height:3px; background:#1e3838; border-radius:2px; overflow:hidden;
+}
+.bl-list-progress-fill {
+  height:100%; background:var(--accent,#00c8b4);
+  border-radius:2px; transition:width 0.3s ease; width:0%;
+}
+.bl-list-progress-text {
+  font-size:10px; color:#4a8080; margin-top:4px;
+}
+
+/* Toggle */
+.bl-toggle-wrap {
+  display:flex; align-items:center; flex-shrink:0;
+}
+
+/* Custom rules */
+.bl-custom-wrap {
+  background:#0f2222; border:1px solid #1e3838;
+  border-radius:10px; overflow:hidden; margin-top:4px;
+}
+.bl-custom-header {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 14px; border-bottom:1px solid #1a3030;
+}
+.bl-custom-title {
+  flex:1; font-size:13px; font-weight:600; color:#c8e8e5;
+}
+.bl-custom-count {
+  font-size:11px; color:#4a8080;
+}
+
+.bl-custom-add-row {
+  display:flex; gap:8px; padding:10px 14px;
+  border-bottom:1px solid #1a3030;
+}
+.bl-custom-inp {
+  flex:1; background:#0a1818; border:1px solid #2e4a4c;
+  border-radius:7px; color:#c8e8e5; font-size:12px;
+  padding:7px 10px; outline:none; transition:border-color 0.15s;
+}
+.bl-custom-inp:focus { border-color:var(--accent,#00c8b4); }
+.bl-custom-inp::placeholder { color:#3a6060; }
+.bl-custom-add-btn {
+  background:var(--accent,#00c8b4); border:none; border-radius:7px;
+  color:#001a18; font-size:12px; font-weight:700;
+  padding:7px 14px; cursor:pointer; flex-shrink:0;
+  transition:all 0.15s;
+}
+.bl-custom-add-btn:hover { filter:brightness(1.1); }
+
+.bl-custom-list {
+  max-height:200px; overflow-y:auto; padding:4px 0;
+}
+.bl-custom-list::-webkit-scrollbar { width:4px; }
+.bl-custom-list::-webkit-scrollbar-thumb { background:#1a4a4a; border-radius:2px; }
+
+.bl-custom-item {
+  display:flex; align-items:center; gap:10px;
+  padding:7px 14px; transition:background 0.1s;
+}
+.bl-custom-item:hover { background:#162828; }
+.bl-custom-domain {
+  flex:1; font-size:12px; color:#7aadad;
+  font-family:'Consolas','Fira Code',monospace;
+}
+.bl-custom-del {
+  background:transparent; border:none; color:#4a8080;
+  cursor:pointer; padding:2px; border-radius:4px;
+  display:flex; align-items:center; transition:color 0.12s;
+}
+.bl-custom-del:hover { color:#ef4444; }
+
+.bl-empty {
+  text-align:center; padding:20px; font-size:12px; color:#2e5a5a;
+}
+
+/* ── Toolbar badge ── */
+#btn-blocklist-badge {
+  position: relative;
+}
+.bl-badge-count {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 14px; height: 14px; padding: 0 3px;
+  border-radius: 7px;
+  background: var(--accent, #00c8b4);
+  color: #001a18; font-size: 9px; font-weight: 700;
+  line-height: 14px; text-align: center;
+  pointer-events: none; display: none;
+  border: 1.5px solid var(--bg-surface, #22383a);
+}
+.bl-badge-count.visible { display: block; }

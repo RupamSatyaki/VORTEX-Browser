@@ -385,6 +385,34 @@ function _showPermissionPrompt({ domain, permission, label, permIds }) {
 window.addEventListener('DOMContentLoaded', () => {
   IPC.on('downloads:badge', (count) => Navigation.setDownloadBadge(count));
 
+  // ── Blocklist events → forward to settings iframe + badge ─────────────────
+  IPC.on('blocklist:blocked', (data) => {
+    // Forward to settings if open
+    const frame = document.getElementById('panel-frame');
+    if (frame?.contentWindow) {
+      try { frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'blocklist:blocked', data }, '*'); } catch {}
+    }
+    // Update badge for active tab
+    if (typeof BlocklistBadge !== 'undefined' && data) {
+      const tabId = typeof Tabs !== 'undefined' ? Tabs.getActiveId() : null;
+      if (tabId) BlocklistBadge.onBlocked(tabId);
+    }
+  });
+
+  IPC.on('blocklist:progress', (data) => {
+    const frame = document.getElementById('panel-frame');
+    if (frame?.contentWindow) {
+      try { frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'blocklist:progress', data }, '*'); } catch {}
+    }
+  });
+
+  IPC.on('blocklist:done', (data) => {
+    const frame = document.getElementById('panel-frame');
+    if (frame?.contentWindow) {
+      try { frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'blocklist:done', data }, '*'); } catch {}
+    }
+  });
+
   // ── Custom dialog from webview (alert/confirm/prompt) ─────────────────────
   IPC.on('dialog:show', (data) => {
     if (typeof VortexDialog !== 'undefined') {

@@ -49,12 +49,12 @@ const Navigation = (() => {
         ${SEARCH_ICON}
         <input id="url-bar" type="text" placeholder="Search or enter URL..." spellcheck="false" />
         <div class="address-bar-icons">
-          <div class="address-icon" id="btn-bookmark" title="Bookmark">
+          <div class="address-icon addr-icon-hover" id="btn-bookmark" title="Bookmark">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          <div class="address-icon" id="btn-copy-url" title="Copy URL">
+          <div class="address-icon addr-icon-hover" id="btn-copy-url" title="Copy URL">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
               <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
@@ -99,9 +99,10 @@ const Navigation = (() => {
             <path d="M8 14h8M8 17h5"/>
           </svg>
         </button>
-        <button class="toolbar-btn" id="nav-whatsapp" title="WhatsApp" style="display:none">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+        <button class="toolbar-btn" id="nav-whatsapp" title="WhatsApp Web" style="display:none;color:#25D366;">
+          <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+            <!-- WhatsApp logo SVG -->
+            <path fill="#25D366" d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.38 1.26 4.79L2.05 22l5.43-1.43c1.36.74 2.9 1.16 4.56 1.16 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.16c-1.49 0-2.9-.4-4.12-1.1l-.29-.17-3.04.8.81-2.97-.19-.31a8.23 8.23 0 0 1-1.26-4.41c0-4.54 3.7-8.23 8.24-8.23 4.54 0 8.23 3.69 8.23 8.23 0 4.54-3.69 8.16-8.38 8.16zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43s.17-.25.25-.41c.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.48-.29z"/>
           </svg>
         </button>
         <button class="toolbar-btn" id="nav-devhub" title="DevHub — Developer Tools" style="display:none">
@@ -141,6 +142,28 @@ const Navigation = (() => {
     // Inject autofill icon
     if (typeof PasswordAutofill !== 'undefined') {
       PasswordAutofill.init();
+    }
+    // Inject blocklist badge icon
+    if (typeof BlocklistBadge !== 'undefined') {
+      BlocklistBadge.init();
+    }
+
+    // Show/hide dynamic address bar icons on hover
+    const addrBar = document.getElementById('address-bar-wrap');
+    if (addrBar) {
+      const DYNAMIC_IDS = ['btn-permissions', 'btn-autofill', 'btn-blocklist-badge', 'btn-bookmarks'];
+      const _show = () => DYNAMIC_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity = '1'; el.style.pointerEvents = 'all'; el.style.transform = 'scale(1)'; }
+      });
+      const _hide = () => DYNAMIC_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.style.opacity = '0'; el.style.pointerEvents = 'none'; el.style.transform = 'scale(0.88)'; }
+      });
+      addrBar.addEventListener('mouseenter', _show);
+      addrBar.addEventListener('mouseleave', _hide);
+      addrBar.addEventListener('focusin',    _show);
+      addrBar.addEventListener('focusout',   _hide);
     }
 
     // Zoom buttons

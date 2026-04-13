@@ -159,26 +159,54 @@ window.addEventListener('keydown', (e) => {
 })();
 
 
-// ── YouTube Ad Blocker + Auto-Skipper ────────────────────────────────────────
+// ── YouTube Ad Blocker + Auto-Skipper (Layer 2 — DOM) ────────────────────────
 (function ytAdBlock() {
-  // Check hostname — works in preload context
   function _isYT() {
-    try { return location.hostname.includes('youtube.com'); } catch(_) { return false; }
+    try { return location.hostname.includes('youtube.com'); } catch { return false; }
   }
 
-  // CSS to inject — hide all known ad containers instantly
+  // ── Layer 2a: CSS — hide all ad containers instantly ──────────────────────
   const AD_CSS = `
-    #masthead-ad, #player-ads, ytd-ad-slot-renderer,
-    ytd-banner-promo-renderer, ytd-statement-banner-renderer,
+    /* Player ads */
+    #masthead-ad, #player-ads, .ytp-ad-module,
+    ytd-ad-slot-renderer, ytd-action-companion-ad-renderer,
+    ytd-video-masthead-ad-v3-renderer, ytd-video-masthead-ad-primetime-renderer,
+
+    /* In-feed ads */
     ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer,
     ytd-promoted-video-renderer, ytd-display-ad-renderer,
-    ytd-compact-promoted-video-renderer, ytd-action-companion-ad-renderer,
-    ytd-video-masthead-ad-v3-renderer, ytd-promoted-sparkles-text-search-renderer,
-    .ytp-ad-overlay-container, .ytp-ad-text-overlay, .ytp-ad-image-overlay,
-    .ytp-ad-player-overlay-instream-info, .ytp-ad-player-overlay-layout,
+    ytd-compact-promoted-video-renderer,
+    ytd-promoted-sparkles-text-search-renderer,
+
+    /* Banner ads */
+    ytd-banner-promo-renderer, ytd-statement-banner-renderer,
+    ytd-mealbar-promo-renderer,
+
+    /* Overlay ads */
+    .ytp-ad-overlay-container, .ytp-ad-text-overlay,
+    .ytp-ad-image-overlay, .ytp-ad-player-overlay-instream-info,
+    .ytp-ad-player-overlay-layout, .ytp-ad-player-overlay,
+
+    /* Companion ads */
     #google-container-id, #companion-ad-container,
+    .ytd-companion-slot-renderer,
+
+    /* Popup ads */
     tp-yt-paper-dialog[aria-label*="ad" i],
-    ytd-popup-container ytd-ad-slot-renderer
+    ytd-popup-container ytd-ad-slot-renderer,
+
+    /* Sponsored cards */
+    ytd-promoted-sparkles-text-search-renderer,
+    .ytd-promoted-video-renderer,
+
+    /* Homepage promotions */
+    ytd-ad-slot-renderer[class*="masthead"],
+    ytd-rich-item-renderer:has(ytd-ad-slot-renderer)
+
+    { display: none !important; visibility: hidden !important; }
+
+    /* Hide ad badge on thumbnails */
+    .ytd-thumbnail-overlay-bottom-panel-renderer[aria-label*="Ad" i]
     { display: none !important; }
   `;
 
@@ -190,49 +218,80 @@ window.addEventListener('keydown', (e) => {
     (document.head || document.documentElement).appendChild(s);
   }
 
+  // ── Layer 2b: Skip + Speed ────────────────────────────────────────────────
+  let _adSpeed = 16;
+  let _lastSkipAttempt = 0;
+
   function _trySkipAndBlock() {
     if (!_isYT()) return;
 
-    // 1. Click skip button immediately
-    const skipBtn = document.querySelector(
-      '.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, ' +
-      'button.ytp-skip-ad-button, .videoAdUiSkipButton, [class*="skip-ad"]'
-    );
-    if (skipBtn && skipBtn.offsetParent !== null) {
-      skipBtn.click();
-    }
+    const now = Date.now();
 
-    // 2. Ad playing — speed to 16x and jump to end
-    const video = document.querySelector('video');
-    const adShowing = document.querySelector('.ad-showing');
-    if (adShowing && video && !video.paused) {
-      if (video.playbackRate !== 16) video.playbackRate = 16;
-      if (isFinite(video.duration) && video.duration > 0) {
-        video.currentTime = video.duration - 0.01;
+    // 1. Click skip button (debounced)
+    if (now - _lastSkipAttempt > 200) {
+      const skipBtn = document.querySelector(
+        '.ytp-skip-ad-button, .ytp-ad-skip-button, .ytp-ad-skip-button-modern, ' +
+        '.videoAdUiSkipButton, [class*="skip-ad"], .ytp-ad-skip-button-slot button'
+      );
+      if (skipBtn && skipBtn.offsetParent !== null) {
+        skipBtn.click();
+        _lastSkipAttempt = now;
       }
-    } else if (video && video.playbackRate === 16) {
-      video.playbackRate = 1;
     }
 
-    // 3. Remove ad DOM nodes
+    // 2. Speed up + jump to end for unskippable ads
+    const video = document.querySelector('video');
+    const adShowing = document.querySelector('.ad-showing, .ytp-ad-player-overlay');
+    if (adShowing && video && !video.paused) {
+      if (video.playbackRate !== _adSpeed) video.playbackRate = _adSpeed;
+      if (isFinite(video.duration) && video.duration > 0 && video.duration < 60) {
+        video.currentTime = video.duration - 0.1;
+      }
+    } else if (video && video.playbackRate === _adSpeed) {
+      video.playbackRate = 1; // restore normal speed
+    }
+
+    // 3. Remove lingering ad DOM nodes
+    const AD_SELECTORS = [
+      '#masthead-ad', '#player-ads', 'ytd-ad-slot-renderer',
+      'ytd-in-feed-ad-layout-renderer', 'ytd-promoted-video-renderer',
+      'ytd-display-ad-renderer', 'ytd-banner-promo-renderer',
+      'ytd-statement-banner-renderer', 'ytd-action-companion-ad-renderer',
+      'ytd-mealbar-promo-renderer',
+    ];
+    document.querySelectorAll(AD_SELECTORS.join(',')).forEach(el => {
+      try { el.remove(); } catch {}
+    });
+
+    // 4. Close "Ad" info overlay if present
+    const adInfoClose = document.querySelector('.ytp-ad-button-icon, .ytp-ad-overlay-close-button');
+    if (adInfoClose) { try { adInfoClose.click(); } catch {} }
+  }
+
+  // ── Layer 2c: Remove sponsored cards + homepage promotions ───────────────
+  function _removePromotions() {
+    if (!_isYT()) return;
+    // Sponsored shelf
     document.querySelectorAll(
-      '#masthead-ad, #player-ads, ytd-ad-slot-renderer, ' +
-      'ytd-in-feed-ad-layout-renderer, ytd-promoted-video-renderer, ' +
-      'ytd-display-ad-renderer, ytd-banner-promo-renderer, ' +
-      'ytd-statement-banner-renderer, ytd-action-companion-ad-renderer'
-    ).forEach(el => { try { el.remove(); } catch(_) {} });
+      'ytd-shelf-renderer[is-promoted], ytd-promoted-sparkles-web-renderer, ' +
+      '.ytd-promoted-video-renderer, ytd-rich-item-renderer:has(ytd-ad-slot-renderer)'
+    ).forEach(el => { try { el.remove(); } catch {} });
   }
 
-  // Inject CSS as early as possible
-  if (document.documentElement) {
+  // ── Init ──────────────────────────────────────────────────────────────────
+  if (document.documentElement) _injectCSS();
+  document.addEventListener('DOMContentLoaded', () => {
     _injectCSS();
-  }
-  document.addEventListener('DOMContentLoaded', _injectCSS);
+    _removePromotions();
+  });
 
-  // Poll every 300ms for skip button + ad elements
-  setInterval(_trySkipAndBlock, 300);
+  // Poll every 250ms
+  setInterval(() => {
+    _trySkipAndBlock();
+    _removePromotions();
+  }, 250);
 
-  // MutationObserver for instant reaction when ad elements appear
+  // MutationObserver for instant reaction
   const _obs = new MutationObserver(() => {
     if (_isYT()) {
       _injectCSS();
