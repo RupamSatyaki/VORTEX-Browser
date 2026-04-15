@@ -63,6 +63,14 @@ const DEFAULTS = {
   bookmarks: [],
   downloads_history: [],
   tab_history: [],
+  proxy: {
+    enabled: false,
+    type: 'none',
+    http:   { host: '', port: 8080, username: '', password: '' },
+    socks5: { host: '', port: 1080, username: '', password: '' },
+    tor:    { socksPort: 9050, controlPort: 9051, controlPassword: 'vortex_tor_ctrl', customBinaryPath: '', useBundled: true, autoStart: false },
+    bypassList: ['localhost', '127.0.0.1', '::1'],
+  },
 };
 
 function ensureDefaults() {

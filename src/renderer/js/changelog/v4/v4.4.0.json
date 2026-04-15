@@ -1,0 +1,244 @@
+{
+  "id": "v4.4.0",
+  "version": "4.4.0",
+  "badge": "latest",
+  "name": "Proxy & Tor + Browser Polish",
+  "date": "2026-04-15",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 12, "improve": 16, "fix": 6 },
+  "categories": [
+    {
+      "label": "Privacy & Security",
+      "features": [
+        {
+          "type": "new",
+          "label": "Built-in Proxy Manager",
+          "desc": "HTTP aur SOCKS5 proxy support with host, port, username/password authentication. Settings → Proxy & Tor → type select karo → credentials fill karo → Save & Connect.",
+          "howto": "Settings → Privacy & Performance → Proxy & Tor → HTTP ya SOCKS5 select karo."
+        },
+        {
+          "type": "new",
+          "label": "Tor Network Integration",
+          "desc": "Built-in Tor mode — traffic 3 encrypted relays se route hota hai. Bootstrap progress bar, circuit info (Guard → Relay → Exit), New Identity button with 10s cooldown.",
+          "howto": "Settings → Proxy & Tor → Tor select karo → Auto Download → Start Tor → 100% pe Save & Connect."
+        },
+        {
+          "type": "new",
+          "label": "Auto Tor Downloader",
+          "desc": "tor.exe automatically download hota hai Tor Project ke official server se (~15MB). No manual install needed. Pure Node.js tar.gz extractor — koi external dependency nahi.",
+          "howto": "Tor panel mein 'Auto Download Tor' button click karo — progress bar dikhega."
+        },
+        {
+          "type": "new",
+          "label": "Real IP vs Current IP Display",
+          "desc": "Proxy panel mein do tabs — Real IP (direct connection se) aur Current IP (proxy ke through). IPv4, IPv6, Country, Region, City, ZIP, Timezone, ISP, Org/AS, Lat/Lon, Mobile/Proxy detection sab dikhata hai.",
+          "howto": "Settings → Proxy & Tor → status card mein Real IP / Current IP tabs switch karo."
+        },
+        {
+          "type": "new",
+          "label": "Toolbar Proxy / Tor Indicator",
+          "desc": "Jab proxy active ho toh toolbar mein blue PROXY badge dikhta hai. Tor mode mein purple TOR badge. Click karne pe directly proxy settings khulti hai.",
+          "howto": "Proxy enable karo — toolbar mein badge automatically appear hoga."
+        },
+        {
+          "type": "new",
+          "label": "Bypass List Editor",
+          "desc": "Chip-style bypass rules editor — localhost, 127.0.0.1, ::1 default. Custom domains/IPs/CIDR ranges add karo jo proxy se bypass honge.",
+          "howto": "Settings → Proxy & Tor → Bypass List section → domain add karo."
+        },
+        {
+          "type": "new",
+          "label": "Proxy Setup Guide",
+          "desc": "Settings ke proxy section mein 'How to use Proxy & Tor?' link — click karne pe floating panel khulta hai with step-by-step guide for HTTP, SOCKS5, Tor, Bypass List, aur Disable.",
+          "howto": "Settings → Proxy & Tor → neeche 'How to use Proxy & Tor?' link click karo."
+        },
+        {
+          "type": "new",
+          "label": "Tor Circuit Info & New Identity",
+          "desc": "Active Tor circuit ka Guard → Relay → Exit node display. 'New Identity' button se fresh circuit milta hai — 10 second cooldown with countdown timer.",
+          "howto": "Tor connected hone ke baad Circuit Info section mein nodes dikhenge."
+        }
+      ]
+    },
+    {
+      "label": "Address Bar",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Clean URL Display",
+          "desc": "Address bar mein https://, www. hide ho jaata hai — sirf domain + path dikhta hai. Focus ya hover pe full URL wapas aata hai.",
+          "howto": "Kisi bhi site pe jao — address bar mein clean URL dikhega. Click karo toh full URL."
+        },
+        {
+          "type": "improve",
+          "label": "Security Icons — HTTPS / HTTP / Local / Vortex",
+          "desc": "HTTPS pe green lock, HTTP pe orange warning triangle, Local/IP (192.168.x.x, localhost, .local) pe blue home icon, vortex:// internal pages pe shield icon.",
+          "howto": "Address bar ke left side mein icon automatically change hota hai."
+        },
+        {
+          "type": "new",
+          "label": "Security Info Popup",
+          "desc": "Security icon click karne pe popup — certificate info, connection type, aur HTTP sites pe 'Try HTTPS' button.",
+          "howto": "Address bar mein lock/warning icon click karo."
+        },
+        {
+          "type": "improve",
+          "label": "Smart URL Detection",
+          "desc": "192.168.0.1, localhost, .local domains pe automatically http:// prefix lagta hai. localhost:3000 → http://localhost:3000 — port bhi handle hota hai.",
+          "howto": "Address bar mein localhost:3000 type karo — automatically navigate hoga."
+        }
+      ]
+    },
+    {
+      "label": "Tab Bar & Favicon Cache",
+      "features": [
+        {
+          "type": "improve",
+          "label": "HTTP Site Favicon Support",
+          "desc": "HTTP sites ka favicon bhi fetch hota hai — webview ke andar se base64 convert karke cache mein save hota hai.",
+          "howto": "HTTP sites pe bhi tab mein favicon dikhega."
+        },
+        {
+          "type": "new",
+          "label": "Favicon Cache System",
+          "desc": "Domain-based local cache (favicon-cache.json) — hostname:port key, base64 encoded favicon. Max 500 entries, oldest delete. Offline bhi kaam karta hai. Tab create hote hi cached favicon/title instantly dikhta hai.",
+          "howto": "Ek baar visit karo — agli baar tab instantly favicon ke saath khulega."
+        },
+        {
+          "type": "improve",
+          "label": "Omnibox Favicon",
+          "desc": "Omnibox suggestions mein bhi cached favicon dikhta hai — history aur bookmarks dono mein.",
+          "howto": "Address bar mein type karo — suggestions mein site icons dikhenge."
+        }
+      ]
+    },
+    {
+      "label": "UI & UX Polish",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Address Bar Icons — Hover to Show",
+          "desc": "Saare address bar icons (bookmark, permission, autofill, blocklist badge) default hidden rehte hain. Address bar hover ya focus pe smoothly appear hote hain.",
+          "howto": "Address bar pe hover karo — icons fade in honge."
+        },
+        {
+          "type": "improve",
+          "label": "Bookmark Icon Always Visible When Bookmarked",
+          "desc": "Agar page bookmarked hai toh bookmark icon hamesha visible + filled (teal color) rehta hai — hover ki zaroorat nahi.",
+          "howto": "Koi page bookmark karo — icon hamesha dikhega."
+        },
+        {
+          "type": "improve",
+          "label": "WhatsApp Icon — Official Logo",
+          "desc": "WhatsApp panel button mein official WhatsApp logo SVG use kiya — proper green color with glow effect.",
+          "howto": "Toolbar mein WhatsApp button enable karo Settings → Appearance se."
+        },
+        {
+          "type": "improve",
+          "label": "Permission Icon Redesign",
+          "desc": "Permission icon naya design — user silhouette with checkmark. Zyada intuitive aur clear.",
+          "howto": "Kisi site pe permission request aane pe address bar mein icon dikhega."
+        },
+        {
+          "type": "improve",
+          "label": "Profile Dropdown — Smart Navigation",
+          "desc": "Edit Profile button click karne pe Settings panel directly Profile tab pe open hota hai. Bookmarks count BookmarkStore se fresh load, Downloads count DownloadHistory se total.",
+          "howto": "Toolbar mein profile icon → Edit Profile click karo."
+        }
+      ]
+    },
+    {
+      "label": "Settings & Updates",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Settings Active Tab Persist",
+          "desc": "Settings panel refresh ya reopen karne pe same tab active rehta hai (sessionStorage). settings:navigate message se programmatically kisi bhi tab pe ja sakte ho.",
+          "howto": "Settings kholo, koi tab select karo, band karo — dobara kholne pe same tab."
+        },
+        {
+          "type": "new",
+          "label": "Update Badge in Tab Bar",
+          "desc": "App start pe background mein version check hota hai. Naya version available hone pe tabbar mein green pulsing badge button appear hota hai. Click karne pe Settings → Updates tab directly open.",
+          "howto": "Naya version release hone pe automatically badge dikhega."
+        }
+      ]
+    },
+    {
+      "label": "Download Manager",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Custom Download Folder",
+          "desc": "Selected folder pe download hota hai — Desktop, custom folder kuch bhi. Settings → Downloads → folder pick karo.",
+          "howto": "Settings → Downloads → Download Location → folder select karo."
+        },
+        {
+          "type": "improve",
+          "label": "Ask Before Download + Auto-Open",
+          "desc": "Ask before download toggle — native OS save dialog. Auto-open on complete toggle — file automatically khulta hai. Settings change hone pe instantly apply — restart nahi.",
+          "howto": "Settings → Downloads → Ask where to save / Open after download toggles."
+        }
+      ]
+    },
+    {
+      "label": "YouTube Ad Blocker",
+      "features": [
+        {
+          "type": "improve",
+          "label": "YouTube Section Redesigned",
+          "desc": "Settings → YouTube section completely redesigned — 3 layer badges visible, cleaner layout, better organization.",
+          "howto": "Settings → Privacy & Performance → YouTube."
+        },
+        {
+          "type": "new",
+          "label": "Remove Sponsored Cards & Homepage Promotions",
+          "desc": "YouTube Sponsored Cards aur Homepage Promotions remove karne ke alag toggles. Better CSS selectors, faster ad skip.",
+          "howto": "Settings → YouTube → Sponsored Cards / Homepage Promotions toggles."
+        },
+        {
+          "type": "improve",
+          "label": "Blocklist + YouTube Integration",
+          "desc": "youtube-ads built-in list settings ke ytAdblock toggle se linked. Toggle karo → engine reload → IMA SDK block/unblock automatically.",
+          "howto": "Settings → YouTube → Ad Blocker toggle — blocklist engine bhi sync hota hai."
+        }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "Real IP not showing in Proxy panel",
+          "desc": "net.request Electron 28 mein session option reliably kaam nahi karta tha. Fix: session.fromPartition('persist:proxy-ip-check') use karo aur proxyRules: 'direct://' force karo."
+        },
+        {
+          "type": "fix",
+          "label": "Internet drops when Tor starts",
+          "desc": "Proxy Tor start hone se pehle hi set ho jaati thi — sab traffic fail. Fix: applyProxy() Tor ke liye sirf tab proxy set karta hai jab bootstrap 100% ho (onTorReady callback)."
+        },
+        {
+          "type": "fix",
+          "label": "Google logout on Tor enable",
+          "desc": "Abrupt proxy change se Google ka IP mismatch security logout trigger karta tha. Fix: Tor proxy sirf fully connected hone ke baad apply hoti hai."
+        },
+        {
+          "type": "fix",
+          "label": "Proxy listener accumulation on re-render",
+          "desc": "ProxyState.on() har panel open pe naye listeners add karta tha. Fix: clearAll() on mount, unsubscribe functions stored in _unsubs array."
+        },
+        {
+          "type": "fix",
+          "label": "Bookmark check using wrong URL",
+          "desc": "Bookmark check bar.value (clean URL) se ho raha tha — actual URL se nahi. Fix: bar.dataset.fullUrl se check — bookmark button properly marked/unmarked."
+        },
+        {
+          "type": "fix",
+          "label": "IPC events double-bind in proxy panel",
+          "desc": "Settings panel baar baar open/close karne pe duplicate IPC events fire hote the. Fix: _ipcBound flag — events sirf ek baar bind hote hain."
+        }
+      ]
+    }
+  ]
+}

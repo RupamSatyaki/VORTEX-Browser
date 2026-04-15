@@ -1,18 +1,30 @@
 // Navigation toolbar
 const Navigation = (() => {
-  let firstClick = true; // track first vs second click on url bar
+  let firstClick = true;
 
-  // Lock/unlock SVG icons for address bar
+  // ── Security icons ────────────────────────────────────────────────────────
   const LOCK_ICON = `
-    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00c8b4" stroke-width="2" style="cursor:pointer;flex-shrink:0" title="Secure connection">
+    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#22c55e" stroke-width="2" style="cursor:pointer;flex-shrink:0;transition:opacity 0.15s" title="Secure connection">
       <rect x="5" y="11" width="14" height="10" rx="2"/>
       <path d="M8 11V7a4 4 0 0 1 8 0v4"/>
     </svg>`;
 
   const UNLOCK_ICON = `
-    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7a5a20" stroke-width="2" style="cursor:pointer;flex-shrink:0" title="Not secure">
-      <rect x="5" y="11" width="14" height="10" rx="2"/>
-      <path d="M8 11V7a4 4 0 0 1 7.5-1"/>
+    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#f59e0b" stroke-width="2" style="cursor:pointer;flex-shrink:0" title="Not secure — connection is not encrypted">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>`;
+
+  const LOCAL_ICON = `
+    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#3b82f6" stroke-width="2" style="cursor:pointer;flex-shrink:0" title="Local network">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>`;
+
+  const VORTEX_ICON = `
+    <svg id="url-security-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--accent,#00c8b4)" stroke-width="2" style="flex-shrink:0" title="Vortex internal page">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
     </svg>`;
 
   const SEARCH_ICON = `
@@ -122,6 +134,15 @@ const Navigation = (() => {
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
         <div class="toolbar-separator"></div>
+        <div id="proxy-indicator" title="Proxy Active — Click to manage" style="display:none;align-items:center;gap:5px;background:rgba(37,99,235,0.15);border:1px solid rgba(37,99,235,0.3);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:#60a5fa;cursor:pointer;flex-shrink:0;-webkit-app-region:no-drag;letter-spacing:0.4px">
+          <span style="width:6px;height:6px;border-radius:50%;background:#60a5fa;flex-shrink:0;animation:proxyDot 2s infinite"></span>
+          PROXY
+        </div>
+        <div id="tor-indicator" title="Tor Mode Active — Click to manage" style="display:none;align-items:center;gap:5px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:700;color:#a78bfa;cursor:pointer;flex-shrink:0;-webkit-app-region:no-drag;letter-spacing:0.4px">
+          <span id="tor-dot" style="width:6px;height:6px;border-radius:50%;background:#a78bfa;flex-shrink:0;animation:proxyDot 2s infinite"></span>
+          TOR
+        </div>
+        <div class="toolbar-separator"></div>
         <div class="user-icon" id="btn-user" title="Profile">V</div>
       </div>
     `;
@@ -190,6 +211,11 @@ const Navigation = (() => {
     });
 
     urlBar.addEventListener('focus', () => {
+      // Show full URL on focus
+      const fullUrl = urlBar.dataset.fullUrl || urlBar.value;
+      if (fullUrl && fullUrl !== urlBar.value) {
+        urlBar.value = fullUrl;
+      }
       if (firstClick) {
         setTimeout(() => urlBar.select(), 0);
         firstClick = false;
@@ -197,8 +223,15 @@ const Navigation = (() => {
     });
 
     urlBar.addEventListener('blur', () => {
-      firstClick = true; // reset for next focus
+      firstClick = true;
       Omnibox.onBlur();
+      // Restore clean URL on blur
+      const fullUrl = urlBar.dataset.fullUrl;
+      if (fullUrl && !urlBar.value.startsWith('http') && !urlBar.value.startsWith('vortex://')) {
+        // User didn't type a new URL — restore clean display
+      } else if (fullUrl) {
+        urlBar.value = _cleanDisplayUrl(fullUrl);
+      }
     });
 
     urlBar.addEventListener('keydown', (e) => {
@@ -220,7 +253,8 @@ const Navigation = (() => {
 
     // Bookmark button — toggle add/remove
     document.getElementById('btn-bookmark').addEventListener('click', async () => {
-      const url = urlBar.value;
+      // Use full URL — bar.value may show clean display URL
+      const url = urlBar.dataset.fullUrl || urlBar.value;
       if (!url || url.startsWith('vortex://')) return;
       const btn = document.getElementById('btn-bookmark');
       const isBookmarked = btn.classList.contains('bookmarked');
@@ -261,17 +295,129 @@ const Navigation = (() => {
     if (!old) return;
 
     let newIcon;
-    if (!url || url.startsWith('about:') || url.startsWith('chrome:')) {
+    let borderColor = '';
+
+    if (!url || url === '' || url.startsWith('about:')) {
       newIcon = SEARCH_ICON;
+    } else if (url.startsWith('vortex://')) {
+      newIcon = VORTEX_ICON;
+    } else if (_isLocalAddress(url)) {
+      newIcon = LOCAL_ICON;
+      // Local addresses — no warning needed
     } else if (url.startsWith('https://')) {
       newIcon = LOCK_ICON;
-    } else {
+    } else if (url.startsWith('http://')) {
       newIcon = UNLOCK_ICON;
+      borderColor = 'rgba(245,158,11,0.4)';
+    } else {
+      newIcon = SEARCH_ICON;
     }
 
     const tmp = document.createElement('div');
     tmp.innerHTML = newIcon;
-    old.replaceWith(tmp.firstElementChild);
+    const newEl = tmp.firstElementChild;
+
+    // Click handler for security icon
+    newEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _showSecurityPopup(url, newEl);
+    });
+
+    old.replaceWith(newEl);
+
+    // Address bar border tint for HTTP
+    if (borderColor) {
+      wrap.style.setProperty('--http-border', borderColor);
+      wrap.classList.add('http-warning');
+    } else {
+      wrap.classList.remove('http-warning');
+    }
+  }
+
+  // ── Local address detection ───────────────────────────────────────────────
+  function _isLocalAddress(url) {
+    try {
+      const host = new URL(url).hostname;
+      return /^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|0\.0\.0\.0)/.test(host)
+          || /\.(local|lan|internal|home|corp|intranet|localdomain)$/.test(host)
+          || /^\d+\.\d+\.\d+\.\d+$/.test(host); // any IP
+    } catch { return false; }
+  }
+
+  // ── Security popup ────────────────────────────────────────────────────────
+  function _showSecurityPopup(url, anchor) {
+    const existing = document.getElementById('url-security-popup');
+    if (existing) { existing.remove(); return; }
+
+    let type = 'search';
+    if (url.startsWith('vortex://'))      type = 'vortex';
+    else if (_isLocalAddress(url))        type = 'local';
+    else if (url.startsWith('https://'))  type = 'secure';
+    else if (url.startsWith('http://'))   type = 'insecure';
+
+    const CONFIGS = {
+      secure:   { icon: '🔒', color: '#22c55e', title: 'Connection is secure',       desc: 'Your connection to this site is encrypted and authenticated.' },
+      insecure: { icon: '⚠️', color: '#f59e0b', title: 'Connection is not secure',   desc: 'Passwords and data you enter may be visible to others on the network.' },
+      local:    { icon: '🏠', color: '#3b82f6', title: 'Local network',              desc: 'This is a local or private network address.' },
+      vortex:   { icon: '🛡️', color: 'var(--accent,#00c8b4)', title: 'Vortex page', desc: 'This is a built-in Vortex browser page.' },
+      search:   { icon: '🔍', color: '#4a8080', title: 'Search',                     desc: 'Enter a URL or search term.' },
+    };
+
+    const cfg = CONFIGS[type];
+    let domain = '';
+    try { domain = new URL(url).hostname; } catch {}
+
+    const popup = document.createElement('div');
+    popup.id = 'url-security-popup';
+    popup.style.cssText = `
+      position:fixed; z-index:99999;
+      background:var(--bg-panel,#0f2222); border:1px solid var(--bg-border,#2e4a4c);
+      border-radius:10px; width:280px; padding:14px 16px;
+      box-shadow:0 12px 40px rgba(0,0,0,0.6);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      animation:secPopIn 0.15s ease;
+    `;
+
+    if (!document.getElementById('sec-pop-style')) {
+      const s = document.createElement('style');
+      s.id = 'sec-pop-style';
+      s.textContent = `@keyframes secPopIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}`;
+      document.head.appendChild(s);
+    }
+
+    popup.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:18px;">${cfg.icon}</span>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:${cfg.color};">${cfg.title}</div>
+          ${domain ? `<div style="font-size:11px;color:#4a8080;margin-top:1px;">${domain}</div>` : ''}
+        </div>
+      </div>
+      <div style="font-size:12px;color:#7aadad;line-height:1.6;margin-bottom:${type==='insecure'?'12px':'0'};">${cfg.desc}</div>
+      ${type === 'insecure' ? `
+        <button id="sec-try-https" style="width:100%;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:7px;color:#f59e0b;font-size:12px;font-weight:600;padding:7px;cursor:pointer;transition:all 0.15s;">
+          Try HTTPS instead →
+        </button>` : ''}
+    `;
+
+    document.body.appendChild(popup);
+
+    // Position below anchor
+    const rect = anchor.getBoundingClientRect();
+    popup.style.top  = (rect.bottom + 8) + 'px';
+    popup.style.left = Math.max(8, rect.left - 10) + 'px';
+
+    // Try HTTPS button
+    popup.querySelector('#sec-try-https')?.addEventListener('click', () => {
+      popup.remove();
+      const httpsUrl = url.replace(/^http:\/\//, 'https://');
+      WebView.loadURL(httpsUrl);
+    });
+
+    // Close on outside click
+    setTimeout(() => {
+      document.addEventListener('click', () => popup.remove(), { once: true });
+    }, 0);
   }
 
   // Search engine URL templates
@@ -299,16 +445,43 @@ const Navigation = (() => {
   let _searchEngine = 'google';
 
   function navigate() {
-    let url = document.getElementById('url-bar').value.trim();
+    const bar = document.getElementById('url-bar');
+    // If user didn't edit — use stored full URL
+    const stored = bar.dataset.fullUrl || '';
+    const displayed = _cleanDisplayUrl(stored);
+    let url = (stored && bar.value.trim() === displayed)
+      ? stored
+      : bar.value.trim();
+
     if (!url) return;
-    if (!/^https?:\/\//i.test(url)) {
+
+    if (!/^https?:\/\//i.test(url) && !url.startsWith('vortex://') && !url.startsWith('file://')) {
       const base = SEARCH_ENGINES[_searchEngine] || SEARCH_ENGINES.google;
-      url = url.includes('.') && !url.includes(' ')
-        ? 'https://' + url
-        : base + encodeURIComponent(url);
+      if (url.includes(' ') || (!url.includes('.') && !_isLocalHostname(url))) {
+        url = base + encodeURIComponent(url);
+      } else if (_isLocalHostname(url)) {
+        url = 'http://' + url;
+      } else {
+        url = 'https://' + url;
+      }
     }
+
     WebView.loadURL(url);
-    document.getElementById('url-bar').blur();
+    bar.blur();
+  }
+
+  // Detect if hostname should use http:// by default
+  function _isLocalHostname(host) {
+    // Remove port if present
+    const h = host.split(':')[0].toLowerCase();
+    return h === 'localhost'
+      || /^127\./.test(h)
+      || /^192\.168\./.test(h)
+      || /^10\./.test(h)
+      || /^172\.(1[6-9]|2\d|3[01])\./.test(h)
+      || /^0\.0\.0\.0/.test(h)
+      || /^\d+\.\d+\.\d+\.\d+$/.test(h)   // any IPv4
+      || /\.(local|lan|internal|home|corp|intranet|localdomain)$/.test(h);
   }
 
   function applySettings(s) {
@@ -332,9 +505,13 @@ const Navigation = (() => {
 
   function setURL(url) {
     const bar = document.getElementById('url-bar');
-    if (bar) bar.value = url;
+    if (bar) {
+      // Store full URL as data attribute
+      bar.dataset.fullUrl = url || '';
+      // Show clean URL (hide https://, http://, www.)
+      bar.value = _cleanDisplayUrl(url || '');
+    }
     updateSecurityIcon(url);
-    // Update bookmark icon state
     if (window._updateBookmarkIcon) window._updateBookmarkIcon();
     // Update permission badge
     if (typeof PermissionPopup !== 'undefined') {
@@ -343,6 +520,25 @@ const Navigation = (() => {
         PermissionPopup.updateBadge(domain);
         if (typeof PasswordAutofill !== 'undefined') PasswordAutofill.updateBadge(domain);
       } catch {}
+    }
+  }
+
+  // Clean URL for display — hide protocol + www
+  function _cleanDisplayUrl(url) {
+    if (!url) return '';
+    if (url.startsWith('vortex://')) return url;
+    if (url.startsWith('about:'))   return url;
+    try {
+      const u = new URL(url);
+      // Show host (without www.) + path + search + hash
+      const host = u.hostname.replace(/^www\./, '');
+      const rest = u.pathname === '/' ? '' : u.pathname;
+      const query = u.search || '';
+      const hash  = u.hash   || '';
+      return host + rest + query + hash;
+    } catch {
+      // Fallback — just strip protocol
+      return url.replace(/^https?:\/\/(www\.)?/, '');
     }
   }
 
@@ -699,7 +895,7 @@ const Navigation = (() => {
       </div>
       <div class="pd-sep"></div>
       <div class="pd-item" data-action="profile-settings">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit Profile
       </div>
       <div class="pd-item" data-action="bookmarks">
@@ -757,7 +953,16 @@ const Navigation = (() => {
       if (!item) return;
       _closeProfileMenu();
       switch (item.dataset.action) {
-        case 'profile-settings': Panel.open('settings'); break; // opens settings, user navigates to Profile tab
+        case 'profile-settings':
+          Panel.open('settings');
+          // Navigate to Profile tab in settings
+          setTimeout(() => {
+            const frame = document.getElementById('panel-frame');
+            if (frame && frame.contentWindow) {
+              frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'settings:navigate', data: 'profile' }, '*');
+            }
+          }, 350);
+          break;
         case 'bookmarks':   Panel.open('bookmarks'); break;
         case 'history':     Panel.open('history'); break;
         case 'downloads':   Panel.open('downloads'); break;
@@ -773,18 +978,31 @@ const Navigation = (() => {
   }
 
   function _updateProfileStats() {
+    // Tabs count
     const tabCount = Tabs.getAllTabs ? Tabs.getAllTabs().length : 0;
     const tabEl = document.getElementById('pd-stat-tabs');
     if (tabEl) tabEl.querySelector('.pd-stat-num').textContent = tabCount;
+
+    // Bookmarks count — load fresh from store
     if (window.BookmarkStore) {
       BookmarkStore.load().then(list => {
         const bmEl = document.getElementById('pd-stat-bm');
         if (bmEl) bmEl.querySelector('.pd-stat-num').textContent = list.length;
       }).catch(() => {});
     }
-    const badge = document.getElementById('dl-badge');
-    const dlEl = document.getElementById('pd-stat-dl');
-    if (dlEl && badge) dlEl.querySelector('.pd-stat-num').textContent = badge.textContent || '0';
+
+    // Downloads count — from DownloadHistory
+    if (window.DownloadHistory) {
+      DownloadHistory.load().then(list => {
+        const dlEl = document.getElementById('pd-stat-dl');
+        if (dlEl) dlEl.querySelector('.pd-stat-num').textContent = list.length;
+      }).catch(() => {});
+    } else {
+      // Fallback — badge count
+      const badge = document.getElementById('dl-badge');
+      const dlEl  = document.getElementById('pd-stat-dl');
+      if (dlEl) dlEl.querySelector('.pd-stat-num').textContent = badge?.textContent || '0';
+    }
   }
 
   function _toggleProfileMenu() {

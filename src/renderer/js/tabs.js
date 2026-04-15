@@ -7,9 +7,17 @@ const Tabs = (() => {
     const id = Date.now().toString();
     tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, _muted: false, _audible: false });
     _touchTab(id);
-    // Lazy: don't create webview until tab becomes active
+    // Load cached favicon + title for background tab
+    if (typeof FaviconCache !== 'undefined' && url && url.startsWith('http')) {
+      FaviconCache.getFavicon(url).then(fav => { if (fav) updateTab(id, { favicon: fav }); }).catch(() => {});
+      FaviconCache.getTitle(url).then(title => { if (title) updateTab(id, { title }); }).catch(() => {});
+    }
     render();
     return id;
+  }
+
+  function _globeIcon() {
+    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7aadad" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
   }
 
   function createTab(url = 'https://www.google.com', opts = {}) {
@@ -20,7 +28,17 @@ const Tabs = (() => {
     tabs.push({ id, url, title: 'New Tab', favicon: null, _webviewReady: false, _sleeping: false, _muted: false, _audible: false, incognito: !!opts.incognito });
     activeTabId = id;
     _touchTab(id);
-    // Set activeId in WebView BEFORE creating webview so did-start-loading fires correctly
+
+    // Load cached favicon + title immediately (before page loads)
+    if (typeof FaviconCache !== 'undefined' && url.startsWith('http')) {
+      FaviconCache.getFavicon(url).then(fav => {
+        if (fav) updateTab(id, { favicon: fav });
+      }).catch(() => {});
+      FaviconCache.getTitle(url).then(title => {
+        if (title) updateTab(id, { title });
+      }).catch(() => {});
+    }
+
     WebView.setActiveId(id);
     WebView.createWebview(id, url, { incognito: !!opts.incognito });
     tabs.find(t => t.id === id)._webviewReady = true;
@@ -80,12 +98,25 @@ const Tabs = (() => {
         img.width = 14; img.height = 14;
         img.style.borderRadius = '2px';
         img.src = data.favicon;
-        img.onerror = () => {
+        img.onerror = async () => {
           img.remove();
-          el.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7aadad" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+          // Try cache fallback
+          if (typeof FaviconCache !== 'undefined' && tab.url) {
+            const cached = await FaviconCache.getFavicon(tab.url).catch(() => null);
+            if (cached && cached !== data.favicon) {
+              const img2 = document.createElement('img');
+              img2.width = 14; img2.height = 14;
+              img2.style.borderRadius = '2px';
+              img2.src = cached;
+              img2.onerror = () => { img2.remove(); el.innerHTML = _globeIcon(); };
+              el.appendChild(img2);
+              return;
+            }
+          }
+          el.innerHTML = _globeIcon();
         };
         el.appendChild(img);
-        return; // skip full render
+        return;
       }
     }
 
@@ -119,7 +150,7 @@ const Tabs = (() => {
 
   // ── Tab Sleep ─────────────────────────────────────────────────────────────
   let _sleepEnabled  = true;
-  let _sleepTimeout  = 10 * 60 * 1000; // 10 minutes default
+  let _sleepTimeout  = 30 * 60 * 1000; // 30 minutes default
   let _sleepTimer    = null;
   const _lastActive  = new Map(); // tabId → timestamp
 
@@ -429,21 +460,31 @@ const Tabs = (() => {
       iconEl.className = 'tab-icon';
 
       if (tab._sleeping) {
-        // Moon icon for sleeping tabs
         iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4a7a8a" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
       } else if (tab.favicon) {
         const img = document.createElement('img');
-        img.width = 14;
-        img.height = 14;
+        img.width = 14; img.height = 14;
         img.style.borderRadius = '2px';
         img.src = tab.favicon;
-        img.onerror = () => {
+        img.onerror = async () => {
           img.remove();
-          iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7aadad" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+          if (typeof FaviconCache !== 'undefined' && tab.url) {
+            const cached = await FaviconCache.getFavicon(tab.url).catch(() => null);
+            if (cached && cached !== tab.favicon) {
+              const img2 = document.createElement('img');
+              img2.width = 14; img2.height = 14;
+              img2.style.borderRadius = '2px';
+              img2.src = cached;
+              img2.onerror = () => { img2.remove(); iconEl.innerHTML = _globeIcon(); };
+              iconEl.appendChild(img2);
+              return;
+            }
+          }
+          iconEl.innerHTML = _globeIcon();
         };
         iconEl.appendChild(img);
       } else {
-        iconEl.innerHTML = `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#7aadad" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+        iconEl.innerHTML = _globeIcon();
       }
 
       const titleEl = document.createElement('span');
@@ -514,6 +555,13 @@ const Tabs = (() => {
     controls.querySelector('.wc-minimize').addEventListener('click', () => window.vortexAPI.send('window:minimize'));
     controls.querySelector('.wc-maximize').addEventListener('click', () => window.vortexAPI.send('window:maximize'));
     controls.querySelector('.wc-close').addEventListener('click',    () => window.vortexAPI.send('window:close'));
+
+    // Re-inject update badge if it exists
+    const existingBadge = document.getElementById('update-badge-btn');
+    if (existingBadge) {
+      controls.insertBefore(existingBadge, controls.firstChild);
+    }
+
     container.appendChild(controls);
   }
 

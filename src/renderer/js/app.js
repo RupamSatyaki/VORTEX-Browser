@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     BlocklistBadge.init();
   }
 
+  // Check for updates in background (non-blocking)
+  _checkUpdateBadge();
+
   // Parallel: WebView init + settings load
   const [, appSettings] = await Promise.all([
     WebView.init(),
@@ -181,6 +184,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (s.bgTheme) applyBgTheme(s.bgTheme);
     WebView.setYTAdblock(s.ytAdblock !== false, s.ytAdSpeed || 16);
   });
+
+  // ── Proxy toolbar indicator ───────────────────────────────────────────────
+  // Inject animation CSS once
+  if (!document.getElementById('proxy-indicator-style')) {
+    const s = document.createElement('style');
+    s.id = 'proxy-indicator-style';
+    s.textContent = `
+      @keyframes proxyDot {
+        0%,100% { opacity:1; }
+        50%      { opacity:0.4; }
+      }
+      #proxy-indicator:hover { background:rgba(37,99,235,0.25) !important; }
+      #tor-indicator:hover   { background:rgba(124,58,237,0.25) !important; }
+      #tor-indicator.connecting { background:rgba(245,158,11,0.15) !important; border-color:rgba(245,158,11,0.3) !important; color:#fbbf24 !important; }
+      #tor-indicator.connecting #tor-dot { background:#fbbf24 !important; animation-duration:0.6s !important; }
+    `;
+    document.head.appendChild(s);
+  }
+
+  function _updateProxyIndicator(s) {
+    const proxyEl = document.getElementById('proxy-indicator');
+    const torEl   = document.getElementById('tor-indicator');
+    if (!proxyEl || !torEl) return;
+
+    const isProxy = s.enabled && (s.type === 'http' || s.type === 'socks5');
+    const isTor   = s.enabled && s.type === 'tor';
+
+    proxyEl.style.display = isProxy ? 'flex' : 'none';
+    torEl.style.display   = isTor   ? 'flex' : 'none';
+
+    if (isTor) {
+      torEl.className = s.connected ? '' : 'connecting';
+    }
+  }
+
+  // Listen for proxy status updates (from settings panel via postMessage)
+  window.addEventListener('message', (e) => {
+    if (e.data && e.data.__vortexAction && e.data.channel === 'proxy:statusUpdate') {
+      _updateProxyIndicator(e.data.payload);
+    }
+  });
+
+  // Also listen directly from main process
+  IPC.on('proxy:statusUpdate', (s) => _updateProxyIndicator(s));
+
+  // Load initial proxy status
+  IPC.invoke('proxy:getStatus').then(s => { if (s) _updateProxyIndicator(s); }).catch(() => {});
+
+  // Click indicators → open settings on proxy section
+  setTimeout(() => {
+    const proxyEl = document.getElementById('proxy-indicator');
+    const torEl   = document.getElementById('tor-indicator');
+    const _openProxy = () => {
+      Panel.open('settings');
+      let tries = 0;
+      const _nav = () => {
+        const frame = document.getElementById('panel-frame');
+        if (frame && frame.contentWindow) {
+          frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'settings:navigate', data: 'proxy' }, '*');
+        }
+        if (++tries < 5) setTimeout(_nav, 300);
+      };
+      setTimeout(_nav, 300);
+    };
+    if (proxyEl) proxyEl.addEventListener('click', _openProxy);
+    if (torEl)   torEl.addEventListener('click', _openProxy);
+  }, 1000);
   window.addEventListener('message', (e) => {
     if (e.data && e.data.__vortexAction && e.data.channel === 'settings:changed') {
       Navigation.applySettings(e.data.payload);
@@ -199,3 +269,105 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
+// ── Update badge check ────────────────────────────────────────────────────────
+async function _checkUpdateBadge() {
+  try {
+    const currentVer = await IPC.invoke('app:version');
+    if (!currentVer) return;
+
+    const releases = await IPC.invoke('updater:fetchAllReleases');
+    if (!releases || releases.error || !releases.length) return;
+
+    const latest = releases[0];
+    if (!latest || !latest.tag) return;
+
+    // Compare versions
+    function _cmp(a, b) {
+      const pa = a.replace(/^v/, '').split('.').map(Number);
+      const pb = b.replace(/^v/, '').split('.').map(Number);
+      for (let i = 0; i < 3; i++) {
+        if ((pa[i]||0) > (pb[i]||0)) return 1;
+        if ((pa[i]||0) < (pb[i]||0)) return -1;
+      }
+      return 0;
+    }
+
+    if (_cmp(currentVer, latest.tag) < 0) {
+      // Update available — show badge button
+      _showUpdateBadge(latest.tag, latest.name);
+    }
+  } catch {}
+}
+
+function _showUpdateBadge(tag, name) {
+  // Don't show if already exists
+  if (document.getElementById('update-badge-btn')) return;
+
+  const btn = document.createElement('button');
+  btn.id = 'update-badge-btn';
+  btn.title = `Update available: ${tag} — Click to update`;
+  btn.style.cssText = `
+    display:flex; align-items:center; gap:5px;
+    background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3);
+    border-radius:6px; color:#22c55e; font-size:11px; font-weight:700;
+    padding:4px 10px; cursor:pointer; transition:all 0.15s;
+    white-space:nowrap; flex-shrink:0;
+    -webkit-app-region: no-drag;
+    animation:updatePulse 2s ease-in-out infinite;
+    margin-right:6px;
+  `;
+
+  // Inject animation
+  if (!document.getElementById('update-badge-style')) {
+    const s = document.createElement('style');
+    s.id = 'update-badge-style';
+    s.textContent = `
+      @keyframes updatePulse {
+        0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); }
+        50%      { box-shadow: 0 0 0 4px rgba(34,197,94,0); }
+      }
+      #update-badge-btn:hover {
+        background: rgba(34,197,94,0.22) !important;
+        border-color: rgba(34,197,94,0.5) !important;
+        transform: translateY(-1px);
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    ${tag}
+  `;
+
+  // Insert inside window-controls div, before minimize button
+  const controls = document.querySelector('.window-controls');
+  if (controls) {
+    controls.insertBefore(btn, controls.firstChild);
+  }
+
+  // Click → open settings on Updates tab
+  btn.addEventListener('click', () => {
+    Panel.open('settings');
+    // Wait for settings iframe to load then navigate to updates
+    let attempts = 0;
+    const _tryNavigate = () => {
+      const frame = document.getElementById('panel-frame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage({
+          __vortexIPC: true,
+          channel: 'settings:navigate',
+          data: 'updates'
+        }, '*');
+      }
+      // Retry a few times to ensure iframe is ready
+      if (++attempts < 5) setTimeout(_tryNavigate, 300);
+    };
+    setTimeout(_tryNavigate, 300);
+  });
+}

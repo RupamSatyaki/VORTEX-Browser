@@ -150,7 +150,8 @@ async function _updateBookmarkIcon() {
   const bar = document.getElementById('url-bar');
   const btn = document.getElementById('btn-bookmark');
   if (!bar || !btn) return;
-  const url = bar.value;
+  // Use full URL (stored in dataset) — bar.value may show clean URL
+  const url = bar.dataset.fullUrl || bar.value;
   const saved = url && !url.startsWith('vortex://') ? await BookmarkStore.has(url) : false;
   btn.classList.toggle('bookmarked', saved);
   btn.title = saved ? 'Remove bookmark' : 'Bookmark this page';
@@ -384,6 +385,17 @@ function _showPermissionPrompt({ domain, permission, label, permIds }) {
 
 window.addEventListener('DOMContentLoaded', () => {
   IPC.on('downloads:badge', (count) => Navigation.setDownloadBadge(count));
+
+  // ── Download folder selected ──────────────────────────────────────────────
+  IPC.on('settings:downloadFolder', (folder) => {
+    // Forward to settings iframe
+    const frame = document.getElementById('panel-frame');
+    if (frame && frame.contentWindow) {
+      try {
+        frame.contentWindow.postMessage({ __vortexIPC: true, channel: 'settings:downloadFolder', data: folder }, '*');
+      } catch {}
+    }
+  });
 
   // ── Blocklist events → forward to settings iframe + badge ─────────────────
   IPC.on('blocklist:blocked', (data) => {
