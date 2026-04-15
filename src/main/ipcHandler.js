@@ -211,22 +211,91 @@ function registerHandlers() {
   });
 
   // ── Download tracking ──────────────────────────────────────────────────────
-  session.defaultSession.on('will-download', (_e, item) => {
+  // ── Download settings cache (updated when settings change) ──────────────
+  let _dlSettings = { downloadFolder: '', askdl: false, opendl: false };
+
+  function _refreshDlSettings() {
+    try {
+      const { readFile } = require('./storage');
+      const s = readFile('settings') || {};
+      _dlSettings = {
+        downloadFolder: s.downloadFolder || '',
+        askdl:  s.askdl  === true,
+        opendl: s.opendl === true,
+      };
+    } catch {}
+  }
+
+  // Load on startup
+  _refreshDlSettings();
+
+  // Refresh when settings change (via settings:changed IPC or storage:write)
+  ipcMain.on('settings:changed', (_e, s) => {
+    if (s && (s.downloadFolder !== undefined || s.askdl !== undefined || s.opendl !== undefined)) {
+      _refreshDlSettings();
+    }
+  });
+
+  // Override storage:write to refresh dl settings when settings.json is saved
+  ipcMain.removeHandler('storage:write');
+  ipcMain.handle('storage:write', (_e, name, data) => {
+    const { writeFile } = require('./storage');
+    const result = writeFile(name, data);
+    if (name === 'settings') _refreshDlSettings();
+    return result;
+  });
+
+  session.defaultSession.on('will-download', async (_e, item) => {
     const id = ++dlIdCounter;
     const startTime = Date.now();
     let lastBytes = 0;
     let lastTime = startTime;
     let speedHistory = [];
 
+    // Use cached settings
+    const { downloadFolder: dlFolder, askdl: askDl, opendl: openDl } = _dlSettings;
+
+    const filename = item.getFilename();
+
+    if (askDl) {
+      // Show save dialog
+      const { dialog } = require('electron');
+      const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
+      const defaultPath = dlFolder
+        ? require('path').join(dlFolder, filename)
+        : require('path').join(require('os').homedir(), 'Downloads', filename);
+
+      const result = await dialog.showSaveDialog(win, {
+        title: 'Save File',
+        defaultPath,
+        buttonLabel: 'Download',
+      });
+
+      if (result.canceled || !result.filePath) {
+        item.cancel();
+        return;
+      }
+      item.setSavePath(result.filePath);
+    } else if (dlFolder) {
+      // Save directly to selected folder
+      const path = require('path');
+      const fs   = require('fs');
+      if (!fs.existsSync(dlFolder)) {
+        try { fs.mkdirSync(dlFolder, { recursive: true }); } catch {}
+      }
+      item.setSavePath(path.join(dlFolder, filename));
+    }
+    // else — Electron uses default Downloads folder
+
     const dl = {
       id,
-      filename: item.getFilename(),
+      filename,
       savePath: '',
       totalBytes: item.getTotalBytes(),
       receivedBytes: 0,
       speed: 0,
       percent: 0,
-      status: 'progressing', // progressing | completed | cancelled | interrupted | waiting
+      status: 'progressing',
       startTime,
       item,
     };
@@ -282,12 +351,17 @@ function registerHandlers() {
 
       pushToRenderer('download:done', {
         id,
-        status: state, // 'completed' | 'cancelled' | 'interrupted'
+        status: state,
         savePath,
         filename: item.getFilename(),
       });
 
-      // Update badge
+      // Auto-open file if setting enabled
+      if (state === 'completed' && openDl && savePath) {
+        const { shell } = require('electron');
+        shell.openPath(savePath).catch(() => {});
+      }
+
       const inProgress = [...activeDownloads.values()].length;
       pushToRenderer('downloads:badge', inProgress);
     });
@@ -528,6 +602,10 @@ function registerHandlers() {
   const BlocklistEngine = require('./blocklist/engine');
   BlocklistEngine.registerHandlers();
 
+  // ── Proxy + Tor ───────────────────────────────────────────────────────────
+  const { registerProxyHandlers } = require('./proxy/ipcHandlers');
+  registerProxyHandlers(pushToRenderer);
+
   // ── Default Browser ───────────────────────────────────────────────────────
   ipcMain.handle('browser:isDefault', () => {
     try {
@@ -542,6 +620,56 @@ function registerHandlers() {
       shell.openExternal('ms-settings:defaultapps');
     } catch {}
   });
+
+  // ── Favicon Cache ─────────────────────────────────────────────────────────
+  const _favCachePath = () => {
+    const { app } = require('electron');
+    return require('path').join(app.getPath('userData'), 'vortex', 'storage', 'favicon-cache.json');
+  };
+
+  let _favCache = null;
+  const FAV_MAX = 500;
+
+  function _loadFavCache() {
+    if (_favCache) return _favCache;
+    try {
+      const fs = require('fs');
+      const f = _favCachePath();
+      if (fs.existsSync(f)) _favCache = JSON.parse(fs.readFileSync(f, 'utf8'));
+      else _favCache = {};
+    } catch { _favCache = {}; }
+    return _favCache;
+  }
+
+  function _saveFavCache() {
+    try {
+      const fs = require('fs');
+      const f = _favCachePath();
+      const dir = require('path').dirname(f);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      // Trim to max entries (keep newest)
+      const entries = Object.entries(_favCache);
+      if (entries.length > FAV_MAX) {
+        entries.sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+        _favCache = Object.fromEntries(entries.slice(0, FAV_MAX));
+      }
+      fs.writeFileSync(f, JSON.stringify(_favCache));
+    } catch {}
+  }
+
+  ipcMain.handle('favicon-cache:get', (_e, domain) => {
+    const cache = _loadFavCache();
+    return cache[domain] || null;
+  });
+
+  ipcMain.handle('favicon-cache:set', (_e, domain, data) => {
+    const cache = _loadFavCache();
+    cache[domain] = { ...data, ts: Date.now() };
+    _saveFavCache();
+    return true;
+  });
+
+  ipcMain.handle('favicon-cache:getAll', () => _loadFavCache());
 
   // ── Password Manager ──────────────────────────────────────────────────────
   const _pwPath = () => {

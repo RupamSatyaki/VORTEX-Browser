@@ -124,12 +124,83 @@ const WebView = (() => {
     'vortex://newtab':    { fileUrl: () => newtabPageUrl,    title: 'New Tab'   },
   };
 
-  // Returns favicon URL for any website using Google's favicon CDN
+  // Returns favicon URL — Google CDN for HTTPS, direct fetch for HTTP/local
   function _getFavicon(url) {
     try {
-      const { hostname } = new URL(url);
+      const u = new URL(url);
+      const { hostname, protocol } = u;
+
+      // Local/IP addresses — fetch directly from site
+      if (protocol === 'http:' ||
+          /^(localhost|127\.|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname) ||
+          /\.(local|lan|internal|home|corp|intranet)$/.test(hostname) ||
+          /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
+        // Try /favicon.ico directly from the site
+        return `${u.protocol}//${u.host}/favicon.ico`;
+      }
+
+      // HTTPS public sites — use Google CDN (more reliable)
       return `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
     } catch (_) { return null; }
+  }
+
+  // Extract favicon from page DOM via executeJavaScript (works for HTTP sites)
+  async function _extractFavicon(wv, tabId) {
+    try {
+      const pageUrl = wv.src || '';
+      if (!pageUrl || pageUrl.startsWith('vortex://') || pageUrl.startsWith('about:')) return;
+
+      // Get favicon as base64 directly from inside the webview (bypasses CORS)
+      const base64 = await wv.executeJavaScript(`
+        (function() {
+          // Find best favicon URL
+          var selectors = [
+            'link[rel="icon"]',
+            'link[rel="shortcut icon"]',
+            'link[rel="apple-touch-icon"]',
+            'link[rel="apple-touch-icon-precomposed"]',
+          ];
+          var faviconUrl = null;
+          for (var i = 0; i < selectors.length; i++) {
+            var el = document.querySelector(selectors[i]);
+            if (el && el.href) { faviconUrl = el.href; break; }
+          }
+          if (!faviconUrl) faviconUrl = location.protocol + '//' + location.host + '/favicon.ico';
+
+          // Fetch and convert to base64 inside webview (no CORS issues)
+          return fetch(faviconUrl, { cache: 'force-cache' })
+            .then(function(r) {
+              if (!r.ok) throw new Error('not ok');
+              return r.blob();
+            })
+            .then(function(blob) {
+              return new Promise(function(resolve) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(reader.result); };
+                reader.onerror = function() { resolve(null); };
+                reader.readAsDataURL(blob);
+              });
+            })
+            .catch(function() { return null; });
+        })()
+      `, true); // userGesture:true
+
+      if (base64 && typeof base64 === 'string' && base64.startsWith('data:')) {
+        // Update tab icon with base64
+        Tabs.updateTab(tabId, { favicon: base64 });
+        if (!isIncognito && window.TabHistory) TabHistory.onFaviconUpdate(tabId, base64);
+        // Save to cache
+        if (typeof FaviconCache !== 'undefined') {
+          FaviconCache.saveBase64(pageUrl, base64).catch(() => {});
+        }
+      }
+    } catch {
+      // Offline — try cache
+      if (typeof FaviconCache !== 'undefined') {
+        const cached = await FaviconCache.getFavicon(wv.src || '').catch(() => null);
+        if (cached) Tabs.updateTab(tabId, { favicon: cached });
+      }
+    }
   }
 
   // ── Preloading ──────────────────────────────────────────────────────────────
@@ -312,19 +383,46 @@ const WebView = (() => {
       if (activeId === tabId && typeof BlocklistBadge !== 'undefined') {
         BlocklistBadge.onNavigate(tabId);
       }
+
+      // Extract favicon from page DOM (works for HTTP sites too)
+      _extractFavicon(wv, tabId);
     });
 
     wv.addEventListener('page-title-updated', (e) => {
       Tabs.updateTab(tabId, { title: e.title });
       if (activeId === tabId) document.title = e.title + ' — Vortex';
       if (!isIncognito && window.TabHistory) TabHistory.onTitleUpdate(tabId, e.title);
+      // Cache title
+      if (typeof FaviconCache !== 'undefined' && wv.src) {
+        FaviconCache.saveTitle(wv.src, e.title).catch(() => {});
+      }
     });
 
     // page-favicon-updated — highest priority, overrides Google CDN favicon
     wv.addEventListener('page-favicon-updated', (e) => {
       if (e.favicons && e.favicons.length) {
-        Tabs.updateTab(tabId, { favicon: e.favicons[0] });
-        if (!isIncognito && window.TabHistory) TabHistory.onFaviconUpdate(tabId, e.favicons[0]);
+        const favUrl = e.favicons[0];
+        // Convert to base64 inside webview for cache + HTTP support
+        wv.executeJavaScript(`
+          fetch(${JSON.stringify(favUrl)}, { cache: 'force-cache' })
+            .then(r => r.ok ? r.blob() : Promise.reject())
+            .then(blob => new Promise(resolve => {
+              var rd = new FileReader();
+              rd.onload = () => resolve(rd.result);
+              rd.onerror = () => resolve(null);
+              rd.readAsDataURL(blob);
+            }))
+            .catch(() => null)
+        `, true).then(base64 => {
+          const icon = (base64 && base64.startsWith('data:')) ? base64 : favUrl;
+          Tabs.updateTab(tabId, { favicon: icon });
+          if (!isIncognito && window.TabHistory) TabHistory.onFaviconUpdate(tabId, icon);
+          if (typeof FaviconCache !== 'undefined' && wv.src && base64) {
+            FaviconCache.saveBase64(wv.src, base64).catch(() => {});
+          }
+        }).catch(() => {
+          Tabs.updateTab(tabId, { favicon: favUrl });
+        });
       }
     });
 

@@ -818,6 +818,10 @@
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>
             Blocklists
         </div>
+        <div class="nav-item" data-section="proxy">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Proxy &amp; Tor
+        </div>
         <div class="nav-item" data-section="performance">
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Performance
@@ -1179,6 +1183,12 @@
 
         <!-- Blocklists -->
         <div class="section" id="sec-blocklists">
+        </div>
+
+        <!-- Proxy & Tor -->
+        <div class="section" id="sec-proxy">
+            <div class="section-title">Proxy &amp; Tor</div>
+            <div id="px-panel-root"></div>
         </div>
 
         <!-- Performance -->
@@ -2712,14 +2722,46 @@
     </style>
 
     <script>
+        // ── IPC bridge for settings.html (same as ipc.js pattern) ────────────────
+        const IPC = {
+          send:   (ch, d)    => window.vortexAPI.send(ch, d),
+          on:     (ch, cb)   => window.vortexAPI.on(ch, cb),
+          invoke: (ch, ...a) => window.vortexAPI.invoke(ch, ...a),
+        };
+
         // -- Navigation --------------------------------------------------------------
+        let _currentSection = 'appearance';
+
+        function _navigateTo(section) {
+            const item = document.querySelector(`.nav-item[data-section="${section}"]`);
+            const sec  = document.getElementById('sec-' + section);
+            if (!item || !sec) return;
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            item.classList.add('active');
+            sec.classList.add('active');
+            _currentSection = section;
+            // Persist active section in sessionStorage
+            try { sessionStorage.setItem('vx_settings_section', section); } catch {}
+        }
+
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-                item.classList.add('active');
-                document.getElementById('sec-' + item.dataset.section).classList.add('active');
-            });
+            item.addEventListener('click', () => _navigateTo(item.dataset.section));
+        });
+
+        // Restore last active section on load
+        try {
+            const saved = sessionStorage.getItem('vx_settings_section');
+            if (saved && document.querySelector(`.nav-item[data-section="${saved}"]`)) {
+                _navigateTo(saved);
+            }
+        } catch {}
+
+        // Listen for navigate message from parent (update badge click)
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.__vortexIPC && e.data.channel === 'settings:navigate') {
+                _navigateTo(e.data.data);
+            }
         });
 
         // -- Changelog toggle --------------------------------------------------------
@@ -2732,6 +2774,7 @@
             theme: 'dark', fontsize: 'medium', tabpreview: true, bookmarksbar: false, whatsappBtn: true, devhubBtn: true,
             accentColor: '#00c8b4',
             bgTheme: 'teal',
+            downloadFolder: '',
             startup: 'session', homepage: 'https://www.google.com',
             engine: 'google', suggestions: true,
             trackers: true, https: false, dnt: false,
@@ -2843,6 +2886,11 @@
             set('set-trackers', s.trackers); set('set-https', s.https); set('set-dnt', s.dnt);
             set('set-gpu', s.gpu); set('set-prefetch', s.prefetch); set('set-cache', s.cache);
             set('set-askdl', s.askdl); set('set-opendl', s.opendl);
+            // Show current download folder
+            if (s.downloadFolder) {
+                const desc = document.querySelector('#btn-dl-path')?.closest('.card-row')?.querySelector('.row-desc');
+                if (desc) desc.textContent = s.downloadFolder;
+            }
             set('set-tabsleep', s.tabsleep !== false);
             set('set-tabsleep-minutes', s.tabsleepMinutes || 10);
             set('set-pip', s.pip !== false);
@@ -3330,6 +3378,20 @@
 
         document.getElementById('btn-dl-path').addEventListener('click', () => {
             _send('settings:pickDownloadFolder');
+        });
+
+        // Receive selected download folder path
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.__vortexIPC && e.data.channel === 'settings:downloadFolder') {
+                const folder = e.data.data;
+                if (folder) {
+                    settings.downloadFolder = folder;
+                    save(settings);
+                    // Update displayed path
+                    const desc = document.querySelector('#btn-dl-path')?.closest('.card-row')?.querySelector('.row-desc');
+                    if (desc) desc.textContent = folder;
+                }
+            }
         });
 
         // -- Version & Commit ---------------------------------------------------------
@@ -4133,6 +4195,15 @@
     <script src="js/blocklist/components/updateBar.js"></script>
     <script src="js/blocklist/components/ytAdBlock.js"></script>
     <script src="js/blocklist/index.js"></script>
+    <!-- Proxy & Tor -->
+    <script src="js/proxy/state.js"></script>
+    <script src="js/proxy/components/statusCard.js"></script>
+    <script src="js/proxy/components/typeSelector.js"></script>
+    <script src="js/proxy/components/proxyForm.js"></script>
+    <script src="js/proxy/components/torPanel.js"></script>
+    <script src="js/proxy/components/bypassList.js"></script>
+    <script src="js/proxy/proxyQuickPanel.js"></script>
+    <script src="js/proxy/index.js"></script>
     <script>
         // ── Site Permissions lazy init ────────────────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
@@ -4193,6 +4264,21 @@
                         }
                         blContainer.innerHTML = '<div class="section-title">Ad & Tracker Blocking</div><div id="bl-settings-body" style="padding:0 2px;"></div>';
                         BlocklistManager.render(document.getElementById('bl-settings-body'));
+                    }
+                });
+            }
+        });
+
+        // ── Proxy & Tor lazy init ─────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const pxContainer = document.getElementById('px-panel-root');
+            if (!pxContainer) return;
+            const navItem = document.querySelector('[data-section="proxy"]');
+            if (navItem) {
+                navItem.addEventListener('click', () => {
+                    if (!pxContainer._pxMounted) {
+                        pxContainer._pxMounted = true;
+                        ProxyManager.mount(pxContainer);
                     }
                 });
             }

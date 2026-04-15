@@ -90,10 +90,43 @@ window.Omnibox = (() => {
   // ── Render ───────────────────────────────────────────────────────────────
 
   const ICONS = {
-    bookmark: `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#00c8b4" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
+    bookmark: `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--accent,#00c8b4)" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>`,
     history:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#7aadad" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
     suggest:  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#4a8080" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`,
   };
+
+  function _faviconEl(item) {
+    // For history/bookmark items with URL — try cache
+    if ((item.type === 'history' || item.type === 'bookmark') && item.url) {
+      const span = document.createElement('span');
+      span.className = 'omni-icon';
+      span.style.cssText = 'width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+
+      if (typeof FaviconCache !== 'undefined') {
+        FaviconCache.getFavicon(item.url).then(cached => {
+          if (cached) {
+            const img = document.createElement('img');
+            img.width = 14; img.height = 14;
+            img.style.borderRadius = '3px';
+            img.src = cached;
+            img.onerror = () => { img.remove(); span.innerHTML = ICONS[item.type]; };
+            span.innerHTML = '';
+            span.appendChild(img);
+          } else {
+            span.innerHTML = ICONS[item.type];
+          }
+        }).catch(() => { span.innerHTML = ICONS[item.type]; });
+      } else {
+        span.innerHTML = ICONS[item.type];
+      }
+      return span;
+    }
+    // Suggest — search icon
+    const span = document.createElement('span');
+    span.className = 'omni-icon';
+    span.innerHTML = ICONS[item.type] || ICONS.suggest;
+    return span;
+  }
 
   function _render(localItems, suggestions, query) {
     const box = _ensureBox();
@@ -118,9 +151,7 @@ window.Omnibox = (() => {
       row.className = 'omni-row';
       row.dataset.idx = idx;
 
-      const icon = document.createElement('span');
-      icon.className = 'omni-icon';
-      icon.innerHTML = ICONS[item.type] || ICONS.suggest;
+      const icon = _faviconEl(item);
 
       const text = document.createElement('span');
       text.className = 'omni-text';

@@ -152,6 +152,11 @@ app.whenReady().then(() => {
   Storage.registerStorageHandlers();
   // Ensure default storage files exist on first run
   Storage.ensureDefaults();
+
+  // ── Proxy + Tor init ──────────────────────────────────────────────────────
+  const ProxyManager = require('./src/main/proxy/proxyManager');
+  ProxyManager.init().catch(() => {});
+
   WindowManager.createMainWindow();
   MenuManager.setupMenu();
   IpcHandler.registerHandlers();
@@ -184,7 +189,11 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    // Shutdown proxy/tor cleanly
+    try { require('./src/main/proxy/proxyManager').shutdown(); } catch {}
+    app.quit();
+  }
 });
 
 app.on('activate', () => {

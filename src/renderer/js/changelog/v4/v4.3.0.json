@@ -1,11 +1,11 @@
 {
   "id": "v4.3.0",
   "version": "4.3.0",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Ad & Tracker Blocklist System",
   "date": "2026-04-10",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 3, "improve": 1, "fix": 0 },
   "categories": [
     {
