@@ -342,9 +342,9 @@
 
 /* Autofill dropdown */
 #pm-autofill-dropdown {
-  position: fixed; z-index: 99999;
+  position: fixed; z-index: 99996;
   background: #0f2222; border: 1px solid #2e4a4c;
-  border-radius: 10px; min-width: 260px;
+  border-radius: 10px; min-width: 260px; max-width: min(340px, calc(100vw - 16px));
   box-shadow: 0 12px 40px rgba(0,0,0,0.6);
   overflow: hidden;
   opacity: 0; pointer-events: none;

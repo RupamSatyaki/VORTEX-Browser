@@ -330,49 +330,19 @@ body {
   stroke-width: 2;
 }
 
-/* Hover-only icons — hidden by default, show on address bar hover */
-.addr-icon-hover {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.85);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.address-bar:hover .addr-icon-hover,
-.address-bar:focus-within .addr-icon-hover {
-  opacity: 1;
-  pointer-events: all;
-  transform: scale(1);
-}
-
-/* Address bar — ALL icons hidden by default, show on hover */
-.address-bar-icons .address-icon,
-#btn-permissions,
-#btn-autofill,
-#btn-blocklist-badge {
-  opacity: 0;
-  pointer-events: none;
-  transform: scale(0.88);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.address-bar:hover .address-bar-icons .address-icon,
-.address-bar:focus-within .address-bar-icons .address-icon {
-  opacity: 1;
-  pointer-events: all;
-  transform: scale(1);
-}
-
-/* Bookmark — always show + fill when bookmarked */
+/* Bookmark — fill when bookmarked */
 #btn-bookmark.bookmarked {
-  opacity: 1 !important;
-  pointer-events: all !important;
-  transform: scale(1) !important;
   color: var(--accent);
 }
 #btn-bookmark.bookmarked svg {
   fill: var(--accent);
   stroke: var(--accent);
+}
+
+/* Blocklist badge — non-clickable display only */
+#btn-blocklist-badge {
+  cursor: default !important;
+  pointer-events: none !important;
 }
 
 /* Permission icon — distinct style */

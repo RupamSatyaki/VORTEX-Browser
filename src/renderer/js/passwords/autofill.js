@@ -165,11 +165,39 @@ const PasswordAutofill = (() => {
     activeWv.executeJavaScript(script).catch(() => {});
   }
 
+  // ── Dynamic top offset (address bar bottom + gap) ────────────────────────
+  function _getNavbarBottom() {
+    // offsetTop + offsetHeight is more reliable than getBoundingClientRect for fixed layouts
+    const navbar = document.getElementById('navbar-container');
+    if (navbar) {
+      const bottom = navbar.offsetTop + navbar.offsetHeight;
+      if (bottom > 0 && bottom < 300) return bottom + 6;
+    }
+    // Fallback: address bar getBoundingClientRect
+    const addressBar = document.querySelector('.address-bar');
+    if (addressBar) {
+      const rect = addressBar.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.bottom < 300) return Math.round(rect.bottom) + 6;
+    }
+    // Fallback: tabbar bottom + estimated toolbar height
+    const tabbar = document.getElementById('tabbar-container');
+    if (tabbar) {
+      const bottom = tabbar.offsetTop + tabbar.offsetHeight;
+      if (bottom > 0) return bottom + 52;
+    }
+    return 90; // safe fallback
+  }
+
   // ── Save password popup ───────────────────────────────────────────────────
   function showSavePrompt(domain, username, password) {
     _injectStyles();
+
+    // Animate out existing prompt before replacing (fix Issue #8)
     const existing = document.getElementById('pm-save-prompt');
-    if (existing) existing.remove();
+    if (existing) {
+      existing.style.animation = 'pmSlideRightOut 0.15s ease forwards';
+      setTimeout(() => existing.remove(), 160);
+    }
 
     // Check never-save list
     try {
@@ -177,11 +205,16 @@ const PasswordAutofill = (() => {
       if (blocked.includes(domain)) return;
     } catch {}
 
+    // Fix Issue #1: dynamic top based on actual address bar position
+    const topOffset = Math.min(_getNavbarBottom(), Math.round(window.innerHeight * 0.3));
+    // Fix Issue #4: clamp width so it never overflows on narrow windows
+    const maxW = Math.min(320, window.innerWidth - 32);
+
     const el = document.createElement('div');
     el.id = 'pm-save-prompt';
     el.style.cssText = `
-      position:fixed; top:76px; right:16px;
-      z-index:99998; width:320px;
+      position:fixed; top:${topOffset}px; right:16px;
+      z-index:99998; width:${maxW}px; max-width:calc(100vw - 32px);
       background:var(--bg-panel,#0f2222);
       border:1px solid rgba(0,200,180,0.35);
       border-radius:14px; overflow:hidden;
@@ -338,9 +371,13 @@ const PasswordAutofill = (() => {
       setTimeout(() => _dismiss(true), 800);
     });
 
-    // Auto-dismiss after 20s
-    const autoTimer = setTimeout(() => _dismiss(true), 20000);
-    el.addEventListener('mouseenter', () => clearTimeout(autoTimer), { once: true });
+    // Fix Issue #7: auto-dismiss restarts on mouseleave (not just cancelled on mouseenter)
+    let autoTimer = setTimeout(() => _dismiss(true), 20000);
+    el.addEventListener('mouseenter', () => clearTimeout(autoTimer));
+    el.addEventListener('mouseleave', () => {
+      clearTimeout(autoTimer);
+      autoTimer = setTimeout(() => _dismiss(true), 8000); // shorter restart after hover
+    });
   }
 
   // ── Detect form submit in webview ─────────────────────────────────────────
@@ -476,10 +513,23 @@ const PasswordAutofill = (() => {
     const existing = document.getElementById('pm-autofill-banner');
     if (existing) existing.remove();
 
+    // Position directly below address bar (floating style)
+    const addressBar = document.querySelector('.address-bar');
+    let bannerTop = _getNavbarBottom();
+    if (addressBar) {
+      const rect = addressBar.getBoundingClientRect();
+      if (rect.bottom > 0 && rect.bottom < window.innerHeight * 0.5) {
+        bannerTop = Math.round(rect.bottom) + 6;
+      }
+    }
+    // Safety clamp — never go below 30% of screen height
+    bannerTop = Math.min(bannerTop, Math.round(window.innerHeight * 0.3));
+
     const banner = document.createElement('div');
     banner.id = 'pm-autofill-banner';
     banner.style.cssText = `
-      position:fixed; top:76px; left:50%; transform:translateX(-50%);
+      position:fixed; top:${bannerTop}px; left:50%;
+      transform:translateX(-50%);
       z-index:99997; display:flex; align-items:center; gap:10px;
       background:var(--bg-panel,#0f2222);
       border:1px solid var(--accent,#00c8b4);
@@ -487,7 +537,8 @@ const PasswordAutofill = (() => {
       box-shadow:0 8px 32px rgba(0,0,0,0.5);
       font-size:12px; color:var(--text-main,#c8e8e5);
       animation:pmBannerIn 0.2s ease;
-      max-width:460px; width:max-content;
+      min-width:220px; max-width:min(460px, calc(100vw - 32px));
+      width:max-content; box-sizing:border-box;
     `;
 
     if (entry && !multipleMatches) {
@@ -521,9 +572,13 @@ const PasswordAutofill = (() => {
   }
 
   function init() {
-    _injectIcon();
     _injectStyles();
+    // Icon is injected by navigation.js on address bar hover
+    // Just update badge if icon already exists
+    if (document.getElementById('btn-autofill')) {
+      updateBadge(_currentDomain);
+    }
   }
 
-  return { init, updateBadge, onPageLoad, onNavigate, showSavePrompt };
+  return { init, updateBadge, onPageLoad, onNavigate, showSavePrompt, _toggleDropdown };
 })();

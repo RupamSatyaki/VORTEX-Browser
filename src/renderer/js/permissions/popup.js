@@ -13,38 +13,13 @@ const PermissionPopup = (() => {
   let _cssInjected = false;
 
   function _injectCSS() {
-    if (_cssInjected) return;
-    _cssInjected = true;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    const base = location.href.replace(/[^/]*$/, '');
-    link.href = base + 'js/permissions/styles.css';
-    document.head.appendChild(link);
+    // styles.css is loaded via index.html <link> — no dynamic injection needed
   }
 
   // ── Address bar icon ──────────────────────────────────────────────────────
   function injectIcon() {
+    // Icon is now injected by navigation.js on address bar hover — no-op here
     _injectCSS();
-    const icons = document.querySelector('.address-bar-icons');
-    if (!icons || document.getElementById('btn-permissions')) return;
-
-    const btn = document.createElement('div');
-    btn.className = 'address-icon';
-    btn.id = 'btn-permissions';
-    btn.title = 'Site Permissions (Ctrl+Shift+I)';
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M12 14c-5 0-8 2-8 4v1h16v-1c0-2-3-4-8-4z"/>
-        <path d="M17 3l1.5 1.5L21 2" stroke-width="2.5"/>
-      </svg>
-      <span class="perm-badge" id="perm-addr-badge" style="display:none;"></span>`;
-
-    const bookmark = document.getElementById('btn-bookmark');
-    if (bookmark) icons.insertBefore(btn, bookmark);
-    else icons.prepend(btn);
-
-    btn.addEventListener('click', e => { e.stopPropagation(); toggle(); });
   }
 
   function updateBadge(domain) {
@@ -54,11 +29,11 @@ const PermissionPopup = (() => {
     if (!badge || !btn) return;
 
     if (!domain || domain.startsWith('vortex://') || domain === 'newtab') {
-      badge.style.display = 'none';
-      btn.style.opacity = '0.45';
+      btn.style.display = 'none';
       return;
     }
 
+    btn.style.display = 'flex';
     btn.style.opacity = '1';
     const perms = PermissionManager.getForDomain(domain);
     const vals  = Object.values(perms);
