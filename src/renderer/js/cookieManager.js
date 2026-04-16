@@ -156,7 +156,7 @@ const CookieManager = (() => {
         </div>
 
         <!-- Tab contents -->
-        <div class="cm-tab-content" id="cm-tab-overview"></div>
+        <div class="cm-tab-content" id="cm-tab-overview" style="display:flex"></div>
         <div class="cm-tab-content" id="cm-tab-browse"   style="display:none"></div>
         <div class="cm-tab-content" id="cm-tab-block"    style="display:none"></div>
         <div class="cm-tab-content" id="cm-tab-export"   style="display:none"></div>
@@ -175,7 +175,7 @@ const CookieManager = (() => {
         _container.querySelectorAll('.cm-tab-content').forEach(c => c.style.display = 'none');
         tab.classList.add('active');
         _activeTab = tab.dataset.tab;
-        _container.querySelector('#cm-tab-' + _activeTab).style.display = '';
+        _container.querySelector('#cm-tab-' + _activeTab).style.display = 'flex';
         _renderActiveTab();
       });
     });

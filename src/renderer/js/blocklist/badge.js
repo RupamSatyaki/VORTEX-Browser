@@ -9,27 +9,7 @@ const BlocklistBadge = (() => {
   let _injected = false;
 
   function init() {
-    if (_injected) return;
-    _injected = true;
-    _injectIcon();
-  }
-
-  function _injectIcon() {
-    const icons = document.querySelector('.address-bar-icons');
-    if (!icons || document.getElementById('btn-blocklist-badge')) return;
-
-    const btn = document.createElement('div');
-    btn.className = 'address-icon';
-    btn.id = 'btn-blocklist-badge';
-    btn.title = 'Ad & Tracker Blocking';
-    btn.style.opacity = '0.5';
-    btn.innerHTML = `
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-      <span class="bl-badge-count" id="bl-badge-num"></span>`;
-
-    // Inject CSS once
+    // Inject CSS once — icons are injected by navigation.js on hover
     if (!document.getElementById('bl-badge-css')) {
       const s = document.createElement('style');
       s.id = 'bl-badge-css';
@@ -48,11 +28,10 @@ const BlocklistBadge = (() => {
       `;
       document.head.appendChild(s);
     }
+  }
 
-    // Insert before permission icon or bookmark
-    const ref = document.getElementById('btn-permissions') || document.getElementById('btn-bookmark');
-    if (ref) icons.insertBefore(btn, ref);
-    else icons.prepend(btn);
+  function _injectIcon() {
+    // No-op — icon is injected by navigation.js on address bar hover
   }
 
   // Called when a request is blocked — increment count for active tab
@@ -92,5 +71,11 @@ const BlocklistBadge = (() => {
     }
   }
 
-  return { init, onBlocked, onTabChange, onNavigate };
+  // Refresh badge with current active tab count (called when icons are injected)
+  function _refreshBadge() {
+    const activeId = typeof Tabs !== 'undefined' ? Tabs.getActiveId() : null;
+    _updateBadge(activeId ? (_counts[activeId] || 0) : 0);
+  }
+
+  return { init, onBlocked, onTabChange, onNavigate, _refreshBadge };
 })();

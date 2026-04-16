@@ -148,13 +148,18 @@ const _activeDownloads = new Map();
 // Update address bar bookmark icon based on current URL
 async function _updateBookmarkIcon() {
   const bar = document.getElementById('url-bar');
-  const btn = document.getElementById('btn-bookmark');
-  if (!bar || !btn) return;
+  if (!bar) return;
   // Use full URL (stored in dataset) — bar.value may show clean URL
   const url = bar.dataset.fullUrl || bar.value;
   const saved = url && !url.startsWith('vortex://') ? await BookmarkStore.has(url) : false;
-  btn.classList.toggle('bookmarked', saved);
-  btn.title = saved ? 'Remove bookmark' : 'Bookmark this page';
+  // Cache state so icon can be set when injected on hover
+  window._bookmarkState = saved;
+  // Apply to button if currently visible
+  const btn = document.getElementById('btn-bookmark');
+  if (btn) {
+    btn.classList.toggle('bookmarked', saved);
+    btn.title = saved ? 'Remove bookmark' : 'Bookmark this page';
+  }
 }
 
 // Expose so navigation.js can call it on URL change
