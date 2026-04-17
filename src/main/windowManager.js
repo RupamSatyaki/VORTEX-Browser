@@ -48,7 +48,12 @@ function createMainWindow() {
   mainWindow.loadFile(_indexHtmlPath());
 
   if (!app.isPackaged) {
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
+    // Open DevTools after page loads
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow.webContents.openDevTools({ mode: 'detach' });
+    });
+    
+    // Hot reload on file changes
     const rendererDir = path.join(__dirname, '../renderer');
     const fs = require('fs');
     fs.watch(rendererDir, { recursive: true }, (_event, filename) => {
