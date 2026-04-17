@@ -490,6 +490,23 @@ window.addEventListener('DOMContentLoaded', () => {
     _applyInstallProgress(data);
   });
 
+  // ── Proxy & Tor events → forward to settings iframe ──────────────────────
+  const _TOR_PROXY_CHANNELS = [
+    'proxy:statusUpdate', 'proxy:changed',
+    'tor:bootstrapProgress', 'tor:ready', 'tor:stopped',
+    'tor:error', 'tor:downloadProgress',
+  ];
+  _TOR_PROXY_CHANNELS.forEach(channel => {
+    IPC.on(channel, (data) => {
+      const frame = document.getElementById('panel-frame');
+      if (frame && frame.contentWindow) {
+        try {
+          frame.contentWindow.postMessage({ __vortexIPC: true, channel, data }, '*');
+        } catch (_) {}
+      }
+    });
+  });
+
   function _applyInstallProgress(data) {
     const bar  = document.getElementById('upd-install-bar');
     const pct  = document.getElementById('upd-install-pct');
