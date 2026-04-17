@@ -4,17 +4,104 @@
  */
 
 const DevHub = (() => {
-  const TOOLS = [
-    JsonViewerTool,
-    ColorPickerTool,
-    RegexTesterTool,
-    Base64Tool,
-    UrlEncoderTool,
-    HashTool,
-    ImageConverterTool,
-    ImageEditorTool,
-    NotepadTool,
+  // Lazy loading state
+  let _toolsLoaded = false;
+  let _loadingTools = false;
+
+  const TOOL_SCRIPTS = [
+    'tools/json-viewer.js',
+    'tools/color-picker.js',
+    'tools/regex-tester.js',
+    'tools/base64/utils.js',
+    'tools/base64/text.js',
+    'tools/base64/image.js',
+    'tools/base64/file.js',
+    'tools/base64/jwt.js',
+    'tools/base64/index.js',
+    'tools/url-encoder/utils.js',
+    'tools/url-encoder/encode.js',
+    'tools/url-encoder/parser.js',
+    'tools/url-encoder/builder.js',
+    'tools/url-encoder/tools.js',
+    'tools/url-encoder/index.js',
+    'tools/hash/utils.js',
+    'tools/hash/text.js',
+    'tools/hash/file.js',
+    'tools/hash/compare.js',
+    'tools/hash/advanced.js',
+    'tools/hash/formats.js',
+    'tools/hash/index.js',
+    'tools/image-converter/converter.js',
+    'tools/image-converter/index.js',
+    'tools/image-editor/canvas.js',
+    'tools/image-editor/core/filters.js',
+    'tools/image-editor/interactions.js',
+    'tools/image-editor/adjustments.js',
+    'tools/image-editor/overlay.js',
+    'tools/image-editor/ui/layers.js',
+    'tools/image-editor/ui/shortcuts.js',
+    'tools/image-editor/editor.js',
+    'tools/image-editor/index.js',
+    'tools/notepad/core/highlight.js',
+    'tools/notepad/core/storage.js',
+    'tools/notepad/core/editor.js',
+    'tools/notepad/ui/tabs.js',
+    'tools/notepad/ui/find.js',
+    'tools/notepad/ui/preview.js',
+    'tools/notepad/ui/snippets.js',
+    'tools/notepad/index.js',
   ];
+
+  function _loadTools() {
+    return new Promise((resolve, reject) => {
+      if (_toolsLoaded) { resolve(); return; }
+      if (_loadingTools) { 
+        // Wait for existing load to complete
+        const checkInterval = setInterval(() => {
+          if (_toolsLoaded) { clearInterval(checkInterval); resolve(); }
+        }, 50);
+        return;
+      }
+
+      _loadingTools = true;
+      let loaded = 0;
+
+      TOOL_SCRIPTS.forEach((src, index) => {
+        const script = document.createElement('script');
+        script.src = `js/devhub/${src}`;
+        script.onload = () => {
+          loaded++;
+          if (loaded === TOOL_SCRIPTS.length) {
+            _toolsLoaded = true;
+            _loadingTools = false;
+            resolve();
+          }
+        };
+        script.onerror = () => {
+          console.warn(`Failed to load DevHub tool: ${src}`);
+          loaded++;
+          if (loaded === TOOL_SCRIPTS.length) {
+            _toolsLoaded = true;
+            _loadingTools = false;
+            resolve();
+          }
+        };
+        document.body.appendChild(script);
+      });
+    });
+  }
+
+  const TOOLS = () => [
+    typeof JsonViewerTool !== 'undefined' ? JsonViewerTool : null,
+    typeof ColorPickerTool !== 'undefined' ? ColorPickerTool : null,
+    typeof RegexTesterTool !== 'undefined' ? RegexTesterTool : null,
+    typeof Base64Tool !== 'undefined' ? Base64Tool : null,
+    typeof UrlEncoderTool !== 'undefined' ? UrlEncoderTool : null,
+    typeof HashTool !== 'undefined' ? HashTool : null,
+    typeof ImageConverterTool !== 'undefined' ? ImageConverterTool : null,
+    typeof ImageEditorTool !== 'undefined' ? ImageEditorTool : null,
+    typeof NotepadTool !== 'undefined' ? NotepadTool : null,
+  ].filter(Boolean);
 
   let _open       = false;
   let _activeTool = null;
@@ -1051,8 +1138,9 @@ const DevHub = (() => {
   // ── Filtered tools ────────────────────────────────────────────────────────────
   function _filtered() {
     const q = _query.toLowerCase().trim();
-    if (!q) return TOOLS;
-    return TOOLS.filter(t =>
+    const tools = TOOLS(); // Call function to get tools array
+    if (!q) return tools;
+    return tools.filter(t =>
       t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q)
     );
   }
@@ -1113,7 +1201,14 @@ const DevHub = (() => {
   // ── Open / Close ──────────────────────────────────────────────────────────────
   function toggle() { _open ? close() : open(); }
 
-  function open() {
+  async function open() {
+    // Lazy load tools on first open
+    if (!_toolsLoaded && !_loadingTools) {
+      const body = document.getElementById('dh-body');
+      if (body) body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#4a8080;font-size:13px;">Loading tools...</div>';
+      await _loadTools();
+    }
+
     _open = true;
     _query = '';
     const panel    = document.getElementById('devhub-panel');
