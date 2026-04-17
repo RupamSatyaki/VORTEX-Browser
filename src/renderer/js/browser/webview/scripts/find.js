@@ -39,11 +39,13 @@ const WVFind = (() => {
     if (!wv || !input) return;
     const query = input.value.trim();
     if (!query) { document.getElementById('find-count').textContent = ''; return; }
+    // findNext: true means continue from current position
     wv.findInPage(query, { forward, findNext: true, matchCase: false });
   }
 
   function bindBar(webviewsGetter, activeIdGetter) {
-    document.addEventListener('DOMContentLoaded', () => {
+    // Bind immediately if DOM ready, otherwise wait
+    const _bind = () => {
       const input = document.getElementById('find-input');
       if (!input) return;
 
@@ -56,6 +58,7 @@ const WVFind = (() => {
           if (wv) { try { wv.stopFindInPage('clearSelection'); } catch(_){} }
           return;
         }
+        // findNext: false means start from beginning (top of page)
         if (wv) wv.findInPage(q, { forward: true, findNext: false, matchCase: false });
       });
 
@@ -67,7 +70,13 @@ const WVFind = (() => {
       document.getElementById('find-next')?.addEventListener('click',  () => _doFind(true,  webviewsGetter(), activeIdGetter()));
       document.getElementById('find-prev')?.addEventListener('click',  () => _doFind(false, webviewsGetter(), activeIdGetter()));
       document.getElementById('find-close')?.addEventListener('click', () => close(webviewsGetter(), activeIdGetter()));
-    });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _bind);
+    } else {
+      _bind();
+    }
   }
 
   function attachListener(wv) {
