@@ -1,0 +1,724 @@
+================================================================================
+VORTEX BROWSER — PROJECT CONTEXT FILE
+Last Updated: v4.4.0 | April 17, 2026
+GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
+Branch: VORTEX-Browser-Restructure
+================================================================================
+
+IMPORTANT INSTRUCTIONS FOR AI:
+- Hinglish mein respond karo (Hindi + English mix)
+- Git commands manually run karne do — execute mat karo
+- User khud commit/push karta hai — jab user bole tabhi commit karo
+- Internal pages (vortex://settings, vortex://downloads, vortex://bookmarks,
+  vortex://history) floating panel mein open hote hain, tab mein nahi
+- vortex://newtab tab mein khulta hai
+- Production build mein app.isPackaged use karo NODE_ENV ki jagah
+- Settings changes live apply hone chahiye — restart nahi
+- GitHub repo mein files root mein hain (vortex/ subfolder nahi)
+- JS folder structure: core/ browser/ features/ privacy/ settings/ devhub/ changelog/
+- index.html aur settings.html ke script tags naye paths pe hain
+
+================================================================================
+PROJECT OVERVIEW
+================================================================================
+
+Vortex is an Electron-based browser built from scratch.
+Root folder: vortex/
+Entry: vortex/main.js
+Renderer: vortex/src/renderer/index.html
+
+STORAGE PATHS (runtime):
+  %APPDATA%\vortex\storage\settings.json
+  %APPDATA%\vortex\storage\profile.json
+  %APPDATA%\vortex\storage\tab_history.json
+  %APPDATA%\vortex\storage\passwords.json        ← encrypted vault
+  %APPDATA%\vortex\storage\passwords_imported.json ← imported (plain)
+  %APPDATA%\vortex\storage\addresses.json
+  %APPDATA%\vortex\storage\permissions.json
+  %APPDATA%\vortex\storage\blocklists\           ← blocklist dir
+    meta.json, easylist.txt, easyprivacy.txt, etc.
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+vortex/
+├── src/
+│   ├── assets/
+│   │   ├── 55.jpg
+│   │   └── icon.png
+│   ├── main/
+│   │   ├── blocklist/
+│   │   │   ├── downloader.js
+│   │   │   ├── engine.js
+│   │   │   ├── lists.js
+│   │   │   └── parser.js
+│   │   ├── ipc/
+│   │   │   ├── addressHandlers.js
+│   │   │   ├── appHandlers.js
+│   │   │   ├── browserHandlers.js
+│   │   │   ├── cookieHandlers.js
+│   │   │   ├── downloadHandlers.js
+│   │   │   ├── miscHandlers.js
+│   │   │   ├── passwordHandlers.js
+│   │   │   ├── permissionHandlers.js
+│   │   │   ├── screenshotHandlers.js
+│   │   │   ├── storageHandlers.js
+│   │   │   ├── tabHandlers.js
+│   │   │   ├── updaterHandlers.js
+│   │   │   └── windowHandlers.js
+│   │   ├── proxy/
+│   │   │   ├── ipcHandlers.js
+│   │   │   ├── proxyManager.js
+│   │   │   ├── torDownloader.js
+│   │   │   └── torProcess.js
+│   │   ├── ipcHandler.js
+│   │   ├── menuManager.js
+│   │   ├── storage.js
+│   │   └── windowManager.js
+│   └── renderer/
+│       ├── css/
+│       │   └── style.css
+│       ├── js/
+│       │   ├── blocklist/
+│       │   │   ├── components/
+│       │   │   │   ├── customRules.js
+│       │   │   │   ├── listCard.js
+│       │   │   │   ├── statsCard.js
+│       │   │   │   ├── updateBar.js
+│       │   │   │   └── ytAdBlock.js
+│       │   │   ├── badge.js
+│       │   │   ├── index.js
+│       │   │   └── styles.css
+│       │   ├── browser/
+│       │   │   ├── navigation/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── addressBar.js
+│       │   │   │   │   ├── hoverIcons.js
+│       │   │   │   │   ├── menuDropdown.js
+│       │   │   │   │   ├── profileMenu.js
+│       │   │   │   │   ├── progressBar.js
+│       │   │   │   │   └── securityIcon.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   ├── menuDropdownHTML.js
+│       │   │   │   │   ├── profileMenuHTML.js
+│       │   │   │   │   └── toolbarHTML.js
+│       │   │   │   └── index.js
+│       │   │   ├── tabs/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── tabAudio.js
+│       │   │   │   │   ├── tabDrag.js
+│       │   │   │   │   └── tabSleep.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   ├── tabContextMenu.js
+│       │   │   │   │   └── tabRenderer.js
+│       │   │   │   └── index.js
+│       │   │   ├── webview/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── favicon.js
+│       │   │   │   │   ├── find.js
+│       │   │   │   │   ├── langDetect.js
+│       │   │   │   │   ├── listeners.js
+│       │   │   │   │   ├── preloader.js
+│       │   │   │   │   ├── ytAdblock.js
+│       │   │   │   │   └── zoom.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   ├── translateBar.js
+│       │   │   │   │   └── zoomBar.js
+│       │   │   │   └── index.js
+│       │   │   ├── contextMenu.js
+│       │   │   ├── faviconCache.js
+│       │   │   ├── omnibox.js
+│       │   │   ├── tabHistory.js
+│       │   │   └── tabPreview.js
+│       │   ├── changelog/
+│       │   │   ├── v1/
+│       │   │   │   ├── v1.0.0.json
+│       │   │   │   ├── v1.0.1.json
+│       │   │   │   ├── v1.1.0.json
+│       │   │   │   ├── v1.2.0.json
+│       │   │   │   └── v1.2.1.json
+│       │   │   ├── v2/
+│       │   │   │   ├── v2.0.0.json
+│       │   │   │   ├── v2.1.0.json
+│       │   │   │   ├── v2.1.1.json
+│       │   │   │   ├── v2.1.2.json
+│       │   │   │   ├── v2.2.0.json
+│       │   │   │   ├── v2.2.1.json
+│       │   │   │   ├── v2.3.0.json
+│       │   │   │   ├── v2.3.1.json
+│       │   │   │   ├── v2.4.0.json
+│       │   │   │   ├── v2.4.1.json
+│       │   │   │   ├── v2.4.2.json
+│       │   │   │   ├── v2.5.0.json
+│       │   │   │   ├── v2.6.0.json
+│       │   │   │   ├── v2.6.1.json
+│       │   │   │   ├── v2.7.0.json
+│       │   │   │   ├── v2.7.1.json
+│       │   │   │   ├── v2.7.2.json
+│       │   │   │   ├── v2.7.3.json
+│       │   │   │   ├── v2.7.4.json
+│       │   │   │   ├── v2.8.0.json
+│       │   │   │   ├── v2.8.1.json
+│       │   │   │   ├── v2.8.2.json
+│       │   │   │   ├── v2.9.0.json
+│       │   │   │   └── v2.9.1.json
+│       │   │   ├── v3/
+│       │   │   │   ├── v3.0.0.json
+│       │   │   │   ├── v3.1.0.json
+│       │   │   │   ├── v3.2.0.json
+│       │   │   │   ├── v3.2.1.json
+│       │   │   │   └── v3.3.0.json
+│       │   │   ├── v4/
+│       │   │   │   ├── v4.0.0.json
+│       │   │   │   ├── v4.1.0.json
+│       │   │   │   ├── v4.2.0.json
+│       │   │   │   ├── v4.3.0.json
+│       │   │   │   └── v4.4.0.json
+│       │   │   └── index.js
+│       │   ├── core/
+│       │   │   ├── app/
+│       │   │   │   ├── index.js
+│       │   │   │   ├── themes.js
+│       │   │   │   └── updateBadge.js
+│       │   │   ├── ipc/
+│       │   │   │   ├── bookmarkStore.js
+│       │   │   │   ├── downloadHistory.js
+│       │   │   │   ├── index.js
+│       │   │   │   ├── indicators.js
+│       │   │   │   └── permissionPrompt.js
+│       │   │   ├── dialog.js
+│       │   │   ├── panel.js
+│       │   │   └── session.js
+│       │   ├── devhub/
+│       │   │   ├── tools/
+│       │   │   │   ├── base64/
+│       │   │   │   │   ├── file.js
+│       │   │   │   │   ├── image.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   ├── jwt.js
+│       │   │   │   │   ├── styles.css
+│       │   │   │   │   ├── text.js
+│       │   │   │   │   └── utils.js
+│       │   │   │   ├── hash/
+│       │   │   │   │   ├── advanced.js
+│       │   │   │   │   ├── compare.js
+│       │   │   │   │   ├── file.js
+│       │   │   │   │   ├── formats.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   ├── styles.css
+│       │   │   │   │   ├── text.js
+│       │   │   │   │   └── utils.js
+│       │   │   │   ├── image-converter/
+│       │   │   │   │   ├── converter.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   └── styles.css
+│       │   │   │   ├── image-editor/
+│       │   │   │   │   ├── core/
+│       │   │   │   │   │   └── filters.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── layers.js
+│       │   │   │   │   │   └── shortcuts.js
+│       │   │   │   │   ├── adjustments.js
+│       │   │   │   │   ├── canvas.js
+│       │   │   │   │   ├── editor.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   ├── interactions.js
+│       │   │   │   │   ├── overlay.js
+│       │   │   │   │   └── styles.css
+│       │   │   │   ├── notepad/
+│       │   │   │   │   ├── core/
+│       │   │   │   │   │   ├── editor.js
+│       │   │   │   │   │   ├── highlight.js
+│       │   │   │   │   │   └── storage.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── find.js
+│       │   │   │   │   │   ├── preview.js
+│       │   │   │   │   │   ├── snippets.js
+│       │   │   │   │   │   └── tabs.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   └── styles.css
+│       │   │   │   ├── url-encoder/
+│       │   │   │   │   ├── builder.js
+│       │   │   │   │   ├── encode.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   ├── parser.js
+│       │   │   │   │   ├── styles.css
+│       │   │   │   │   ├── tools.js
+│       │   │   │   │   └── utils.js
+│       │   │   │   ├── color-picker.js
+│       │   │   │   ├── json-viewer.js
+│       │   │   │   └── regex-tester.js
+│       │   │   └── devhub.js
+│       │   ├── features/
+│       │   │   ├── quickLaunch/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── bookmarksHandler.js
+│       │   │   │   │   ├── popularSitesHandler.js
+│       │   │   │   │   └── qlOmnibox.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   ├── addBookmarkUI.js
+│       │   │   │   │   ├── bookmarksGridUI.js
+│       │   │   │   │   └── popularSitesUI.js
+│       │   │   │   └── index.js
+│       │   │   ├── screenshot/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   └── screenshotHandler.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   └── screenshotPanel.js
+│       │   │   │   └── index.js
+│       │   │   ├── summarizer/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── providers/
+│       │   │   │   │   │   ├── extractive.js
+│       │   │   │   │   │   ├── huggingface.js
+│       │   │   │   │   │   ├── ollama.js
+│       │   │   │   │   │   └── openai.js
+│       │   │   │   │   └── summarizerHandler.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   └── summarizerUI.js
+│       │   │   │   └── index.js
+│       │   │   ├── cookieManager.js
+│       │   │   ├── faq.js
+│       │   │   ├── netStatus.js
+│       │   │   ├── prefetch.js
+│       │   │   └── whatsappPanel.js
+│       │   ├── passwords/
+│       │   │   ├── address.js
+│       │   │   ├── autofill.js
+│       │   │   ├── crypto.js
+│       │   │   ├── generator.js
+│       │   │   ├── importer.js
+│       │   │   ├── index.js
+│       │   │   └── styles.css
+│       │   ├── permissions/
+│       │   │   ├── index.js
+│       │   │   ├── popup.js
+│       │   │   └── styles.css
+│       │   ├── proxy/
+│       │   │   ├── components/
+│       │   │   │   ├── bypassList.js
+│       │   │   │   ├── proxyForm.js
+│       │   │   │   ├── statusCard.js
+│       │   │   │   ├── torPanel.js
+│       │   │   │   └── typeSelector.js
+│       │   │   ├── index.js
+│       │   │   ├── proxyQuickPanel.js
+│       │   │   ├── state.js
+│       │   │   └── styles.css
+│       │   ├── settings/
+│       │   │   ├── components/
+│       │   │   │   ├── button.js
+│       │   │   │   ├── card.js
+│       │   │   │   ├── input.js
+│       │   │   │   ├── sectionHeader.js
+│       │   │   │   ├── select.js
+│       │   │   │   └── toggle.js
+│       │   │   ├── core/
+│       │   │   │   ├── ipc.js
+│       │   │   │   ├── liveApply.js
+│       │   │   │   └── storage.js
+│       │   │   ├── sections/
+│       │   │   │   ├── about/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── aboutHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── aboutUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── appearance/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   ├── accentHandler.js
+│       │   │   │   │   │   ├── themeHandler.js
+│       │   │   │   │   │   └── toggleHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── accentPicker.js
+│       │   │   │   │   │   ├── appearanceToggles.js
+│       │   │   │   │   │   └── themeSelector.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── blocklists/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── blocklistsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── blocklistsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── changelog/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── changelogHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── changelogUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── cookies/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── cookiesHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── cookiesUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── downloads/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── downloadsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── downloadsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── faq/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── faqHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── faqData.js
+│       │   │   │   │   │   └── faqUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── languages/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── languagesHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── languagesUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── notifications/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── notificationsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── notificationsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── passwords/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── passwordsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── passwordsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── performance/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── performanceHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── performanceUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── permissions/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── permissionsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── permissionsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── privacy/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── privacyHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── privacyUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── profile/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── profileHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── profileUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── proxy/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── proxyHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── proxyUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── search/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── searchHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── searchUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── shortcuts/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── shortcutsHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── shortcutsUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── startup/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── startupHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── startupUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── sync/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── syncHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── syncUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   ├── updates/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── updatesHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── updatesUI.js
+│       │   │   │   │   └── index.js
+│       │   │   │   └── youtube/
+│       │   │   │       ├── scripts/
+│       │   │   │       │   └── youtubeHandler.js
+│       │   │   │       ├── ui/
+│       │   │   │       │   └── youtubeUI.js
+│       │   │   │       └── index.js
+│       │   │   ├── index.js
+│       │   │   └── styles.css
+│       │   └── webviewPreload.js
+│       ├── bookmarks.html
+│       ├── downloads.html
+│       ├── history.html
+│       ├── index.html
+│       ├── newtab.html
+│       └── settings.html
+├── .gitignore
+├── installer.nsh
+├── main.js
+├── package-lock.json
+├── package.json
+└── preload.js
+
+================================================================================
+RECENT CHANGES (April 17, 2026)
+================================================================================
+
+RESTRUCTURE PHASE COMPLETED:
+- Settings panel: 4289 lines → 316 lines + 65 modular files (js/settings/)
+- Main process IPC: 1164 lines → 13 handler files (main/ipc/)
+- Renderer features: 8 large files → 130+ modular files
+  - navigation.js (1374 lines) → browser/navigation/ (10 files)
+  - webview.js (949 lines) → browser/webview/ (10 files)
+  - tabs.js (750 lines) → browser/tabs/ (6 files)
+  - ipc.js (719 lines) → core/ipc/ (5 files)
+  - app.js (280 lines) → core/app/ (3 files)
+  - quickLaunch.js (520 lines) → features/quickLaunch/ (7 files)
+  - summarizer.js (280 lines) → features/summarizer/ (7 files)
+  - screenshot.js (145 lines) → features/screenshot/ (3 files)
+
+BUG FIXES:
+- Fixed storage:read duplicate handler crash (main.js + ipcHandler.js conflict)
+- Fixed cookieHandlers.js incorrect refreshDlSettings export
+- Created WhatsAppPanel module (was missing, causing undefined error)
+- Fixed find in page event listeners (DOMContentLoaded wrapper issue)
+- Fixed find in page search behavior (always start from top on new search)
+- Suppressed harmless Electron errors (WebFrameMain, dragEvent, Render frame disposed)
+
+FILES MOVED TO PROPER LOCATIONS:
+- panel.js, dialog.js, session.js → core/
+- omnibox.js, contextMenu.js, tabHistory.js, tabPreview.js, faviconCache.js → browser/
+- prefetch.js, netStatus.js, cookieManager.js, faq.js, whatsappPanel.js → features/
+
+TOTAL IMPACT:
+- ~6500 lines split into ~130 modular files
+- Improved maintainability and code organization
+- All features working correctly after restructure
+
+================================================================================
+VERSION HISTORY (newest first)
+================================================================================
+
+v4.4.0 — Proxy & Tor Privacy System + Browser Polish (HTTP/SOCKS5/Tor proxy, auto Tor downloader, Real/Current IP full details, toolbar indicator, bypass list, setup guide; Address bar clean URL + security icons + popup; Favicon cache system; Settings tab persist; Update badge; Download manager improvements; YouTube ad blocker redesign; 6 bug fixes)
+v4.3.0 — Ad & Tracker Blocklist System (EasyList/EasyPrivacy/Peter Lowe/Steven Black/Malware, network-level blocking, toolbar badge, custom rules, modular components)
+v4.2.0 — Windows Default Browser (NSIS registry, single instance, open-url), Custom Alert/Confirm/Prompt UI (dialog.js), about:blank → new tab, external links → new tab
+v4.1.0 — Built-in Password Manager (AES-256 vault, autofill, save popup, address manager, Chrome/Firefox import, generator, HTTP/HTTPS fix)
+v4.0.0 — Site Permissions Manager + Background Themes (10) + Custom Accent Color + GitHub Releases Updater (install/download/rollback)
+v3.3.0 — Site Permissions Manager + GitHub Releases updater
+v3.2.1 — Background Theme accordion UI + 4 new themes (total 10)
+v3.2.0 — Background Themes (6 palettes, CSS variables)
+v3.1.0 — Custom Accent Color (8 presets + custom picker)
+v3.0.0 — Cookie Manager in Settings
+v2.9.0 — Notepad Tool
+v2.8.x — Image Editor Tool
+v2.7.x — Image Converter Tool
+v2.6.x — Hash Generator Tool
+v2.5.0 — URL Encoder full rewrite
+v2.4.x — Base64 full rewrite
+v2.3.x — Regex Tester
+v2.2.x — Color Picker
+v2.1.x — JSON Viewer
+v2.0.0 — DevHub panel launched
+v1.x.x — Initial releases
+
+================================================================================
+DEVHUB PANEL
+================================================================================
+
+Trigger: Toolbar wrench icon (nav-devhub button)
+Toggle: Settings → Appearance → Show DevHub Button
+Style: Centered floating modal, 900x720px, backdrop blur
+
+TOOLS (9): JSON Viewer, Color Picker, Regex Tester, Base64, URL Encoder,
+           Hash Generator, Image Converter, Image Editor, Notepad
+
+================================================================================
+CHANGELOG SYSTEM (MODULAR)
+================================================================================
+
+Directory: vortex/src/renderer/js/changelog/
+  index.js — fetches all JSONs, renders with major version group dropdowns
+  v1/ v2/ v3/ v4/ — JSON files per version
+
+VERSION_GROUPS in index.js: v4, v3, v2, v1
+
+Each JSON: { id, version, badge, name, date, isCurrent, open, counts, categories[] }
+Each feature: { type ('new'|'fix'|'improve'|'perf'), label, desc, howto? }
+
+================================================================================
+CORE BROWSER FEATURES
+================================================================================
+
+BROWSING:
+- Multi-tab (drag-drop reorder, tab sleep, thumbnail previews, per-tab mute)
+- Smart Omnibox (search suggestions, 5 engines, keyboard nav)
+- Find in Page (Ctrl+F), Incognito Mode, Session restore
+
+PRODUCTIVITY:
+- Command Palette (Ctrl+Shift+P), Bookmarks + History, Download Manager
+- Quick Launch Panel (Ctrl+Space)
+
+AI & CONTENT:
+- AI Page Summarizer, Page Translator
+
+MEDIA & TOOLS:
+- Picture-in-Picture Manager, Screenshot Tool, WhatsApp Panel
+
+YOUTUBE:
+- Ad Blocker (network-level + CSS), Ad Speed Control + Auto-Skip
+
+PRIVACY:
+- Site Permissions Manager (camera/mic/notifications/location/30+ types)
+- Cookie Manager (view/browse/block/export)
+- Ad & Tracker Blocklist (EasyList, EasyPrivacy, Peter Lowe, Steven Black, Malware)
+- Custom block rules
+- Proxy Manager (HTTP, SOCKS5, Tor) with Real IP / Current IP display
+- Tor Network integration (auto-download, bootstrap, circuit info, New Identity)
+- Bypass List editor, toolbar proxy/tor indicator
+
+PASSWORD MANAGER:
+- AES-256-GCM encrypted vault, master password
+- Autofill (username + password), save prompt after login
+- Address Manager + autofill
+- Import Chrome/Firefox CSV, Export JSON/CSV
+- Password Generator + breach detection
+
+SYSTEM:
+- GitHub Releases Updater (version check, .exe download/install, rollback)
+- Windows Default Browser registration (NSIS installer)
+- External links → new tab (single instance)
+- DNS Prefetch, Network Speed Indicator, Profile system
+
+================================================================================
+SETTINGS SYSTEM
+================================================================================
+
+DEFAULTS (settings.html):
+  theme, fontsize, tabpreview, bookmarksbar, whatsappBtn, devhubBtn,
+  accentColor, bgTheme,
+  startup, homepage, engine, suggestions,
+  trackers, https, dnt,
+  gpu, prefetch, cache, askdl, opendl,
+  tabsleep, tabsleepMinutes, pip, pipSites,
+  notifications, notifSound, notifSites,
+  lang, spellcheck, spellcheckLang,
+  ytAdblock, ytAdSpeed
+
+Settings sidebar groups:
+  General: Appearance (Accent Color, Background Theme, Font Size, etc.), On Startup,
+           Search Engine, Languages, Downloads, Notifications
+  Privacy & Performance: Privacy & Security, Cookie Manager, Site Permissions,
+                         Password Manager, Blocklists, Proxy & Tor, Performance, YouTube
+  Account: Profile, Sync & Backup
+  System: Keyboard Shortcuts, Updates, About Vortex
+  Info: What's New, Help & FAQ
+
+================================================================================
+IPC CHANNELS
+================================================================================
+
+Main → Renderer (send):
+  settings:changed, profile:changed
+  download:start, download:update, download:done, download:removed, downloads:badge
+  permission:request, dialog:show, open-url
+  blocklist:blocked, blocklist:progress, blocklist:done
+  updater:installProgress
+  proxy:statusUpdate, proxy:changed
+  tor:bootstrapProgress, tor:ready, tor:stopped, tor:error, tor:downloadProgress
+
+Renderer → Main (invoke):
+  storage:read, storage:write, app:version, updater:localSha,
+  browser:isDefault,
+  updater:fetchCommits, updater:applyCommit,
+  updater:fetchAllReleases, updater:downloadExe, updater:deleteApplied,
+  updater:installRelease,
+  tab:capture, screenshot:capture, screenshot:captureFull, screenshot:save,
+  webview:setZoom, tab:setMuted, tab:isAudible, pip:trigger,
+  tab:memoryUsage, file:exists, settings:pickDownloadFolder,
+  cookies:getAll, cookies:getForDomain, cookies:delete, cookies:deleteAll,
+  cookies:deleteForDomain, cookies:deleteExpired, cookies:set, cookies:getStats,
+  permissions:getAll, permissions:saveAll,
+  passwords:read, passwords:write, passwords:readImported, passwords:writeImported,
+  addresses:read, addresses:write,
+  blocklist:getLists, blocklist:setEnabled, blocklist:download, blocklist:downloadAll,
+  blocklist:getStats, blocklist:getCustom, blocklist:addCustom, blocklist:removeCustom,
+  blocklist:resetStats,
+  proxy:getConfig, proxy:setConfig, proxy:getStatus, proxy:testConnection,
+  proxy:getOriginalIp, proxy:getOriginalIpFull, proxy:fetchIpInfo, proxy:disable,
+  tor:start, tor:stop, tor:newIdentity, tor:getCircuit, tor:getBinaryPath,
+  tor:isRunning, tor:getProcessStatus, tor:pickBinary, tor:download,
+  tor:isDownloaded, tor:getInstallDir
+
+Renderer → Main (send):
+  shell:openExternal, app:relaunch, browser:clearData, browser:setDefault,
+  download:cancel, download:remove, download:openFile, download:openFolder,
+  download:markDeleted, spellcheck:setLanguage,
+  window:minimize, window:maximize, window:close, window:fullscreen,
+  window:new, window:incognito,
+  devhub:download,
+  blocklist:resetTabStats,
+  permission:response:{domain}:{permission}
+
+================================================================================
+KNOWN PATTERNS & CONVENTIONS
+================================================================================
+
+1. Panel system: Panel.open('settings'|'downloads'|'bookmarks'|'history')
+2. Settings communication: postMessage with __vortexAction flag
+3. WhatsApp panel: #wa-panel, persist:whatsapp partition
+4. Incognito: separate BrowserWindow, purple theme, ?incognito=1
+5. YT Adblock: ipcHandler.js (network) + webview.js (CSS+JS injection)
+6. Tab sleep: webview src → 'about:blank', restored on click
+7. Version in packaged builds: app.getVersion() NOT require(package.json)
+8. CSS toggle class: .toggle-track (NOT .slider)
+9. DevHub download: vortexAPI.send('devhub:download', {dataUrl, filename})
+10. Modular tools: each tool in own directory, CSS injected via <link> in _injectCSS()
+11. Changelog: fetch() based, JSON files per version, major version group dropdowns
+12. Cookie Manager: cookieManager.js renders lazily, block list in localStorage
+13. Password Manager: dual storage — vault (encrypted) + imported (plain JSON)
+    Autofill: sessionStorage cache for vault, imported always available
+    Save prompt: after login/signup via did-navigate-in-page
+14. Blocklist: engine.js registers webRequest.onBeforeRequest on startup
+    Domain Set in memory, O(1) lookup, per-tab stats via Map
+    Settings panel lazy-rendered on nav click
+15. Windows Default Browser: installer.nsh NSIS script writes HKLM+HKCU registry
+    app.setAsDefaultProtocolClient('http'/'https') in main.js (packaged only)
+    open-url IPC → new tab, queued if app not ready (_markAppReady pattern)
+16. Custom Alert/Confirm/Prompt: webviewPreload.js overrides window.alert/confirm/prompt
+    → ipcRenderer.sendToHost('dialog:show') → ipc-message → VortexDialog.show()
+17. new-window → new tab: app.on('web-contents-created') + setWindowOpenHandler
+18. Accent color: CSS var(--accent), applied via applyAccent() in app.js
+20. Proxy system: src/main/proxy/ — proxyManager, torProcess, torDownloader, ipcHandlers
+    Tor proxy sirf bootstrap 100% ke baad apply hoti hai (onTorReady callback)
+    Real IP: session.fromPartition('persist:proxy-ip-check') with proxyRules:'direct://'
+    ProxyState: singleton event emitter, clearAll() on panel remount
+    Storage: %APPDATA%\vortex\storage\proxy.json
+
+================================================================================
+GIT WORKFLOW
+================================================================================
+
+Repo: https://github.com/RupamSatyaki/VORTEX-Browser
+Files at root (not in vortex/ subfolder on GitHub)
+
+Standard commit:
+  git add -A
+  git commit -m "vX.X.X: description"
+  git push
+
+Version bump checklist:
+  1. package.json → "version": "X.X.X"
+  2. changelog/vX/vX.Y.Z.json → create new file
+  3. changelog/index.js → add path to VERSION_FILES (newest first)
+  4. Previous latest JSON → badge:'stable', isCurrent:false
+  5. CONTEXT.txt → update version + file structure
+
+================================================================================
+END OF CONTEXT
+================================================================================

@@ -1,0 +1,248 @@
+================================================================================
+VORTEX BROWSER — RESTRUCTURE MANUAL TEST CHECKLIST
+Branch: VORTEX-Browser-Restructure
+Date: April 2026
+================================================================================
+
+Yeh checklist manually test karo browser open karke.
+Har item ke saamne ✅ ya ❌ mark karo.
+
+================================================================================
+SECTION 1 — APP STARTUP
+================================================================================
+
+[ ] 1.1  Browser opens without errors (no white screen, no crash)
+[ ] 1.2  Tab bar renders correctly (tabs + window controls visible)
+[ ] 1.3  Address bar renders (search icon, URL input visible)
+[ ] 1.4  Toolbar buttons visible (back, forward, reload, downloads, menu)
+[ ] 1.5  Profile icon visible in toolbar right
+[ ] 1.6  New tab opens (Google or homepage loads)
+[ ] 1.7  Console has no JS errors on startup (F12 → Console)
+
+================================================================================
+SECTION 2 — NAVIGATION
+================================================================================
+
+[ ] 2.1  Type URL in address bar → page loads
+[ ] 2.2  Type search query → Google search opens
+[ ] 2.3  Back/Forward buttons work
+[ ] 2.4  Reload button works
+[ ] 2.5  Address bar shows clean URL (no https://, no www.)
+[ ] 2.6  Security icon shows (🔒 for HTTPS, ⚠️ for HTTP)
+[ ] 2.7  Security popup opens on icon click
+[ ] 2.8  Progress bar shows during page load
+[ ] 2.9  Hover icons appear on address bar hover (bookmark, autofill, etc.)
+[ ] 2.10 Hover icons disappear on mouse leave
+
+================================================================================
+SECTION 3 — TABS
+================================================================================
+
+[ ] 3.1  New tab opens (Ctrl+T or + button)
+[ ] 3.2  Tab closes (Ctrl+W or × button)
+[ ] 3.3  Switch between tabs works
+[ ] 3.4  Tab title updates when page loads
+[ ] 3.5  Tab favicon updates
+[ ] 3.6  Tab drag-and-drop reordering works
+[ ] 3.7  Tab right-click context menu shows (mute/reload/duplicate/close)
+[ ] 3.8  Tab preview shows on hover
+[ ] 3.9  Tab sleep works (inactive tab suspends after timeout)
+[ ] 3.10 Sleeping tab wakes on click
+
+================================================================================
+SECTION 4 — SETTINGS PANEL
+================================================================================
+
+[ ] 4.1  Settings opens (Ctrl+, or menu → Settings)
+[ ] 4.2  All 22 sections load without errors
+[ ] 4.3  Appearance — theme/font/toggles save and apply live
+[ ] 4.4  Accent color picker works (swatches + custom)
+[ ] 4.5  Background theme accordion opens/closes, theme applies live
+[ ] 4.6  Startup section saves
+[ ] 4.7  Search engine section saves
+[ ] 4.8  Languages section saves
+[ ] 4.9  Downloads — folder picker works
+[ ] 4.10 Notifications — per-site allow/block works
+[ ] 4.11 Privacy — clear data button works
+[ ] 4.12 Cookie Manager renders and loads cookies
+[ ] 4.13 Site Permissions renders
+[ ] 4.14 Password Manager renders (lock screen or vault)
+[ ] 4.15 Blocklists panel renders
+[ ] 4.16 Proxy & Tor panel renders
+[ ] 4.17 Performance — tab sleep/PiP settings save
+[ ] 4.18 YouTube section saves
+[ ] 4.19 Profile — avatar/name/status/bio saves
+[ ] 4.20 Sync — export/import bookmarks works
+[ ] 4.21 Shortcuts — table renders
+[ ] 4.22 Updates — check for updates works, releases list shows
+[ ] 4.23 About — version loads, default browser check works
+[ ] 4.24 Changelog — groups expand/collapse, versions expand/collapse
+[ ] 4.25 FAQ — search works, category filter works, accordion works
+[ ] 4.26 Settings persist after browser restart
+[ ] 4.27 sessionStorage restores last active section
+
+================================================================================
+SECTION 5 — QUICK LAUNCH (Ctrl+Space)
+================================================================================
+
+[ ] 5.1  Quick Launch panel opens
+[ ] 5.2  Bookmarks grid shows
+[ ] 5.3  Popular sites list shows
+[ ] 5.4  Category filter buttons work
+[ ] 5.5  Search in popular sites works
+[ ] 5.6  Click site → opens in new tab
+[ ] 5.7  Add bookmark panel opens and saves
+[ ] 5.8  Omnibox suggestions appear while typing
+[ ] 5.9  Enter key navigates to URL/search
+[ ] 5.10 Escape closes panel
+
+================================================================================
+SECTION 6 — SCREENSHOT (Ctrl+Shift+S / Ctrl+Shift+F)
+================================================================================
+
+[ ] 6.1  Visible area screenshot captures
+[ ] 6.2  Full page screenshot captures
+[ ] 6.3  Preview panel shows with image
+[ ] 6.4  Copy button copies to clipboard
+[ ] 6.5  Save PNG button opens save dialog
+[ ] 6.6  Escape closes panel
+
+================================================================================
+SECTION 7 — AI SUMMARIZER
+================================================================================
+
+[ ] 7.1  Summarizer drawer opens (toolbar AI button)
+[ ] 7.2  Extractive summary generates (offline)
+[ ] 7.3  Refresh button re-summarizes
+[ ] 7.4  Copy button copies bullets
+[ ] 7.5  Drawer closes on × or Escape
+[ ] 7.6  Auto re-summarizes on tab change
+
+================================================================================
+SECTION 8 — PRIVACY FEATURES
+================================================================================
+
+[ ] 8.1  Password Manager — vault unlock works
+[ ] 8.2  Autofill — key icon appears on address bar hover
+[ ] 8.3  Autofill — dropdown shows on login page
+[ ] 8.4  Autofill — save prompt appears after login
+[ ] 8.5  Blocklist badge shows blocked count
+[ ] 8.6  Site Permissions — permission prompt shows on camera/mic request
+[ ] 8.7  Cookie Manager — cookies load and delete works
+[ ] 8.8  Proxy panel — HTTP/SOCKS5 config saves
+[ ] 8.9  Tor panel — start/stop works, status updates live (no refresh needed)
+
+================================================================================
+SECTION 9 — BROWSER FEATURES
+================================================================================
+
+[ ] 9.1  Find in Page (Ctrl+F) works
+[ ] 9.2  Zoom In/Out/Reset (Ctrl+=/−/0) works
+[ ] 9.3  Zoom bar shows and auto-hides
+[ ] 9.4  Picture-in-Picture triggers on tab switch
+[ ] 9.5  YouTube ad blocker works
+[ ] 9.6  Translate bar appears on foreign language page
+[ ] 9.7  Translate button opens Google Translate
+[ ] 9.8  Context menu (right-click) shows on page
+[ ] 9.9  Downloads panel opens (Ctrl+J)
+[ ] 9.10 Bookmarks panel opens (Ctrl+B)
+[ ] 9.11 History panel opens (Ctrl+H)
+[ ] 9.12 Command Palette opens (Ctrl+K)
+[ ] 9.13 WhatsApp panel opens (toolbar button)
+[ ] 9.14 DevHub panel opens (toolbar button)
+[ ] 9.15 Session restores on restart
+
+================================================================================
+SECTION 10 — IPC & MAIN PROCESS
+================================================================================
+
+[ ] 10.1  Downloads work (file downloads, progress shows)
+[ ] 10.2  Download folder picker works in Settings
+[ ] 10.3  Screenshot save dialog works
+[ ] 10.4  Storage read/write works (settings persist)
+[ ] 10.5  Favicon cache works (favicons load from cache)
+[ ] 10.6  Window minimize/maximize/close buttons work
+[ ] 10.7  New window opens (Ctrl+N)
+[ ] 10.8  Proxy status indicator shows in toolbar
+[ ] 10.9  Tor status indicator shows in toolbar
+[ ] 10.10 Updates check works in Settings → Updates
+
+================================================================================
+SECTION 11 — KNOWN ISSUES TO WATCH
+================================================================================
+
+[ ] 11.1  No "Cannot find module" errors in main process console
+[ ] 11.2  No "is not defined" errors in renderer console
+[ ] 11.3  No duplicate IPC handler warnings
+[ ] 11.4  settings.html loads without blank sections
+[ ] 11.5  index.html loads without missing script errors
+
+================================================================================
+BUGS FIXED (April 2026)
+================================================================================
+
+✅ BUG-1: storage:read duplicate handler crash
+   Root cause: main.js called Storage.registerStorageHandlers() AND
+               IpcHandler.registerHandlers() → storageHandlers.register()
+               Both registered storage:read → Electron crash
+   Fix: Removed Storage.registerStorageHandlers() from main.js
+        Added onWrite(name, cb) callback to storageHandlers.js
+        Removed hacky ipcMain.removeHandler('storage:write') override
+
+✅ BUG-2: WhatsAppPanel is not defined
+   Root cause: navigation/index.js referenced WhatsAppPanel.toggle()
+               but no module existed for it
+   Fix: Created features/whatsappPanel.js with open/close/toggle/toggleFullscreen
+        Added script tag to index.html before navigation scripts
+
+ℹ️  BUG-3: dragEvent is not defined (console noise only)
+   Root cause: Electron internal webview drag implementation bug
+               Not from our code — tabDrag.js uses _drag variable correctly
+   Status: Harmless — already suppressed in main.js uncaughtException handler
+           No functional impact on tab drag feature
+
+ℹ️  BUG-4: All "No handler registered" errors
+   Root cause: Cascade from BUG-1 — crash prevented all handlers from loading
+   Status: Auto-fixed by BUG-1 fix — all 13 handler files now load correctly
+
+================================================================================
+FINAL STRUCTURE SUMMARY
+================================================================================
+
+renderer/js/
+  core/          app/ ipc/ panel.js dialog.js session.js
+  browser/       navigation/ tabs/ webview/ omnibox.js contextMenu.js
+                 tabHistory.js tabPreview.js faviconCache.js
+  features/      quickLaunch/ screenshot/ summarizer/ whatsappPanel.js
+                 prefetch.js netStatus.js cookieManager.js faq.js
+  settings/      ✅ DONE (22 sections)
+  blocklist/     ✅ UNCHANGED
+  passwords/     ✅ UNCHANGED
+  permissions/   ✅ UNCHANGED
+  proxy/         ✅ UNCHANGED
+  devhub/        ✅ UNCHANGED
+  changelog/     ✅ UNCHANGED
+
+main/
+  ipc/           13 handler files
+  ipcHandler.js  orchestrator only
+  blocklist/     ✅ UNCHANGED
+  proxy/         ✅ UNCHANGED
+
+FILES SPLIT:
+  navigation.js  1374 lines → 10 files
+  webview.js      949 lines → 10 files
+  ipc.js          719 lines → 5 files
+  tabs.js         750 lines → 6 files
+  app.js          280 lines → 3 files
+  quickLaunch.js  520 lines → 7 files
+  summarizer.js   280 lines → 7 files
+  screenshot.js   145 lines → 3 files
+  ipcHandler.js  1164 lines → 14 files
+  settings.html  4289 lines → 316 lines + 65 files in js/settings/
+
+TOTAL: ~6500 lines split into ~130 modular files
+
+================================================================================
+END OF CHECKLIST
+================================================================================

@@ -1,0 +1,382 @@
+================================================================================
+VORTEX BROWSER — SETTINGS RESTRUCTURE PLAN
+Branch: VORTEX-Browser-Restructure
+Date: April 2026
+================================================================================
+
+================================================================================
+GOAL
+================================================================================
+
+settings.html (4289 lines) ko clean karna — sirf sidebar HTML + empty section
+containers + script tags rahenge (~200 lines).
+
+Saara JS/CSS → js/settings/ folder mein shift hoga.
+
+App open pe sare sections ek saath load + render honge.
+Nav click pe sirf show/hide hoga — no re-render.
+
+================================================================================
+NEW FOLDER STRUCTURE
+================================================================================
+
+vortex/src/renderer/js/settings/
+│
+├── index.js                          ← Master: nav switching, init all sections,
+│                                        postMessage handler, sessionStorage persist
+│
+├── core/
+│   ├── storage.js                    ← DEFAULTS, read(), write(), get(), set()
+│   ├── ipc.js                        ← invoke(), send(), on() — postMessage bridge
+│   └── liveApply.js                  ← emit settings:changed, accent:changed,
+│                                        bgTheme:changed to parent window
+│
+├── components/                       ← Pure UI building blocks (HTML only, no logic)
+│   ├── toggle.js                     ← renderToggle(id, label, desc, checked)
+│   ├── select.js                     ← renderSelect(id, label, options, value)
+│   ├── input.js                      ← renderInput(id, label, placeholder, value)
+│   ├── button.js                     ← renderButton(id, label, variant, icon)
+│   ├── sectionHeader.js              ← renderHeader(title, subtitle, icon)
+│   └── card.js                       ← renderCard(title, children)
+│
+└── sections/
+    │
+    ├── appearance/
+    │   ├── ui/
+    │   │   ├── themeSelector.js      ← 10 bg theme cards HTML
+    │   │   ├── accentPicker.js       ← 8 swatches + custom color input HTML
+    │   │   └── appearanceToggles.js  ← font size, tab preview, bookmarks bar,
+    │   │                                WA/DevHub btn HTML
+    │   ├── scripts/
+    │   │   ├── themeHandler.js       ← theme card click → save + live apply
+    │   │   ├── accentHandler.js      ← swatch/picker change → save + live apply
+    │   │   └── toggleHandler.js      ← toggle change → save + live apply
+    │   └── index.js                  ← render(container, settings)
+    │
+    ├── startup/
+    │   ├── ui/
+    │   │   └── startupUI.js          ← startup radio buttons + homepage input HTML
+    │   ├── scripts/
+    │   │   └── startupHandler.js     ← radio/input change → save
+    │   └── index.js
+    │
+    ├── search/
+    │   ├── ui/
+    │   │   └── searchUI.js           ← engine cards + suggestions toggle HTML
+    │   ├── scripts/
+    │   │   └── searchHandler.js      ← engine select + suggestions → save + live apply
+    │   └── index.js
+    │
+    ├── languages/
+    │   ├── ui/
+    │   │   └── languagesUI.js        ← language select + spellcheck toggle +
+    │   │                                spellcheck lang select HTML
+    │   ├── scripts/
+    │   │   └── languagesHandler.js   ← change → save + send spellcheck:setLanguage
+    │   └── index.js
+    │
+    ├── downloads/
+    │   ├── ui/
+    │   │   └── downloadsUI.js        ← folder path display + pick button +
+    │   │                                askdl/opendl toggles HTML
+    │   ├── scripts/
+    │   │   └── downloadsHandler.js   ← folder picker IPC + toggle → save
+    │   └── index.js
+    │
+    ├── notifications/
+    │   ├── ui/
+    │   │   └── notificationsUI.js    ← master toggle + sound + sites allowlist HTML
+    │   ├── scripts/
+    │   │   └── notificationsHandler.js ← toggle/input → save
+    │   └── index.js
+    │
+    ├── privacy/
+    │   ├── ui/
+    │   │   └── privacyUI.js          ← trackers, HTTPS, DNT toggles +
+    │   │                                clear data button HTML
+    │   ├── scripts/
+    │   │   └── privacyHandler.js     ← toggle → save, clear data → IPC
+    │   └── index.js
+    │
+    ├── cookies/
+    │   ├── ui/
+    │   │   └── cookiesUI.js          ← shell container HTML
+    │   ├── scripts/
+    │   │   └── cookiesHandler.js     ← lazy init CookieManager.render()
+    │   └── index.js
+    │
+    ├── permissions/
+    │   ├── ui/
+    │   │   └── permissionsUI.js      ← shell container HTML
+    │   ├── scripts/
+    │   │   └── permissionsHandler.js ← lazy init PermissionManager settings render
+    │   └── index.js
+    │
+    ├── passwords/
+    │   ├── ui/
+    │   │   └── passwordsUI.js        ← shell container HTML
+    │   ├── scripts/
+    │   │   └── passwordsHandler.js   ← lazy init PasswordManager.render()
+    │   └── index.js
+    │
+    ├── blocklists/
+    │   ├── ui/
+    │   │   └── blocklistsUI.js       ← shell container HTML
+    │   ├── scripts/
+    │   │   └── blocklistsHandler.js  ← lazy init blocklist panel render
+    │   └── index.js
+    │
+    ├── proxy/
+    │   ├── ui/
+    │   │   └── proxyUI.js            ← shell container HTML
+    │   ├── scripts/
+    │   │   └── proxyHandler.js       ← lazy init proxy panel render
+    │   └── index.js
+    │
+    ├── performance/
+    │   ├── ui/
+    │   │   └── performanceUI.js      ← GPU, prefetch, cache, tab sleep,
+    │   │                                sleep timer HTML
+    │   ├── scripts/
+    │   │   └── performanceHandler.js ← toggle/slider → save + live apply
+    │   └── index.js
+    │
+    ├── youtube/
+    │   ├── ui/
+    │   │   └── youtubeUI.js          ← adblock toggle + speed slider HTML
+    │   ├── scripts/
+    │   │   └── youtubeHandler.js     ← toggle/slider → save + live apply
+    │   └── index.js
+    │
+    ├── profile/
+    │   ├── ui/
+    │   │   └── profileUI.js          ← avatar, name, status, bio HTML
+    │   ├── scripts/
+    │   │   └── profileHandler.js     ← input/picker → save profile.json + live apply
+    │   └── index.js
+    │
+    ├── sync/
+    │   ├── ui/
+    │   │   └── syncUI.js             ← export/import JSON cards HTML
+    │   ├── scripts/
+    │   │   └── syncHandler.js        ← export → file download, import → read + apply
+    │   └── index.js
+    │
+    ├── shortcuts/
+    │   ├── ui/
+    │   │   └── shortcutsUI.js        ← shortcuts table HTML (static)
+    │   ├── scripts/
+    │   │   └── shortcutsHandler.js   ← minimal, mostly static display
+    │   └── index.js
+    │
+    ├── updates/
+    │   ├── ui/
+    │   │   └── updatesUI.js          ← version card + releases list +
+    │   │                                progress bar HTML
+    │   ├── scripts/
+    │   │   └── updatesHandler.js     ← fetch releases, apply, rollback, download exe
+    │   └── index.js
+    │
+    ├── about/
+    │   ├── ui/
+    │   │   └── aboutUI.js            ← version, build info, links,
+    │   │                                default browser card HTML
+    │   ├── scripts/
+    │   │   └── aboutHandler.js       ← check default browser, set default, open links
+    │   └── index.js
+    │
+    ├── changelog/
+    │   ├── ui/
+    │   │   └── changelogUI.js        ← version group dropdowns shell HTML
+    │   ├── scripts/
+    │   │   └── changelogHandler.js   ← fetch JSONs, render entries
+    │   └── index.js
+    │
+    └── faq/
+        ├── ui/
+        │   ├── faqUI.js              ← search bar + category tabs + items list HTML
+        │   └── faqData.js            ← FAQ_DATA array (35+ Q&A) + FAQ_CATEGORIES
+        ├── scripts/
+        │   └── faqHandler.js         ← search filter, category filter, accordion toggle
+        └── index.js
+
+================================================================================
+SECTION FILE PATTERN
+================================================================================
+
+Every section follows this exact pattern:
+
+  ui/*.js     → Pure HTML string functions only. No event listeners. No logic.
+                Example: export function renderAppearanceToggles(settings) { return `...`; }
+
+  scripts/*.js → Event listeners + logic only. No HTML generation.
+                 Example: export function bindThemeHandler(container, settings) { ... }
+
+  index.js    → render(container, settings) — calls ui functions, injects HTML,
+                then calls script functions to bind events.
+                Example:
+                  const AppearanceSection = (() => {
+                    function render(container, settings) {
+                      container.innerHTML = buildHTML(settings);
+                      bindEvents(container, settings);
+                    }
+                    return { render };
+                  })();
+
+================================================================================
+settings/index.js RESPONSIBILITIES
+================================================================================
+
+1. Load settings from storage on DOMContentLoaded
+2. Call render(container, settings) for ALL sections at startup
+3. All sections are in DOM from the start — no lazy render for nav switching
+4. Nav click → only CSS show/hide (display:block / display:none)
+5. Listen for postMessage { channel: 'settings:navigate', data: sectionId }
+6. Save/restore active section in sessionStorage key 'vx_settings_section'
+7. Register all section modules in SECTIONS map
+
+SECTIONS map example:
+  const SECTIONS = {
+    appearance:   AppearanceSection,
+    startup:      StartupSection,
+    search:       SearchSection,
+    ...
+  };
+
+================================================================================
+settings.html AFTER RESTRUCTURE (~200 lines)
+================================================================================
+
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="js/settings/styles.css" />
+</head>
+<body>
+  <!-- Sidebar (nav items HTML — unchanged) -->
+  <div id="sidebar">...</div>
+
+  <!-- Content area — empty section containers only -->
+  <div id="content">
+    <div class="section" id="sec-appearance"></div>
+    <div class="section" id="sec-startup"></div>
+    <div class="section" id="sec-search"></div>
+    ... (one per section)
+  </div>
+
+  <!-- Core -->
+  <script src="js/settings/core/storage.js"></script>
+  <script src="js/settings/core/ipc.js"></script>
+  <script src="js/settings/core/liveApply.js"></script>
+
+  <!-- Components -->
+  <script src="js/settings/components/toggle.js"></script>
+  <script src="js/settings/components/select.js"></script>
+  <script src="js/settings/components/input.js"></script>
+  <script src="js/settings/components/button.js"></script>
+  <script src="js/settings/components/sectionHeader.js"></script>
+  <script src="js/settings/components/card.js"></script>
+
+  <!-- Sections (ui first, then scripts, then index) -->
+  <script src="js/settings/sections/appearance/ui/themeSelector.js"></script>
+  <script src="js/settings/sections/appearance/ui/accentPicker.js"></script>
+  <script src="js/settings/sections/appearance/ui/appearanceToggles.js"></script>
+  <script src="js/settings/sections/appearance/scripts/themeHandler.js"></script>
+  <script src="js/settings/sections/appearance/scripts/accentHandler.js"></script>
+  <script src="js/settings/sections/appearance/scripts/toggleHandler.js"></script>
+  <script src="js/settings/sections/appearance/index.js"></script>
+  ... (repeat for all sections)
+
+  <!-- Master — LAST -->
+  <script src="js/settings/index.js"></script>
+</body>
+</html>
+
+================================================================================
+EXECUTION STEPS
+================================================================================
+
+STEP 1 — Core Foundation
+  1.1  core/storage.js     — DEFAULTS, read(), write(), get(), set()
+  1.2  core/ipc.js         — invoke(), send(), on(), postMessage bridge
+  1.3  core/liveApply.js   — settings:changed, accent:changed, bgTheme:changed
+
+STEP 2 — UI Components
+  2.1  components/toggle.js
+  2.2  components/select.js
+  2.3  components/input.js
+  2.4  components/button.js
+  2.5  components/sectionHeader.js
+  2.6  components/card.js
+
+STEP 3 — Simple Sections (settings read/write only)
+  3.1  sections/startup/
+  3.2  sections/search/
+  3.3  sections/languages/
+  3.4  sections/downloads/
+  3.5  sections/notifications/
+  3.6  sections/privacy/
+  3.7  sections/performance/
+  3.8  sections/youtube/
+  3.9  sections/shortcuts/
+  3.10 sections/about/
+  3.11 sections/sync/
+
+STEP 4 — Complex Sections (external JS dependencies)
+  4.1  sections/appearance/   — accentPicker, bgTheme, toggles
+  4.2  sections/profile/      — profile.json read/write
+  4.3  sections/cookies/      — CookieManager.render() wrap
+  4.4  sections/permissions/  — PermissionManager settings wrap
+  4.5  sections/passwords/    — PasswordManager.render() wrap
+  4.6  sections/blocklists/   — blocklist panel wrap
+  4.7  sections/proxy/        — proxy panel wrap
+
+STEP 5 — Content Sections
+  5.1  sections/faq/          — faqData.js extract + handler
+  5.2  sections/changelog/    — existing changelog/index.js wrap
+  5.3  sections/updates/      — GitHub releases updater
+
+STEP 6 — Master index.js
+  6.1  settings/index.js
+       - Register all sections in SECTIONS map
+       - DOMContentLoaded → load settings → render all sections
+       - Nav switching (show/hide only)
+       - postMessage handler
+       - sessionStorage persist
+
+STEP 7 — settings.html Clean
+  7.1  Saari inline CSS → settings/styles.css
+  7.2  Saara inline JS → already in steps 1-6
+  7.3  settings.html → ~200 lines only
+
+STEP 8 — Test & Verify
+  8.1  Har section open karo — UI sahi dikh raha hai
+  8.2  Settings save ho rahi hain
+  8.3  Live apply kaam kar raha hai (accent, theme)
+  8.4  postMessage navigate kaam kar raha hai
+  8.5  sessionStorage persist kaam kar raha hai
+  8.6  Cookies/Passwords/Permissions/Blocklist/Proxy render ho rahe hain
+
+STEP 9 — Cleanup & Commit
+  9.1  settings.html se sab inline <script> blocks remove
+  9.2  Old references update (cookieManager, faq, changelog)
+  9.3  CONTEXT.txt update
+  9.4  git commit on VORTEX-Browser-Restructure branch
+
+================================================================================
+STATS
+================================================================================
+
+  Current settings.html    : 4289 lines
+  After restructure        : ~200 lines
+
+  New files created        : ~65 files
+  Files removed/emptied    : settings.html inline JS/CSS
+
+  Sections total           : 22
+  Components total         : 6
+  Core files               : 3
+
+================================================================================
+END OF PLAN
+================================================================================

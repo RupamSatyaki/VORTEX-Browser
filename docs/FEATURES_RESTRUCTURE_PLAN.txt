@@ -1,0 +1,357 @@
+================================================================================
+VORTEX BROWSER — FEATURES RESTRUCTURE PLAN
+Branch: VORTEX-Browser-Restructure
+Date: April 2026
+================================================================================
+
+GOAL:
+  Renderer JS flat files ko modular folder structure mein split karna.
+  Settings restructure (DONE ✅) ke baad ab baaki features ki baari.
+  Pattern: ui/ + scripts/ + index.js (same as settings/sections/)
+
+================================================================================
+CURRENT STATE — FILES TO SPLIT
+================================================================================
+
+  File                Lines   Status      Priority
+  ─────────────────────────────────────────────────
+  navigation.js       1374    🔴 Critical  Phase 1
+  webview.js           949    🔴 Critical  Phase 2
+  ipc.js               719    🔴 Critical  Phase 3
+  tabs.js              750    ⚠️ High      Phase 4
+  app.js               280    ⚠️ Medium    Phase 5
+  quickLaunch.js       520    ⚠️ Medium    Phase 6
+  summarizer.js        280    ⚠️ Medium    Phase 7
+  screenshot.js        145    ✅ Low       Phase 8
+  main/ipcHandler.js  1164    🔴 Critical  Phase 9
+
+  UNCHANGED (already focused/structured):
+    omnibox.js, contextMenu.js, dialog.js, panel.js, session.js,
+    prefetch.js, netStatus.js, tabHistory.js, tabPreview.js,
+    faviconCache.js, webviewPreload.js
+    blocklist/, proxy/, passwords/, permissions/, devhub/, changelog/
+
+================================================================================
+NEW FOLDER STRUCTURE — RENDERER (js/)
+================================================================================
+
+js/
+│
+├── core/                              ← App bootstrap + global utilities
+│   ├── app/
+│   │   ├── index.js                  ← DOMContentLoaded orchestrator only
+│   │   ├── themes.js                 ← applyAccent(), applyBgTheme(), BG_THEMES map
+│   │   └── updateBadge.js            ← _checkUpdateBadge(), _showUpdateBadge()
+│   │
+│   ├── ipc/
+│   │   ├── index.js                  ← IPC object, Storage, event forwarding — main entry
+│   │   ├── bookmarkStore.js          ← BookmarkStore class (load, add, remove, update)
+│   │   ├── downloadHistory.js        ← DownloadHistory class (load, add, remove, clear)
+│   │   ├── permissionPrompt.js       ← _showPermissionPrompt(), permission request UI
+│   │   └── indicators.js             ← proxy/tor/update badge, _updateBookmarkIcon
+│   │
+│   ├── panel.js                      ← [UNCHANGED] floating panel open/close/refresh
+│   ├── dialog.js                     ← [UNCHANGED] VortexDialog alert/confirm/prompt
+│   └── session.js                    ← [UNCHANGED] save/restore tabs
+│
+├── browser/                          ← Core browsing engine
+│   │
+│   ├── navigation/
+│   │   ├── index.js                  ← render(), applySettings(), setURL(), navigate()
+│   │   │                                setDownloadBadge(), initShortcuts(), initProfile()
+│   │   ├── ui/
+│   │   │   ├── toolbarHTML.js        ← Full toolbar HTML string (all buttons, address bar)
+│   │   │   ├── menuDropdownHTML.js   ← Nav dropdown menu HTML
+│   │   │   └── profileMenuHTML.js    ← Profile dropdown HTML
+│   │   └── scripts/
+│   │       ├── addressBar.js         ← URL input focus/blur/input/keydown handlers
+│   │       │                            _cleanDisplayUrl(), firstClick logic
+│   │       ├── securityIcon.js       ← updateSecurityIcon(), _isLocalAddress()
+│   │       │                            _showSecurityPopup(), LOCK/UNLOCK/LOCAL icons
+│   │       ├── progressBar.js        ← startProgress(), endProgress(), _progressTimer
+│   │       ├── hoverIcons.js         ← _injectIcons(), _removeIcons(), address bar hover
+│   │       ├── menuDropdown.js       ← _buildMenu(), _toggleMenu(), zoom row, actions
+│   │       └── profileMenu.js        ← _toggleProfileMenu(), _initProfile()
+│   │                                    avatar load, name edit, status, bio
+│   │
+│   ├── tabs/
+│   │   ├── index.js                  ← createTab(), closeTab(), switchTab(), updateTab()
+│   │   │                                getActiveTab(), getActiveId(), touchTab()
+│   │   ├── ui/
+│   │   │   ├── tabRenderer.js        ← render() — full tab bar HTML generation
+│   │   │   └── tabContextMenu.js     ← _showTabContextMenu(), _removeTabCtxMenu()
+│   │   └── scripts/
+│   │       ├── tabSleep.js           ← _sleepTab(), _wakeTab(), _runSleepCheck()
+│   │       │                            setSleepEnabled(), setSleepTimeout()
+│   │       ├── tabDrag.js            ← _initDrag(), _startDrag(), _moveDrag(), _endDrag()
+│   │       │                            _renderDragging()
+│   │       └── tabAudio.js           ← toggleMute(), _startAudiblePoll()
+│   │
+│   ├── webview/
+│   │   ├── index.js                  ← createWebview(), switchTo(), destroyWebview()
+│   │   │                                init(), loadURL(), goBack(), goForward()
+│   │   │                                reload(), hardReload(), print(), savePage()
+│   │   │                                openDevTools(), captureTab()
+│   │   ├── ui/
+│   │   │   ├── translateBar.js       ← translate bar HTML, show/hide, _getTranslateBar()
+│   │   │   └── zoomBar.js            ← zoom status bar HTML, _showZoomBar()
+│   │   └── scripts/
+│   │       ├── listeners.js          ← _attachRegularListeners(), _attachVortexListeners()
+│   │       │                            all webview event bindings
+│   │       ├── preloader.js          ← _buildPreload(), _preloadAll(), preloaded map
+│   │       │                            VORTEX_PAGES map
+│   │       ├── favicon.js            ← _getFavicon(), _extractFavicon()
+│   │       ├── ytAdblock.js          ← YT_AD_CSS, YT_AD_JS constants
+│   │       │                            _injectYTAdBlock(), setYTAdblock()
+│   │       ├── langDetect.js         ← _detectAndShowBar(), LANG_NAMES map (50+ langs)
+│   │       │                            _translateDismissed, _translatedTabs
+│   │       ├── zoom.js               ← zoomIn(), zoomOut(), zoomReset()
+│   │       │                            _getZoom(), _applyZoom(), _showZoomBar()
+│   │       └── find.js               ← _attachFindListener(), find bar open/close
+│   │                                    findNext(), findPrev(), _closeFindBar()
+│   │
+│   ├── omnibox.js                    ← [UNCHANGED]
+│   ├── contextMenu.js                ← [UNCHANGED]
+│   ├── tabHistory.js                 ← [UNCHANGED]
+│   ├── tabPreview.js                 ← [UNCHANGED]
+│   └── faviconCache.js               ← [UNCHANGED]
+│
+├── features/                         ← Standalone browser features
+│   │
+│   ├── screenshot/
+│   │   ├── index.js                  ← capture(), _showLoading() — main entry
+│   │   ├── ui/
+│   │   │   └── screenshotPanel.js    ← _buildPanel() HTML, preview, meta, actions
+│   │   └── scripts/
+│   │       └── screenshotHandler.js  ← copy, save, close button bindings
+│   │
+│   ├── summarizer/
+│   │   ├── index.js                  ← open(), close(), summarize(), _getPageText()
+│   │   ├── ui/
+│   │   │   └── summarizerUI.js       ← drawer HTML, _renderBullets(), _renderLoading()
+│   │   │                                _renderError(), provider select UI
+│   │   └── scripts/
+│   │       ├── summarizerHandler.js  ← provider select, copy, refresh, close bindings
+│   │       └── providers/
+│   │           ├── extractive.js     ← _extractiveSummary() — offline, no API
+│   │           ├── huggingface.js    ← _huggingFaceSummary() — free API
+│   │           ├── ollama.js         ← _ollamaSummary() — local LLM
+│   │           └── openai.js         ← _openAISummary() — GPT-3.5/4
+│   │
+│   ├── quickLaunch/
+│   │   ├── index.js                  ← open(), close(), init(), keyboard shortcuts
+│   │   ├── ui/
+│   │   │   ├── popularSitesUI.js     ← SITES data array, sites grid HTML
+│   │   │   │                            category tabs HTML
+│   │   │   ├── bookmarksGridUI.js    ← bookmarks grid HTML, _makeBookmarkItem()
+│   │   │   └── addBookmarkUI.js      ← add bookmark panel HTML
+│   │   └── scripts/
+│   │       ├── popularSitesHandler.js← category filter, site click, search filter
+│   │       ├── bookmarksHandler.js   ← bookmark click, add, remove, drag
+│   │       └── qlOmnibox.js          ← _fetchSuggestions(), _showOmni(), _hideOmni()
+│   │
+│   ├── prefetch.js                   ← [UNCHANGED]
+│   └── netStatus.js                  ← [UNCHANGED]
+│
+├── privacy/                          ← [UNCHANGED — already structured]
+│   ├── permissions/
+│   ├── passwords/
+│   ├── blocklist/
+│   └── proxy/
+│
+├── devhub/                           ← [UNCHANGED — already structured]
+├── settings/                         ← [DONE ✅ — already restructured]
+└── changelog/                        ← [UNCHANGED]
+
+================================================================================
+NEW FOLDER STRUCTURE — MAIN PROCESS (src/main/)
+================================================================================
+
+src/main/
+├── ipcHandler.js                     ← [SPLIT] orchestrator only — registers all handlers
+│                                        delegates to ipc/ modules
+├── ipc/
+│   ├── appHandlers.js                ← app:version, app:webviewPreload, app:*Page
+│   │                                    app:relaunch, shell:openExternal
+│   ├── windowHandlers.js             ← window:minimize/maximize/close/fullscreen
+│   │                                    window:new, window:incognito
+│   ├── downloadHandlers.js           ← will-download event, download:cancel/remove
+│   │                                    download:openFile/openFolder/markDeleted
+│   ├── screenshotHandlers.js         ← screenshot:capture, screenshot:captureFull
+│   │                                    screenshot:save
+│   ├── tabHandlers.js                ← tab:capture, tab:setMuted, tab:isAudible
+│   │                                    tab:memoryUsage, webview:setZoom
+│   ├── cookieHandlers.js             ← cookies:getAll/getForDomain/delete/deleteAll
+│   │                                    cookies:deleteForDomain/deleteExpired/set/getStats
+│   ├── permissionHandlers.js         ← permissions:getAll/saveAll
+│   │                                    setPermissionRequestHandler
+│   ├── passwordHandlers.js           ← passwords:read/write
+│   │                                    passwords:readImported/writeImported
+│   ├── addressHandlers.js            ← addresses:read/write
+│   ├── browserHandlers.js            ← browser:isDefault, browser:setDefault
+│   │                                    browser:clearData, browser:setDefault
+│   ├── updaterHandlers.js            ← updater:fetchCommits/applyCommit
+│   │                                    updater:fetchAllReleases/downloadExe
+│   │                                    updater:installRelease/deleteApplied
+│   │                                    updater:localSha
+│   ├── storageHandlers.js            ← storage:read/write/delete
+│   │                                    favicon-cache:get/set/getAll
+│   └── miscHandlers.js               ← file:exists, settings:pickDownloadFolder
+│                                        spellcheck:setLanguage, devhub:download
+│                                        pip:trigger
+│
+├── menuManager.js                    ← [UNCHANGED]
+├── windowManager.js                  ← [UNCHANGED]
+├── storage.js                        ← [UNCHANGED]
+├── blocklist/                        ← [UNCHANGED]
+└── proxy/                            ← [UNCHANGED]
+
+================================================================================
+SECTION FILE PATTERN (same as settings/)
+================================================================================
+
+Every module follows this pattern:
+
+  ui/*.js      → Pure HTML string functions. No event listeners. No logic.
+  scripts/*.js → Event listeners + logic only. No HTML generation.
+  index.js     → Assembles ui + binds scripts. Public API exposed.
+
+Example (screenshot):
+  screenshotPanel.js  → function buildPanelHTML(dataURL, title) { return `...`; }
+  screenshotHandler.js→ function bindEvents(panel) { copy btn, save btn, close btn }
+  index.js            → window.Screenshot = { capture, _showLoading }
+
+================================================================================
+EXECUTION STEPS
+================================================================================
+
+PHASE 1 — navigation.js (1374 lines → 8 files)
+  1.1  browser/navigation/ui/toolbarHTML.js
+  1.2  browser/navigation/ui/menuDropdownHTML.js
+  1.3  browser/navigation/ui/profileMenuHTML.js
+  1.4  browser/navigation/scripts/addressBar.js
+  1.5  browser/navigation/scripts/securityIcon.js
+  1.6  browser/navigation/scripts/progressBar.js
+  1.7  browser/navigation/scripts/hoverIcons.js
+  1.8  browser/navigation/scripts/menuDropdown.js
+  1.9  browser/navigation/scripts/profileMenu.js
+  1.10 browser/navigation/index.js
+  1.11 index.html script tags update
+
+PHASE 2 — webview.js (949 lines → 9 files)
+  2.1  browser/webview/ui/translateBar.js
+  2.2  browser/webview/ui/zoomBar.js
+  2.3  browser/webview/scripts/listeners.js
+  2.4  browser/webview/scripts/preloader.js
+  2.5  browser/webview/scripts/favicon.js
+  2.6  browser/webview/scripts/ytAdblock.js
+  2.7  browser/webview/scripts/langDetect.js
+  2.8  browser/webview/scripts/zoom.js
+  2.9  browser/webview/scripts/find.js
+  2.10 browser/webview/index.js
+  2.11 index.html script tags update
+
+PHASE 3 — ipc.js (719 lines → 5 files)
+  3.1  core/ipc/bookmarkStore.js
+  3.2  core/ipc/downloadHistory.js
+  3.3  core/ipc/permissionPrompt.js
+  3.4  core/ipc/indicators.js
+  3.5  core/ipc/index.js
+  3.6  index.html script tags update
+
+PHASE 4 — tabs.js (750 lines → 6 files)
+  4.1  browser/tabs/ui/tabRenderer.js
+  4.2  browser/tabs/ui/tabContextMenu.js
+  4.3  browser/tabs/scripts/tabSleep.js
+  4.4  browser/tabs/scripts/tabDrag.js
+  4.5  browser/tabs/scripts/tabAudio.js
+  4.6  browser/tabs/index.js
+  4.7  index.html script tags update
+
+PHASE 5 — app.js (280 lines → 3 files)
+  5.1  core/app/themes.js
+  5.2  core/app/updateBadge.js
+  5.3  core/app/index.js
+  5.4  index.html script tags update
+
+PHASE 6 — quickLaunch.js (520 lines → 6 files)
+  6.1  features/quickLaunch/ui/popularSitesUI.js
+  6.2  features/quickLaunch/ui/bookmarksGridUI.js
+  6.3  features/quickLaunch/ui/addBookmarkUI.js
+  6.4  features/quickLaunch/scripts/popularSitesHandler.js
+  6.5  features/quickLaunch/scripts/bookmarksHandler.js
+  6.6  features/quickLaunch/scripts/qlOmnibox.js
+  6.7  features/quickLaunch/index.js
+  6.8  index.html script tags update
+
+PHASE 7 — summarizer.js (280 lines → 6 files)
+  7.1  features/summarizer/ui/summarizerUI.js
+  7.2  features/summarizer/scripts/providers/extractive.js
+  7.3  features/summarizer/scripts/providers/huggingface.js
+  7.4  features/summarizer/scripts/providers/ollama.js
+  7.5  features/summarizer/scripts/providers/openai.js
+  7.6  features/summarizer/scripts/summarizerHandler.js
+  7.7  features/summarizer/index.js
+  7.8  index.html script tags update
+
+PHASE 8 — screenshot.js (145 lines → 3 files)
+  8.1  features/screenshot/ui/screenshotPanel.js
+  8.2  features/screenshot/scripts/screenshotHandler.js
+  8.3  features/screenshot/index.js
+  8.4  index.html script tags update
+
+PHASE 9 — main/ipcHandler.js (1164 lines → 13 files)
+  9.1  main/ipc/appHandlers.js
+  9.2  main/ipc/windowHandlers.js
+  9.3  main/ipc/downloadHandlers.js
+  9.4  main/ipc/screenshotHandlers.js
+  9.5  main/ipc/tabHandlers.js
+  9.6  main/ipc/cookieHandlers.js
+  9.7  main/ipc/permissionHandlers.js
+  9.8  main/ipc/passwordHandlers.js
+  9.9  main/ipc/addressHandlers.js
+  9.10 main/ipc/browserHandlers.js
+  9.11 main/ipc/updaterHandlers.js
+  9.12 main/ipc/storageHandlers.js
+  9.13 main/ipc/miscHandlers.js
+  9.14 main/ipcHandler.js → orchestrator only
+
+PHASE 10 — Final cleanup
+  10.1 Old flat files delete (navigation.js, webview.js, ipc.js, tabs.js, app.js,
+       quickLaunch.js, summarizer.js, screenshot.js)
+  10.2 index.html final script tags verify
+  10.3 VORTEX-Browser-Restructure_context.txt update
+  10.4 git commit
+
+================================================================================
+STATS
+================================================================================
+
+  Files being split:    9 files
+  New files created:    ~65 files
+  Files unchanged:      ~25 files
+  Total lines split:    ~6000 lines
+
+  navigation.js   1374 → 10 files
+  webview.js       949 → 10 files
+  ipc.js           719 →  5 files
+  tabs.js          750 →  6 files
+  app.js           280 →  3 files
+  quickLaunch.js   520 →  7 files
+  summarizer.js    280 →  7 files
+  screenshot.js    145 →  3 files
+  ipcHandler.js   1164 → 14 files
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+1. Har phase ke baad browser test karo — koi feature break nahi hona chahiye
+2. index.js mein public API same rahega — baaki files ko kuch change nahi karna
+3. Global variables (Tabs, WebView, Navigation etc.) same naam se expose honge
+4. Script load order critical hai — dependencies pehle load honi chahiye
+5. ui/ files pehle load honge, phir scripts/, phir index.js
+
+================================================================================
+END OF PLAN
+================================================================================
