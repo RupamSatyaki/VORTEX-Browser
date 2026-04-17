@@ -240,22 +240,64 @@
     <div id="cmd-list"></div>
   </div>
 
-  <script src="js/ipc.js"></script>
-  <script src="js/prefetch.js"></script>
-  <script src="js/dialog.js"></script>
-  <script src="js/faviconCache.js"></script>
-  <script src="js/netStatus.js"></script>
-  <script src="js/omnibox.js"></script>
-  <script src="js/screenshot.js"></script>
-  <script src="js/tabPreview.js"></script>
-  <script src="js/tabHistory.js"></script>
-  <script src="js/contextMenu.js"></script>
-  <script src="js/tabs.js"></script>
-  <script src="js/navigation.js"></script>
-  <script src="js/webview.js"></script>
-  <script src="js/quickLaunch.js"></script>
-  <script src="js/panel.js"></script>
-  <script src="js/session.js"></script>
+  <!-- ipc — split into core/ipc/ -->
+  <script src="js/core/ipc/bookmarkStore.js"></script>
+  <script src="js/core/ipc/downloadHistory.js"></script>
+  <script src="js/core/ipc/permissionPrompt.js"></script>
+  <script src="js/core/ipc/indicators.js"></script>
+  <script src="js/core/ipc/index.js"></script>
+  <script src="js/features/prefetch.js"></script>
+  <script src="js/core/dialog.js"></script>
+  <script src="js/browser/faviconCache.js"></script>
+  <script src="js/features/netStatus.js"></script>
+  <script src="js/browser/omnibox.js"></script>
+  <!-- screenshot — split into features/screenshot/ -->
+  <script src="js/features/screenshot/ui/screenshotPanel.js"></script>
+  <script src="js/features/screenshot/scripts/screenshotHandler.js"></script>
+  <script src="js/features/screenshot/index.js"></script>
+  <script src="js/browser/tabPreview.js"></script>
+  <script src="js/browser/tabHistory.js"></script>
+  <script src="js/browser/contextMenu.js"></script>
+  <!-- tabs — split into browser/tabs/ -->
+  <script src="js/browser/tabs/ui/tabRenderer.js"></script>
+  <script src="js/browser/tabs/ui/tabContextMenu.js"></script>
+  <script src="js/browser/tabs/scripts/tabSleep.js"></script>
+  <script src="js/browser/tabs/scripts/tabDrag.js"></script>
+  <script src="js/browser/tabs/scripts/tabAudio.js"></script>
+  <script src="js/browser/tabs/index.js"></script>
+  <!-- navigation — split into browser/navigation/ -->
+  <script src="js/browser/navigation/ui/toolbarHTML.js"></script>
+  <script src="js/browser/navigation/ui/menuDropdownHTML.js"></script>
+  <script src="js/browser/navigation/ui/profileMenuHTML.js"></script>
+  <script src="js/browser/navigation/scripts/addressBar.js"></script>
+  <script src="js/browser/navigation/scripts/securityIcon.js"></script>
+  <script src="js/browser/navigation/scripts/progressBar.js"></script>
+  <script src="js/browser/navigation/scripts/hoverIcons.js"></script>
+  <script src="js/browser/navigation/scripts/menuDropdown.js"></script>
+  <script src="js/browser/navigation/scripts/profileMenu.js"></script>
+  <script src="js/browser/navigation/index.js"></script>
+  <!-- webview — split into browser/webview/ -->
+  <script src="js/browser/webview/ui/translateBar.js"></script>
+  <script src="js/browser/webview/ui/zoomBar.js"></script>
+  <script src="js/browser/webview/scripts/ytAdblock.js"></script>
+  <script src="js/browser/webview/scripts/favicon.js"></script>
+  <script src="js/browser/webview/scripts/langDetect.js"></script>
+  <script src="js/browser/webview/scripts/zoom.js"></script>
+  <script src="js/browser/webview/scripts/find.js"></script>
+  <script src="js/browser/webview/scripts/preloader.js"></script>
+  <script src="js/browser/webview/scripts/listeners.js"></script>
+  <script src="js/browser/webview/index.js"></script>
+  <!-- quickLaunch — split into features/quickLaunch/ -->
+  <script src="js/features/quickLaunch/ui/popularSitesUI.js"></script>
+  <script src="js/features/quickLaunch/ui/bookmarksGridUI.js"></script>
+  <script src="js/features/quickLaunch/ui/addBookmarkUI.js"></script>
+  <script src="js/features/quickLaunch/scripts/popularSitesHandler.js"></script>
+  <script src="js/features/quickLaunch/scripts/bookmarksHandler.js"></script>
+  <script src="js/features/quickLaunch/scripts/qlOmnibox.js"></script>
+  <script src="js/features/quickLaunch/index.js"></script>
+  <script src="js/core/panel.js"></script>
+  <script src="js/core/session.js"></script>
+  <script src="js/features/whatsappPanel.js"></script>
   <!-- DevHub tools — load before devhub.js -->
   <script src="js/devhub/tools/json-viewer.js"></script>
   <script src="js/devhub/tools/color-picker.js"></script>
@@ -313,7 +355,17 @@
   <script src="js/blocklist/components/updateBar.js"></script>
   <script src="js/blocklist/components/ytAdBlock.js"></script>
   <script src="js/blocklist/badge.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/summarizer.js"></script>
+  <!-- app — split into core/app/ -->
+  <script src="js/core/app/themes.js"></script>
+  <script src="js/core/app/updateBadge.js"></script>
+  <script src="js/core/app/index.js"></script>
+  <!-- summarizer — split into features/summarizer/ -->
+  <script src="js/features/summarizer/ui/summarizerUI.js"></script>
+  <script src="js/features/summarizer/scripts/providers/extractive.js"></script>
+  <script src="js/features/summarizer/scripts/providers/huggingface.js"></script>
+  <script src="js/features/summarizer/scripts/providers/ollama.js"></script>
+  <script src="js/features/summarizer/scripts/providers/openai.js"></script>
+  <script src="js/features/summarizer/scripts/summarizerHandler.js"></script>
+  <script src="js/features/summarizer/index.js"></script>
 </body>
 </html>

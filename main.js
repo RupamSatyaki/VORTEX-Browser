@@ -40,6 +40,7 @@ process.on('uncaughtException', (err) => {
   if (!err) return;
   if (err.errno === -3) return;
   if (err.message && err.message.includes('Render frame was disposed')) return;
+  if (err.message && err.message.includes('WebFrameMain')) return;
   if (err.message && err.message.includes('dragEvent')) return;
   console.error(err);
 });
@@ -50,6 +51,7 @@ process.on('unhandledRejection', (reason) => {
   if (reason.errno === -3 || (reason.code && reason.code === 'ERR_ABORTED')) return;
   if (reason.message && reason.message.includes('ERR_ABORTED')) return;
   if (reason.message && reason.message.includes('Render frame was disposed')) return;
+  if (reason.message && reason.message.includes('WebFrameMain')) return;
   console.error('Unhandled rejection:', reason);
 });
 const WindowManager = require('./src/main/windowManager');
@@ -149,8 +151,8 @@ app.whenReady().then(() => {
     return net.fetch('file://' + filePath.replace(/\\/g, '/'));
   });
 
-  Storage.registerStorageHandlers();
   // Ensure default storage files exist on first run
+  // NOTE: IPC handlers are registered by IpcHandler.registerHandlers() below
   Storage.ensureDefaults();
 
   // ── Proxy + Tor init ──────────────────────────────────────────────────────
