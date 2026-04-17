@@ -281,6 +281,12 @@ function clGroupToggle(id) {
   if (el) el.classList.toggle('open');
 }
 
+// ── Version block toggle (exposed globally) ───────────────────────────────────
+function clToggle(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
 // ── Main render ───────────────────────────────────────────────────────────────
 async function renderChangelog() {
   const container = document.getElementById('sec-changelog');
