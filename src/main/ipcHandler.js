@@ -1,10 +1,10 @@
 /**
  * main/ipcHandler.js — Orchestrator only
- * Registers all IPC handlers by delegating to ipc/ modules.
- * No handler logic here — each module owns its handlers.
  */
 
-const { BrowserWindow, session, net } = require('electron');
+const { BrowserWindow, session, net, app, ipcMain } = require('electron');
+const path = require('path');
+const fs   = require('fs');
 
 // ── DNS pre-warm ──────────────────────────────────────────────────────────────
 const DNS_PREFETCH_HOSTS = [
@@ -36,19 +36,12 @@ function _getWin(e) {
 
 // ── Register all handlers ─────────────────────────────────────────────────────
 function registerHandlers() {
-  // Session optimizations
-  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
-    const headers = details.requestHeaders;
-    if (!headers['Cache-Control']) headers['Cache-Control'] = 'max-stale=3600';
-    callback({ requestHeaders: headers });
-  });
   prewarmDNS();
 
   // ── Core modules ──────────────────────────────────────────────────────────
   const storageHandlers = require('./ipc/storageHandlers');
   const dlHandlers = require('./ipc/downloadHandlers');
 
-  // Register storage handlers first; hook settings writes to refresh dl settings
   storageHandlers.register();
   storageHandlers.onWrite('settings', () => dlHandlers.refreshDlSettings());
 
@@ -69,7 +62,7 @@ function registerHandlers() {
   require('./ipc/browserHandlers').register();
   require('./ipc/updaterHandlers').register(pushToRenderer);
 
-  // ── External modules (unchanged) ──────────────────────────────────────────
+  // ── Blocklist Engine ──────────────────────────────────────────────────────
   const BlocklistEngine = require('./blocklist/engine');
   BlocklistEngine.registerHandlers();
 

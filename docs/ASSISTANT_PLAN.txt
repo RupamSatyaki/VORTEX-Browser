@@ -1,0 +1,425 @@
+================================================================================
+VORTEX BROWSER — AI ASSISTANT FEATURE PLAN
+Created: April 20, 2026
+Status: APPROVED — Pending Implementation
+================================================================================
+
+================================================================================
+OVERVIEW
+================================================================================
+
+Toolbar mein existing assistant button click karne pe:
+  - Webview area right side se shrink hoga (~380px)
+  - AI Assistant panel slide-in hoga
+  - Local Ollama LLMs se chat (no cloud, fully private)
+  - Browser actions MCP tools ke through (34 tools)
+  - Thinking model support (<think> tags)
+  - Current page read karne ki ability
+
+================================================================================
+UI LAYOUT
+================================================================================
+
+┌──────────────────────────────────┬──────────────────────┐
+│                                  │  🤖 Vortex Assistant  │
+│                                  │  [llama3:8b       ▼] │
+│         WebView Area             │ ─────────────────── │
+│         (shrinks when            │  👤 is page summarize │
+│          panel opens)            │                      │
+│                                  │  🤔 Thought for 2s ▶ │
+│                                  │  ┌────────────────┐  │
+│                                  │  │ page analyze   │  │ ← expandable
+│                                  │  │ kar raha hoon  │  │
+│                                  │  └────────────────┘  │
+│                                  │                      │
+│                                  │  🤖 Yeh page React   │
+│                                  │  documentation hai.. │
+│                                  │ ─────────────────── │
+│                                  │  📎 [Type here...] ➤ │
+└──────────────────────────────────┴──────────────────────┘
+
+Panel Width  : 380px (default)
+Toggle       : Toolbar assistant button OR Ctrl+Shift+A
+Animation    : Slide-in from right, webview flex-shrink
+
+================================================================================
+FOLDER STRUCTURE
+================================================================================
+
+src/renderer/js/features/assistant/
+│
+├── index.js                          ← entry, panel toggle, webview resize, init
+│
+├── ui/
+│   ├── assistantPanel.js             ← main panel HTML skeleton
+│   ├── chatBubble.js                 ← user/assistant message bubble + markdown
+│   ├── thinkingBlock.js              ← <think> accordion (spinner → "Thought for Xs")
+│   ├── toolResultCard.js             ← MCP tool result card (success/error)
+│   ├── modelSelector.js              ← model dropdown HTML + refresh
+│   ├── inputBar.js                   ← textarea + send + 📎 read page button
+│   └── assistantStyles.css           ← all assistant CSS
+│
+├── scripts/
+│   ├── ollamaClient.js               ← /api/chat streaming, /api/tags, abort
+│   ├── streamParser.js               ← token stream → thinking/content/toolCall
+│   ├── chatHistory.js                ← messages array, render, scroll, storage
+│   ├── modelManager.js               ← fetch models, save default, populate dropdown
+│   ├── pageReader.js                 ← webview innerText extract + clean + truncate
+│   └── contextBuilder.js            ← system prompt + page context + history assembler
+│
+├── mcp/
+│   ├── mcpRegistry.js                ← all tools registered here (single source)
+│   ├── mcpExecutor.js                ← AI response parse + dispatch + result format
+│   ├── mcpSchema.js                  ← tool JSON schemas for system prompt
+│   │
+│   └── tools/
+│       ├── tabs/
+│       │   ├── createTab.js          ← create_tab(url, background?)
+│       │   ├── closeTab.js           ← close_tab(tabId?)
+│       │   ├── switchTab.js          ← switch_tab(tabId)
+│       │   ├── getTabs.js            ← get_tabs()
+│       │   ├── duplicateTab.js       ← duplicate_tab(tabId?)
+│       │   ├── pinTab.js             ← pin_tab(tabId?)
+│       │   └── muteTab.js            ← mute_tab(tabId?, mute?)
+│       │
+│       ├── navigation/
+│       │   ├── navigateTo.js         ← navigate(url)
+│       │   ├── goBack.js             ← go_back()
+│       │   ├── goForward.js          ← go_forward()
+│       │   ├── reloadTab.js          ← reload_tab(hard?)
+│       │   └── stopLoading.js        ← stop_loading()
+│       │
+│       ├── page/
+│       │   ├── readPage.js           ← read_page() → full text extract
+│       │   ├── getPageInfo.js        ← get_page_info() → title, url, favicon
+│       │   ├── getSelectedText.js    ← get_selected_text()
+│       │   ├── scrollPage.js         ← scroll_page(direction, amount)
+│       │   ├── findInPage.js         ← find_in_page(query)
+│       │   └── zoomPage.js           ← zoom_page(level)
+│       │
+│       ├── window/
+│       │   ├── newWindow.js          ← new_window(url?)
+│       │   ├── newIncognito.js       ← new_incognito(url?)
+│       │   ├── minimizeWindow.js     ← minimize_window()
+│       │   ├── maximizeWindow.js     ← maximize_window()
+│       │   └── closeWindow.js        ← close_window()
+│       │
+│       ├── bookmarks/
+│       │   ├── bookmarkPage.js       ← bookmark_page(title?, url?)
+│       │   ├── getBookmarks.js       ← get_bookmarks()
+│       │   └── deleteBookmark.js     ← delete_bookmark(id)
+│       │
+│       ├── history/
+│       │   ├── getHistory.js         ← get_history(limit?)
+│       │   └── searchHistory.js      ← search_history(query)
+│       │
+│       ├── media/
+│       │   ├── takeScreenshot.js     ← take_screenshot()
+│       │   └── togglePip.js          ← toggle_pip()
+│       │
+│       ├── search/
+│       │   ├── searchWeb.js          ← search_web(query, engine?)
+│       │   └── searchCurrentSite.js  ← search_current_site(query)
+│       │
+│       └── downloads/
+│           ├── getDownloads.js       ← get_downloads()
+│           └── openDownload.js       ← open_download(filename)
+│
+└── prompts/
+    └── systemPrompt.js               ← full system prompt with tool schemas
+
+================================================================================
+MCP TOOLS — COMPLETE LIST (34 Tools)
+================================================================================
+
+TABS (7):
+  create_tab(url, background?)        → new tab open karo
+  close_tab(tabId?)                   → tab band karo (current ya specific)
+  switch_tab(tabId)                   → tab pe focus karo
+  get_tabs()                          → saare open tabs ki list
+  duplicate_tab(tabId?)               → tab duplicate karo
+  pin_tab(tabId?)                     → tab pin/unpin karo
+  mute_tab(tabId?, mute?)             → tab mute/unmute karo
+
+NAVIGATION (5):
+  navigate(url)                       → current tab mein URL load karo
+  go_back()                           → browser back
+  go_forward()                        → browser forward
+  reload_tab(hard?)                   → tab reload (hard = cache clear)
+  stop_loading()                      → page loading stop karo
+
+PAGE (6):
+  read_page()                         → current page ka full text extract
+  get_page_info()                     → title, url, favicon
+  get_selected_text()                 → user selected text
+  scroll_page(direction, amount)      → page scroll karo
+  find_in_page(query)                 → page mein text dhundo
+  zoom_page(level)                    → page zoom set karo
+
+WINDOW (5):
+  new_window(url?)                    → naya browser window
+  new_incognito(url?)                 → incognito window
+  minimize_window()                   → window minimize
+  maximize_window()                   → window maximize/restore
+  close_window()                      → window close
+
+BOOKMARKS (3):
+  bookmark_page(title?, url?)         → current page bookmark karo
+  get_bookmarks()                     → saare bookmarks
+  delete_bookmark(id)                 → bookmark delete karo
+
+HISTORY (2):
+  get_history(limit?)                 → browsing history
+  search_history(query)               → history mein search karo
+
+MEDIA (2):
+  take_screenshot()                   → screenshot lo
+  toggle_pip()                        → picture-in-picture toggle
+
+SEARCH (2):
+  search_web(query, engine?)          → web search (google/bing/ddg etc.)
+  search_current_site(query)          → current site pe search
+
+DOWNLOADS (2):
+  get_downloads()                     → download history
+  open_download(filename)             → downloaded file open karo
+
+================================================================================
+OLLAMA INTEGRATION
+================================================================================
+
+Base URL    : http://localhost:11434 (settings mein configurable)
+Models API  : GET /api/tags
+Chat API    : POST /api/chat (streaming)
+Stream      : ReadableStream token-by-token
+Abort       : AbortController (stop generation button)
+
+Request Format:
+  {
+    model: "llama3:8b",
+    messages: [...],
+    stream: true,
+    options: { temperature: 0.7 }
+  }
+
+Error Handling:
+  - Ollama not running → "Ollama not found. Start with: ollama serve"
+  - No models → "No models found. Run: ollama pull llama3"
+  - Network error → retry button
+
+================================================================================
+THINKING MODEL SUPPORT
+================================================================================
+
+Models: deepseek-r1, qwen3, phi4-reasoning, etc.
+
+Stream Parse Flow:
+  Token aaya
+      ↓
+  <think> detect? → thinking buffer start, show spinner "Thinking..."
+      ↓
+  </think> detect? → thinking done, show "Thought for Xs" accordion (collapsed)
+      ↓
+  Normal content → chat bubble mein stream karo
+
+UI States:
+  1. Thinking (streaming) : 🔄 spinner + "Thinking..." (collapsed, not expandable yet)
+  2. Thinking (done)      : 🤔 "Thought for 3s" ▶ (click to expand/collapse)
+  3. Content (streaming)  : text appears token by token
+  4. Content (done)       : full message, copy button appears
+
+================================================================================
+PAGE READING
+================================================================================
+
+pageReader.js:
+  - webview.executeJavaScript() se document.body.innerText extract
+  - Script/style/nav/footer elements remove
+  - 8000 char limit (LLM context budget)
+  - Returns: { url, title, text, selectedText }
+
+Auto-trigger keywords:
+  "is page", "this page", "current page", "summarize", "explain this",
+  "what does this say", "translate this" → auto read_page call
+
+Manual trigger:
+  📎 button in input bar → attach page content to next message
+
+================================================================================
+CONTEXT BUILDER
+================================================================================
+
+contextBuilder.js assembles:
+  1. System prompt (tool schemas + instructions)
+  2. Page context (if read_page called or auto-triggered)
+  3. Chat history (last 20 messages)
+  4. Current user message
+
+System Prompt includes:
+  - Browser assistant role description
+  - All 34 tool schemas (auto-generated from mcpRegistry)
+  - Tool call format: {"tool": "tool_name", "args": {...}}
+  - Response language: match user's language
+  - Thinking model instructions
+
+================================================================================
+STREAM PARSER — STATE MACHINE
+================================================================================
+
+States: IDLE → THINKING → CONTENT → TOOL_CALL
+
+  IDLE:
+    <think> found → switch to THINKING
+    { found → switch to TOOL_CALL
+    else → switch to CONTENT
+
+  THINKING:
+    </think> found → switch to CONTENT, fire onThinkingDone(text, seconds)
+    else → fire onThinkToken(token)
+
+  CONTENT:
+    {"tool": found → switch to TOOL_CALL
+    else → fire onContentToken(token)
+
+  TOOL_CALL:
+    complete JSON → fire onToolCall(name, args), switch to CONTENT
+
+================================================================================
+SETTINGS INTEGRATION
+================================================================================
+
+Settings → Assistant section (new):
+  - Ollama URL          : text input (default: http://localhost:11434)
+  - Default Model       : dropdown (from /api/tags)
+  - Panel Width         : slider 300px - 500px
+  - Save Chat History   : toggle (session only / persistent)
+  - Auto Read Page      : toggle (auto-detect page context keywords)
+  - Temperature         : slider 0.1 - 1.0 (default 0.7)
+  - Max History         : number input (default 20 messages)
+
+================================================================================
+TOOL FILE FORMAT (Standard Pattern)
+================================================================================
+
+Every tool file follows this exact pattern:
+
+  // mcp/tools/tabs/createTab.js
+  const createTab = {
+    name: 'create_tab',
+    description: 'Open a new browser tab with the given URL',
+    parameters: {
+      url: {
+        type: 'string',
+        description: 'Full URL to open (e.g. https://google.com)',
+        required: true
+      },
+      background: {
+        type: 'boolean',
+        description: 'Open tab in background without switching focus',
+        required: false,
+        default: false
+      }
+    },
+    execute({ url, background = false }) {
+      try {
+        // implementation using global Tabs, WebView, vortexAPI etc.
+        return { success: true, result: { tabId: '...' } };
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    }
+  };
+
+================================================================================
+IMPLEMENTATION ORDER
+================================================================================
+
+Phase 1 — Core UI:
+  1. assistantStyles.css
+  2. assistantPanel.js
+  3. inputBar.js
+  4. modelSelector.js
+  5. chatBubble.js
+  6. thinkingBlock.js
+  7. toolResultCard.js
+
+Phase 2 — Ollama:
+  8. ollamaClient.js
+  9. streamParser.js
+  10. modelManager.js
+
+Phase 3 — Chat:
+  11. chatHistory.js
+  12. pageReader.js
+  13. contextBuilder.js
+  14. systemPrompt.js
+
+Phase 4 — MCP Tools:
+  15. mcpRegistry.js
+  16. mcpSchema.js
+  17. mcpExecutor.js
+  18. All 34 tool files (tabs/, navigation/, page/, window/, bookmarks/, history/, media/, search/, downloads/)
+
+Phase 5 — Integration:
+  19. index.js (panel toggle + webview resize)
+  20. index.html (script tags)
+  21. Settings section (Ollama URL, model, etc.)
+
+================================================================================
+INDEX.HTML SCRIPT LOAD ORDER
+================================================================================
+
+<!-- Assistant UI -->
+<script src="js/features/assistant/ui/assistantStyles.css"> (via link)
+<script src="js/features/assistant/ui/assistantPanel.js">
+<script src="js/features/assistant/ui/chatBubble.js">
+<script src="js/features/assistant/ui/thinkingBlock.js">
+<script src="js/features/assistant/ui/toolResultCard.js">
+<script src="js/features/assistant/ui/modelSelector.js">
+<script src="js/features/assistant/ui/inputBar.js">
+
+<!-- Assistant Scripts -->
+<script src="js/features/assistant/scripts/ollamaClient.js">
+<script src="js/features/assistant/scripts/streamParser.js">
+<script src="js/features/assistant/scripts/chatHistory.js">
+<script src="js/features/assistant/scripts/modelManager.js">
+<script src="js/features/assistant/scripts/pageReader.js">
+<script src="js/features/assistant/scripts/contextBuilder.js">
+
+<!-- MCP -->
+<script src="js/features/assistant/prompts/systemPrompt.js">
+<script src="js/features/assistant/mcp/tools/tabs/createTab.js">
+... (all 34 tool files)
+<script src="js/features/assistant/mcp/mcpRegistry.js">
+<script src="js/features/assistant/mcp/mcpSchema.js">
+<script src="js/features/assistant/mcp/mcpExecutor.js">
+
+<!-- Entry -->
+<script src="js/features/assistant/index.js">
+
+================================================================================
+KEYBOARD SHORTCUTS
+================================================================================
+
+Ctrl+Shift+A    → Toggle assistant panel
+Escape          → Close panel (when panel focused)
+Enter           → Send message
+Shift+Enter     → New line in input
+Ctrl+L          → Clear chat history
+
+================================================================================
+NOTES & CONSTRAINTS
+================================================================================
+
+1. Ollama must be running locally (ollama serve)
+2. webviewPreload.js already handles page content access
+3. Existing Tabs, WebView, Navigation globals use karo — no new IPC needed for most tools
+4. vortexAPI.invoke() use karo IPC calls ke liye (screenshot, bookmark, etc.)
+5. Panel state persist karo (open/closed) across tab switches
+6. Assistant panel sirf main window mein hoga (incognito mein nahi)
+7. No external API calls — fully local Ollama only
+8. Tool calls ek message mein multiple ho sakte hain (chain tools)
+
+================================================================================
+END OF PLAN
+================================================================================

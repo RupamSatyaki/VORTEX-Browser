@@ -1,11 +1,11 @@
 {
   "id": "v4.4.0",
   "version": "4.4.0",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Proxy & Tor + Browser Polish",
   "date": "2026-04-15",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 12, "improve": 16, "fix": 6 },
   "categories": [
     {
