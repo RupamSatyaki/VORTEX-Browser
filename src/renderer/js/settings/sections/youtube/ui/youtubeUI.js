@@ -33,17 +33,49 @@ const YoutubeUI = (() => {
                 YouTube Ad Blocker
                 <span style="font-size:10px;background:rgba(34,197,94,0.12);color:#22c55e;
                              border:1px solid rgba(34,197,94,0.2);padding:1px 7px;border-radius:10px;">
-                  3 Layers
+                  2 Layers
                 </span>
               </div>
               <div style="font-size:11px;color:#4a8080;margin-top:2px;">
-                Network block + DOM removal + Speed skip
+                Dedicated session blocking + Auto skip
               </div>
             </div>
             <label class="toggle">
               <input type="checkbox" id="yt-adblock-enabled" ${settings.ytAdblock !== false ? 'checked' : ''}/>
               <div class="toggle-track"></div>
             </label>
+          </div>
+
+          <!-- Layer badges -->
+          <div style="display:flex;gap:8px;padding:10px 16px;flex-wrap:wrap;border-bottom:1px solid #1e3838;">
+            ${[
+              'Layer 1: Session-level Network Block',
+              'Layer 2: Auto Skip + Overlay Hide',
+            ].map(l => `
+              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#22c55e;
+                          background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);
+                          padding:3px 9px;border-radius:5px;">
+                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                ${l}
+              </div>`).join('')}
+          </div>
+
+          <!-- How it works note -->
+          <div style="margin:10px 12px 4px;padding:8px 12px;background:rgba(0,200,180,0.04);
+                      border-radius:8px;border-left:3px solid var(--accent);
+                      display:flex;align-items:flex-start;gap:8px;">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--accent)"
+              stroke-width="2" style="flex-shrink:0;margin-top:1px;">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span style="font-size:11px;color:#4a9090;line-height:1.5;">
+              YouTube runs in a <strong style="color:var(--accent);">dedicated session</strong> with ad request blocking.
+              Skip button is auto-clicked and overlay ads are hidden instantly.
+            </span>
           </div>
 
           <!-- Ad skip speed -->
@@ -64,19 +96,6 @@ const YoutubeUI = (() => {
               { value: '256', label: '256x' },
             ],
           })}
-
-          <!-- Layer badges -->
-          <div style="display:flex;gap:8px;padding:8px 16px 10px;flex-wrap:wrap;">
-            ${['Layer 1: Network Block (IMA SDK)', 'Layer 2: DOM Removal', 'Layer 3: Speed Skip'].map(l => `
-              <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#22c55e;
-                          background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.15);
-                          padding:3px 9px;border-radius:5px;">
-                <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5">
-                  <polyline points="20 6 9 17 4 12"/>
-                </svg>
-                ${l}
-              </div>`).join('')}
-          </div>
 
           <!-- Remove sponsored cards -->
           ${SettingsToggle.render({
@@ -115,8 +134,7 @@ const YoutubeUI = (() => {
               <line x1="12" y1="16" x2="12.01" y2="16"/>
             </svg>
             <span style="font-size:11px;color:#a08040;line-height:1.5;">
-              On low-end PCs, set speed to <strong style="color:#eab308;">16x or lower</strong>
-              to avoid video freezing after the ad ends.
+              YouTube must be opened in a <strong style="color:#eab308;">new tab</strong> after enabling for session blocking to take effect.
             </span>
           </div>
         `,

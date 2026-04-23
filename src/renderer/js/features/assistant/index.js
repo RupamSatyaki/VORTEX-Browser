@@ -11,7 +11,6 @@ const Assistant = (() => {
 
   // ── Init ──────────────────────────────────────────────────────────────────
   function init() {
-    _injectStyles();
     _injectPanel();
     _bindEvents();
 
@@ -33,15 +32,6 @@ const Assistant = (() => {
     };
 
     _waitAndInit();
-  }
-
-  function _injectStyles() {
-    if (document.getElementById('ast-styles')) return;
-    const link = document.createElement('link');
-    link.id   = 'ast-styles';
-    link.rel  = 'stylesheet';
-    link.href = 'js/features/assistant/ui/assistantStyles.css';
-    document.head.appendChild(link);
   }
 
   function _injectPanel() {

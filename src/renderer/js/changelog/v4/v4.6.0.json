@@ -1,0 +1,68 @@
+{
+  "id": "v4.6.0",
+  "version": "4.6.0",
+  "badge": "latest",
+  "name": "YouTube Ad Blocker — Undetectable",
+  "date": "2026-04-23",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 3, "improve": 3, "fix": 2 },
+  "categories": [
+    {
+      "label": "YouTube Ad Blocker",
+      "features": [
+        {
+          "type": "new",
+          "label": "Dedicated YouTube Session",
+          "desc": "YouTube now runs in a separate Electron session (persist:youtube) with its own webRequest interceptor. Ad requests are blocked at network level — YouTube sees a network error, not an ad blocker. No detection possible.",
+          "howto": "Enable in Settings → YouTube → Ad Blocker. Open YouTube in a new tab for session to take effect."
+        },
+        {
+          "type": "new",
+          "label": "Ad Video Content Blocking",
+          "desc": "Ad video URLs are identified by specific parameters (ctier=L, oad=1, adformat=) and blocked before loading. IMA SDK is intentionally allowed to load — blocking it triggers YouTube's detection system.",
+          "howto": "Works automatically when YouTube Ad Blocker is enabled."
+        },
+        {
+          "type": "new",
+          "label": "Auto Skip + Overlay Hide",
+          "desc": "Skip button is automatically clicked when available. Ad module (.ytp-ad-module), overlay banner (.ytp-ad-overlay-slot), and companion/sponsored cards are hidden instantly via MutationObserver.",
+          "howto": "Works automatically — no configuration needed."
+        },
+        {
+          "type": "improve",
+          "label": "Settings → YouTube Section Updated",
+          "desc": "YouTube settings section updated to reflect the new 2-layer approach: Session Network Block + Auto Skip. Info note added explaining that YouTube must be opened in a new tab after enabling.",
+          "howto": "Settings → Privacy & Performance → YouTube."
+        },
+        {
+          "type": "improve",
+          "label": "Blocklist → YouTube Ad Blocker Card Updated",
+          "desc": "Blocklist panel YouTube card updated with new layer badges and info note. Removed redundant speed toggle — only speed selector remains.",
+          "howto": "Settings → Blocklists → YouTube Ad Blocker section."
+        },
+        {
+          "type": "improve",
+          "label": "FOUC Fix — Assistant & DevHub",
+          "desc": "Assistant CSS is now loaded in <head> instead of dynamically injected. Eliminates the flash of unstyled content on app startup where DevHub and Assistant content briefly appeared without styles.",
+          "howto": "App startup is now visually clean — no more unstyled flash."
+        }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "analyze.py root path hardcoded",
+          "desc": "analyze.py had a hardcoded absolute path (C:\\Users\\HARIPADA\\...). Fixed to use Path(__file__).parent.parent for automatic root detection — works on any machine."
+        },
+        {
+          "type": "fix",
+          "label": "YouTube settings section crash",
+          "desc": "YoutubeUI was not defined error after settings update — duplicate code left in file after partial replacement. File rewritten cleanly."
+        }
+      ]
+    }
+  ]
+}
