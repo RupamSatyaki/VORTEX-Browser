@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' vortex-app: file:; script-src 'self' vortex-app: file:; style-src 'self' 'unsafe-inline' vortex-app: file:; img-src 'self' https: data: vortex-app: file:; connect-src 'self' https://suggestqueries.google.com https://translate.googleapis.com; frame-src vortex-app: file:;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' vortex-app: file:; script-src 'self' vortex-app: file:; style-src 'self' 'unsafe-inline' vortex-app: file:; img-src 'self' https: data: vortex-app: file:; connect-src 'self' https://suggestqueries.google.com https://translate.googleapis.com http://localhost:11434 http://127.0.0.1:11434; frame-src vortex-app: file:;" />
   <title>Vortex</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="js/passwords/styles.css" />
@@ -326,5 +326,53 @@
   <script src="js/features/summarizer/scripts/providers/openai.js"></script>
   <script src="js/features/summarizer/scripts/summarizerHandler.js"></script>
   <script src="js/features/summarizer/index.js"></script>
+
+  <!-- Assistant — AI panel with Ollama + MCP tools -->
+  <script src="js/features/assistant/ui/chatBubble.js"></script>
+  <script src="js/features/assistant/ui/thinkingBlock.js"></script>
+  <script src="js/features/assistant/ui/toolResultCard.js"></script>
+  <script src="js/features/assistant/ui/assistantPanel.js"></script>
+  <script src="js/features/assistant/scripts/ollamaClient.js"></script>
+  <script src="js/features/assistant/scripts/chatHistory.js"></script>
+  <script src="js/features/assistant/scripts/modelManager.js"></script>
+  <script src="js/features/assistant/scripts/pageReader.js"></script>
+  <script src="js/features/assistant/prompts/systemPrompt.js"></script>
+  <script src="js/features/assistant/scripts/contextBuilder.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/createTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/closeTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/switchTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/getTabs.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/duplicateTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/tabs/muteTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/navigation/navigateTo.js"></script>
+  <script src="js/features/assistant/mcp/tools/navigation/goBack.js"></script>
+  <script src="js/features/assistant/mcp/tools/navigation/goForward.js"></script>
+  <script src="js/features/assistant/mcp/tools/navigation/reloadTab.js"></script>
+  <script src="js/features/assistant/mcp/tools/navigation/stopLoading.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/readPage.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/getPageInfo.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/getSelectedText.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/scrollPage.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/findInPage.js"></script>
+  <script src="js/features/assistant/mcp/tools/page/zoomPage.js"></script>
+  <script src="js/features/assistant/mcp/tools/window/newWindow.js"></script>
+  <script src="js/features/assistant/mcp/tools/window/newIncognito.js"></script>
+  <script src="js/features/assistant/mcp/tools/window/minimizeWindow.js"></script>
+  <script src="js/features/assistant/mcp/tools/window/maximizeWindow.js"></script>
+  <script src="js/features/assistant/mcp/tools/window/closeWindow.js"></script>
+  <script src="js/features/assistant/mcp/tools/bookmarks/bookmarkPage.js"></script>
+  <script src="js/features/assistant/mcp/tools/bookmarks/getBookmarks.js"></script>
+  <script src="js/features/assistant/mcp/tools/bookmarks/deleteBookmark.js"></script>
+  <script src="js/features/assistant/mcp/tools/history/getHistory.js"></script>
+  <script src="js/features/assistant/mcp/tools/history/searchHistory.js"></script>
+  <script src="js/features/assistant/mcp/tools/media/takeScreenshot.js"></script>
+  <script src="js/features/assistant/mcp/tools/media/togglePip.js"></script>
+  <script src="js/features/assistant/mcp/tools/search/searchWeb.js"></script>
+  <script src="js/features/assistant/mcp/tools/search/searchCurrentSite.js"></script>
+  <script src="js/features/assistant/mcp/tools/downloads/getDownloads.js"></script>
+  <script src="js/features/assistant/mcp/tools/downloads/openDownload.js"></script>
+  <script src="js/features/assistant/mcp/mcpRegistry.js"></script>
+  <script src="js/features/assistant/mcp/mcpExecutor.js"></script>
+  <script src="js/features/assistant/index.js"></script>
 </body>
 </html>

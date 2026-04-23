@@ -13,8 +13,8 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
-ROOT = Path("vortex")
-OUTPUT_FILE = Path("folder_structure.txt")
+ROOT = Path(__file__).resolve().parent.parent  # docs/ → vortex/
+OUTPUT_FILE = ROOT.parent / "folder_structure.txt"  # workspace root
 
 EXCLUDE_DIRS = {"node_modules", ".git", "__pycache__", ".cache", "dist", "build"}
 INCLUDE_EXTS = {

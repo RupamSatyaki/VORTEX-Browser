@@ -1,46 +1,66 @@
-================================================================================
-VORTEX BROWSER — PROJECT CONTEXT FILE
-Last Updated: v4.5.0 | April 23, 2026
-GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
-Branch: VORTEX-Browser-Restructure
-================================================================================
+========================================================================
+VORTEX PROJECT ANALYSIS
+Generated : 2026-04-23 14:28:55
+Root      : C:\Users\HARIPADA\Desktop\VORTEX\vortex
+========================================================================
 
-IMPORTANT INSTRUCTIONS FOR AI:
-- Hinglish mein respond karo (Hindi + English mix)
-- Git commands manually run karne do — execute mat karo
-- User khud commit/push karta hai — jab user bole tabhi commit karo
-- Internal pages (vortex://settings, vortex://downloads, vortex://bookmarks,
-  vortex://history) floating panel mein open hote hain, tab mein nahi
-- vortex://newtab tab mein khulta hai
-- Production build mein app.isPackaged use karo NODE_ENV ki jagah
-- Settings changes live apply hone chahiye — restart nahi
-- GitHub repo mein files root mein hain (vortex/ subfolder nahi)
-- JS folder structure: core/ browser/ features/ privacy/ settings/ devhub/ changelog/
-- index.html aur settings.html ke script tags naye paths pe hain
+── SUMMARY ──────────────────────────────────────────────────────────
+  Total Files      : 350
+  Total Lines      : 56,805
+  Total Characters : 2,301,383
+  Total Size       : 2247.4 KB  (2.19 MB)
 
-================================================================================
-PROJECT OVERVIEW
-================================================================================
+── BY FILE TYPE ─────────────────────────────────────────────────────
+  Ext         Files     Lines       Chars
+  ----------------------------------------
+  .js           282    34,490   1,486,352
+  .css           13     7,067     223,023
+  .json          42     5,956     229,472
+  .jpg            1     4,094     147,062
+  .html           6     3,092     110,199
+  .txt            2     1,150      47,198
+  .png            1       573      41,152
+  .py             1       236       8,245
+  .nsh            1        82       5,375
+  .md             1        65       3,305
 
-Vortex is an Electron-based browser built from scratch.
-Root folder: vortex/
-Entry: vortex/main.js
-Renderer: vortex/src/renderer/index.html
+── LANGUAGE BREAKDOWN (% of total code lines) ───────────────────────
+  Language        Files     Lines   % of Code   % of All
+  --------------------------------------------------------
+  JavaScript        282    34,490    77.2%     60.7%  ██████████████████████████████
+  HTML                6     3,092     6.9%      5.4%  ██
+  CSS                13     7,067    15.8%     12.4%  ██████
+  JSON               42     5,956        —     10.5%  █████
+  Other               7     6,200        —     10.9%  █████
 
-STORAGE PATHS (runtime):
-  %APPDATA%\vortex\storage\settings.json
-  %APPDATA%\vortex\storage\profile.json
-  %APPDATA%\vortex\storage\tab_history.json
-  %APPDATA%\vortex\storage\passwords.json        ← encrypted vault
-  %APPDATA%\vortex\storage\passwords_imported.json ← imported (plain)
-  %APPDATA%\vortex\storage\addresses.json
-  %APPDATA%\vortex\storage\permissions.json
-  %APPDATA%\vortex\storage\blocklists\           ← blocklist dir
-    meta.json, easylist.txt, easyprivacy.txt, etc.
+  Code breakdown (JS + HTML + CSS = 100%):
+    JavaScript    77.2%  ██████████████████████████████████████
+    HTML           6.9%  ███
+    CSS           15.8%  ███████
 
-================================================================================
-FILE STRUCTURE
-================================================================================
+── TOP 20 LARGEST FILES (by lines) ──────────────────────────────────
+   1.  4094 lines  src\assets\55.jpg
+   2.  3861 lines  package-lock.json
+   3.  2607 lines  src\renderer\css\style.css
+   4.  1273 lines  src\renderer\js\devhub\devhub.js
+   5.  1106 lines  src\renderer\js\devhub\tools\regex-tester.js
+   6.  1051 lines  src\renderer\js\proxy\proxyQuickPanel.js
+   7.   868 lines  src\renderer\js\features\assistant\ui\assistantStyles.css
+   8.   823 lines  src\renderer\js\passwords\index.js
+   9.   781 lines  src\renderer\js\devhub\tools\image-converter\converter.js
+  10.   769 lines  src\renderer\js\devhub\tools\color-picker.js
+  11.   725 lines  docs\CONTEXT.txt
+  12.   711 lines  src\renderer\downloads.html
+  13.   658 lines  src\renderer\js\devhub\tools\json-viewer.js
+  14.   634 lines  src\renderer\history.html
+  15.   595 lines  src\renderer\js\features\cookieManager.js
+  16.   591 lines  src\renderer\js\settings\styles.css
+  17.   584 lines  src\renderer\js\passwords\autofill.js
+  18.   573 lines  src\assets\icon.png
+  19.   557 lines  src\renderer\js\devhub\tools\image-editor\editor.js
+  20.   535 lines  src\renderer\js\proxy\styles.css
+
+── FOLDER STRUCTURE ─────────────────────────────────────────────────
 
 vortex/
 ├── docs/
@@ -534,260 +554,6 @@ vortex/
 ├── package.json
 └── preload.js
 
-================================================================================
-RECENT CHANGES (April 17, 2026)
-================================================================================
-
-RESTRUCTURE PHASE COMPLETED:
-- Settings panel: 4289 lines → 316 lines + 65 modular files (js/settings/)
-- Main process IPC: 1164 lines → 13 handler files (main/ipc/)
-- Renderer features: 8 large files → 130+ modular files
-  - navigation.js (1374 lines) → browser/navigation/ (10 files)
-  - webview.js (949 lines) → browser/webview/ (10 files)
-  - tabs.js (750 lines) → browser/tabs/ (6 files)
-  - ipc.js (719 lines) → core/ipc/ (5 files)
-  - app.js (280 lines) → core/app/ (3 files)
-  - quickLaunch.js (520 lines) → features/quickLaunch/ (7 files)
-  - summarizer.js (280 lines) → features/summarizer/ (7 files)
-  - screenshot.js (145 lines) → features/screenshot/ (3 files)
-
-BUG FIXES:
-- Fixed storage:read duplicate handler crash (main.js + ipcHandler.js conflict)
-- Fixed cookieHandlers.js incorrect refreshDlSettings export
-- Created WhatsAppPanel module (was missing, causing undefined error)
-- Fixed find in page event listeners (DOMContentLoaded wrapper issue)
-- Fixed find in page search behavior (always start from top on new search)
-- Suppressed harmless Electron errors (WebFrameMain, dragEvent, Render frame disposed)
-
-FILES MOVED TO PROPER LOCATIONS:
-- panel.js, dialog.js, session.js → core/
-- omnibox.js, contextMenu.js, tabHistory.js, tabPreview.js, faviconCache.js → browser/
-- prefetch.js, netStatus.js, cookieManager.js, faq.js, whatsappPanel.js → features/
-
-TOTAL IMPACT:
-- ~6500 lines split into ~130 modular files
-- Improved maintainability and code organization
-- All features working correctly after restructure
-
-================================================================================
-VERSION HISTORY (newest first)
-================================================================================
-
-v4.5.0 — AI Assistant + Code Restructure (Built-in Ollama AI assistant, 34 MCP browser tools, thinking model support, page reading, streaming chat; Full codebase restructure 130+ modular files; DevHub lazy loading; YouTube ad blocker improved; 4 bug fixes)
-v4.4.0 — Proxy & Tor Privacy System + Browser Polish (HTTP/SOCKS5/Tor proxy, auto Tor downloader, Real/Current IP full details, toolbar indicator, bypass list, setup guide; Address bar clean URL + security icons + popup; Favicon cache system; Settings tab persist; Update badge; Download manager improvements; YouTube ad blocker redesign; 6 bug fixes)
-v4.3.0 — Ad & Tracker Blocklist System (EasyList/EasyPrivacy/Peter Lowe/Steven Black/Malware, network-level blocking, toolbar badge, custom rules, modular components)
-v4.2.0 — Windows Default Browser (NSIS registry, single instance, open-url), Custom Alert/Confirm/Prompt UI (dialog.js), about:blank → new tab, external links → new tab
-v4.1.0 — Built-in Password Manager (AES-256 vault, autofill, save popup, address manager, Chrome/Firefox import, generator, HTTP/HTTPS fix)
-v4.0.0 — Site Permissions Manager + Background Themes (10) + Custom Accent Color + GitHub Releases Updater (install/download/rollback)
-v3.3.0 — Site Permissions Manager + GitHub Releases updater
-v3.2.1 — Background Theme accordion UI + 4 new themes (total 10)
-v3.2.0 — Background Themes (6 palettes, CSS variables)
-v3.1.0 — Custom Accent Color (8 presets + custom picker)
-v3.0.0 — Cookie Manager in Settings
-v2.9.0 — Notepad Tool
-v2.8.x — Image Editor Tool
-v2.7.x — Image Converter Tool
-v2.6.x — Hash Generator Tool
-v2.5.0 — URL Encoder full rewrite
-v2.4.x — Base64 full rewrite
-v2.3.x — Regex Tester
-v2.2.x — Color Picker
-v2.1.x — JSON Viewer
-v2.0.0 — DevHub panel launched
-v1.x.x — Initial releases
-
-================================================================================
-DEVHUB PANEL
-================================================================================
-
-Trigger: Toolbar wrench icon (nav-devhub button)
-Toggle: Settings → Appearance → Show DevHub Button
-Style: Centered floating modal, 900x720px, backdrop blur
-
-TOOLS (9): JSON Viewer, Color Picker, Regex Tester, Base64, URL Encoder,
-           Hash Generator, Image Converter, Image Editor, Notepad
-
-================================================================================
-CHANGELOG SYSTEM (MODULAR)
-================================================================================
-
-Directory: vortex/src/renderer/js/changelog/
-  index.js — fetches all JSONs, renders with major version group dropdowns
-  v1/ v2/ v3/ v4/ — JSON files per version
-
-VERSION_GROUPS in index.js: v4, v3, v2, v1
-
-Each JSON: { id, version, badge, name, date, isCurrent, open, counts, categories[] }
-Each feature: { type ('new'|'fix'|'improve'|'perf'), label, desc, howto? }
-
-================================================================================
-CORE BROWSER FEATURES
-================================================================================
-
-BROWSING:
-- Multi-tab (drag-drop reorder, tab sleep, thumbnail previews, per-tab mute)
-- Smart Omnibox (search suggestions, 5 engines, keyboard nav)
-- Find in Page (Ctrl+F), Incognito Mode, Session restore
-
-PRODUCTIVITY:
-- Command Palette (Ctrl+Shift+P), Bookmarks + History, Download Manager
-- Quick Launch Panel (Ctrl+Space)
-
-AI & CONTENT:
-- AI Page Summarizer, Page Translator
-
-MEDIA & TOOLS:
-- Picture-in-Picture Manager, Screenshot Tool, WhatsApp Panel
-
-YOUTUBE:
-- Ad Blocker (network-level + CSS), Ad Speed Control + Auto-Skip
-
-PRIVACY:
-- Site Permissions Manager (camera/mic/notifications/location/30+ types)
-- Cookie Manager (view/browse/block/export)
-- Ad & Tracker Blocklist (EasyList, EasyPrivacy, Peter Lowe, Steven Black, Malware)
-- Custom block rules
-- Proxy Manager (HTTP, SOCKS5, Tor) with Real IP / Current IP display
-- Tor Network integration (auto-download, bootstrap, circuit info, New Identity)
-- Bypass List editor, toolbar proxy/tor indicator
-
-PASSWORD MANAGER:
-- AES-256-GCM encrypted vault, master password
-- Autofill (username + password), save prompt after login
-- Address Manager + autofill
-- Import Chrome/Firefox CSV, Export JSON/CSV
-- Password Generator + breach detection
-
-SYSTEM:
-- GitHub Releases Updater (version check, .exe download/install, rollback)
-- Windows Default Browser registration (NSIS installer)
-- External links → new tab (single instance)
-- DNS Prefetch, Network Speed Indicator, Profile system
-
-================================================================================
-SETTINGS SYSTEM
-================================================================================
-
-DEFAULTS (settings.html):
-  theme, fontsize, tabpreview, bookmarksbar, whatsappBtn, devhubBtn,
-  accentColor, bgTheme,
-  startup, homepage, engine, suggestions,
-  trackers, https, dnt,
-  gpu, prefetch, cache, askdl, opendl,
-  tabsleep, tabsleepMinutes, pip, pipSites,
-  notifications, notifSound, notifSites,
-  lang, spellcheck, spellcheckLang,
-  ytAdblock, ytAdSpeed
-
-Settings sidebar groups:
-  General: Appearance (Accent Color, Background Theme, Font Size, etc.), On Startup,
-           Search Engine, Languages, Downloads, Notifications
-  Privacy & Performance: Privacy & Security, Cookie Manager, Site Permissions,
-                         Password Manager, Blocklists, Proxy & Tor, Performance, YouTube
-  Account: Profile, Sync & Backup
-  System: Keyboard Shortcuts, Updates, About Vortex
-  Info: What's New, Help & FAQ
-
-================================================================================
-IPC CHANNELS
-================================================================================
-
-Main → Renderer (send):
-  settings:changed, profile:changed
-  download:start, download:update, download:done, download:removed, downloads:badge
-  permission:request, dialog:show, open-url
-  blocklist:blocked, blocklist:progress, blocklist:done
-  updater:installProgress
-  proxy:statusUpdate, proxy:changed
-  tor:bootstrapProgress, tor:ready, tor:stopped, tor:error, tor:downloadProgress
-
-Renderer → Main (invoke):
-  storage:read, storage:write, app:version, updater:localSha,
-  browser:isDefault,
-  updater:fetchCommits, updater:applyCommit,
-  updater:fetchAllReleases, updater:downloadExe, updater:deleteApplied,
-  updater:installRelease,
-  tab:capture, screenshot:capture, screenshot:captureFull, screenshot:save,
-  webview:setZoom, tab:setMuted, tab:isAudible, pip:trigger,
-  tab:memoryUsage, file:exists, settings:pickDownloadFolder,
-  cookies:getAll, cookies:getForDomain, cookies:delete, cookies:deleteAll,
-  cookies:deleteForDomain, cookies:deleteExpired, cookies:set, cookies:getStats,
-  permissions:getAll, permissions:saveAll,
-  passwords:read, passwords:write, passwords:readImported, passwords:writeImported,
-  addresses:read, addresses:write,
-  blocklist:getLists, blocklist:setEnabled, blocklist:download, blocklist:downloadAll,
-  blocklist:getStats, blocklist:getCustom, blocklist:addCustom, blocklist:removeCustom,
-  blocklist:resetStats,
-  proxy:getConfig, proxy:setConfig, proxy:getStatus, proxy:testConnection,
-  proxy:getOriginalIp, proxy:getOriginalIpFull, proxy:fetchIpInfo, proxy:disable,
-  tor:start, tor:stop, tor:newIdentity, tor:getCircuit, tor:getBinaryPath,
-  tor:isRunning, tor:getProcessStatus, tor:pickBinary, tor:download,
-  tor:isDownloaded, tor:getInstallDir
-
-Renderer → Main (send):
-  shell:openExternal, app:relaunch, browser:clearData, browser:setDefault,
-  download:cancel, download:remove, download:openFile, download:openFolder,
-  download:markDeleted, spellcheck:setLanguage,
-  window:minimize, window:maximize, window:close, window:fullscreen,
-  window:new, window:incognito,
-  devhub:download,
-  blocklist:resetTabStats,
-  permission:response:{domain}:{permission}
-
-================================================================================
-KNOWN PATTERNS & CONVENTIONS
-================================================================================
-
-1. Panel system: Panel.open('settings'|'downloads'|'bookmarks'|'history')
-2. Settings communication: postMessage with __vortexAction flag
-3. WhatsApp panel: #wa-panel, persist:whatsapp partition
-4. Incognito: separate BrowserWindow, purple theme, ?incognito=1
-5. YT Adblock: ipcHandler.js (network) + webview.js (CSS+JS injection)
-6. Tab sleep: webview src → 'about:blank', restored on click
-7. Version in packaged builds: app.getVersion() NOT require(package.json)
-8. CSS toggle class: .toggle-track (NOT .slider)
-9. DevHub download: vortexAPI.send('devhub:download', {dataUrl, filename})
-10. Modular tools: each tool in own directory, CSS injected via <link> in _injectCSS()
-11. Changelog: fetch() based, JSON files per version, major version group dropdowns
-12. Cookie Manager: cookieManager.js renders lazily, block list in localStorage
-13. Password Manager: dual storage — vault (encrypted) + imported (plain JSON)
-    Autofill: sessionStorage cache for vault, imported always available
-    Save prompt: after login/signup via did-navigate-in-page
-14. Blocklist: engine.js registers webRequest.onBeforeRequest on startup
-    Domain Set in memory, O(1) lookup, per-tab stats via Map
-    Settings panel lazy-rendered on nav click
-15. Windows Default Browser: installer.nsh NSIS script writes HKLM+HKCU registry
-    app.setAsDefaultProtocolClient('http'/'https') in main.js (packaged only)
-    open-url IPC → new tab, queued if app not ready (_markAppReady pattern)
-16. Custom Alert/Confirm/Prompt: webviewPreload.js overrides window.alert/confirm/prompt
-    → ipcRenderer.sendToHost('dialog:show') → ipc-message → VortexDialog.show()
-17. new-window → new tab: app.on('web-contents-created') + setWindowOpenHandler
-18. Accent color: CSS var(--accent), applied via applyAccent() in app.js
-20. Proxy system: src/main/proxy/ — proxyManager, torProcess, torDownloader, ipcHandlers
-    Tor proxy sirf bootstrap 100% ke baad apply hoti hai (onTorReady callback)
-    Real IP: session.fromPartition('persist:proxy-ip-check') with proxyRules:'direct://'
-    ProxyState: singleton event emitter, clearAll() on panel remount
-    Storage: %APPDATA%\vortex\storage\proxy.json
-
-================================================================================
-GIT WORKFLOW
-================================================================================
-
-Repo: https://github.com/RupamSatyaki/VORTEX-Browser
-Files at root (not in vortex/ subfolder on GitHub)
-
-Standard commit:
-  git add -A
-  git commit -m "vX.X.X: description"
-  git push
-
-Version bump checklist:
-  1. package.json → "version": "X.X.X"
-  2. changelog/vX/vX.Y.Z.json → create new file
-  3. changelog/index.js → add path to VERSION_FILES (newest first)
-  4. Previous latest JSON → badge:'stable', isCurrent:false
-  5. CONTEXT.txt → update version + file structure
-
-================================================================================
-END OF CONTEXT
-================================================================================
+========================================================================
+END
+========================================================================

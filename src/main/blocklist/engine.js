@@ -144,24 +144,25 @@ function _checkDailyReset() {
 }
 
 // ── Apply webRequest handler ──────────────────────────────────────────────────
+// ── Apply webRequest handler ──────────────────────────────────────────────────
 function _applyWebRequest() {
   session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
-    if (_isBlocked(details.url)) {
+    const url = details.url || '';
+
+    if (_isBlocked(url)) {
       _stats.total++;
       _stats.today++;
       _checkDailyReset();
 
-      // Update per-tab stats
       const wcId = details.webContentsId;
       if (wcId) {
         _tabStats.set(wcId, (_tabStats.get(wcId) || 0) + 1);
-        // Notify renderer for badge update
         BrowserWindow.getAllWindows().forEach(win => {
           try {
             if (!win.isDestroyed()) {
               win.webContents.send('blocklist:blocked', {
-                url: details.url,
-                domain: _extractDomain(details.url),
+                url,
+                domain: _extractDomain(url),
                 wcId,
                 count: _tabStats.get(wcId),
               });
@@ -169,7 +170,6 @@ function _applyWebRequest() {
           } catch {}
         });
       }
-
       callback({ cancel: true });
     } else {
       callback({});

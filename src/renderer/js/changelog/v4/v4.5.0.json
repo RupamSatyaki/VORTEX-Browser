@@ -1,0 +1,106 @@
+{
+  "id": "v4.5.0",
+  "version": "4.5.0",
+  "badge": "latest",
+  "name": "AI Assistant + Code Restructure",
+  "date": "2026-04-23",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 7, "improve": 4, "fix": 4 },
+  "categories": [
+    {
+      "label": "AI Assistant",
+      "features": [
+        {
+          "type": "new",
+          "label": "Built-in AI Assistant (Ollama)",
+          "desc": "A fully local, private AI assistant powered by Ollama. Click Assistant in the toolbar or press Ctrl+Shift+A to open the side panel. No cloud, no data leaving your machine.",
+          "howto": "Click 'Assistant' in toolbar or press Ctrl+Shift+A. Requires Ollama running locally."
+        },
+        {
+          "type": "new",
+          "label": "34 MCP Browser Control Tools",
+          "desc": "AI can control your browser — create/close/switch tabs, navigate, go back/forward, reload, read page content, scroll, zoom, find in page, manage bookmarks, history, downloads, take screenshots, toggle PiP, and search the web.",
+          "howto": "Type 'Open YouTube' or 'What tabs are open?' — AI will automatically call the right tool."
+        },
+        {
+          "type": "new",
+          "label": "Thinking Model Support",
+          "desc": "Real-time <think> tag detection for models like DeepSeek-R1, Qwen3, Phi4. Spinner while thinking, then 'Thought for Xs' collapsible accordion when done. Click to expand/collapse reasoning.",
+          "howto": "Select a thinking model (e.g. deepseek-r1) — reasoning will be shown separately."
+        },
+        {
+          "type": "new",
+          "label": "Current Page Reading",
+          "desc": "AI can read the current page content. Click the 📎 button to manually attach, or type 'summarize this page' — auto-detected. 8,000 char limit with clean text extraction.",
+          "howto": "Click 📎 in the assistant input bar, or type 'summarize this page'."
+        },
+        {
+          "type": "new",
+          "label": "Streaming Chat with Tool Cards",
+          "desc": "Responses stream token-by-token with a stop button. Tool calls are shown as collapsible cards — auto-collapse on success, stay open on error. Follow-up response generated after tool execution.",
+          "howto": "Send a message — response streams in real-time, tool calls appear as cards."
+        },
+        {
+          "type": "new",
+          "label": "Model Selector with Live Status",
+          "desc": "Available Ollama models are auto-fetched on panel open. Live status dot — green (online), red (offline), yellow (connecting). Refresh button to reload models. Default model saved across sessions.",
+          "howto": "Open assistant panel — model dropdown at the top with live Ollama status."
+        }
+      ]
+    },
+    {
+      "label": "Code Restructure",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Full Codebase Restructure",
+          "desc": "The entire codebase reorganized into 130+ modular files. Settings panel: 4,289 lines → 65 modular files. Main process IPC: 1,164 lines → 13 handler files. Navigation, webview, tabs, features all modular.",
+          "howto": "No user-facing changes — code is internally organized for better maintainability."
+        },
+        {
+          "type": "improve",
+          "label": "DevHub Lazy Loading",
+          "desc": "42 DevHub tool scripts no longer load at startup — only when DevHub button is clicked. App startup is ~35% faster (76 scripts instead of 118).",
+          "howto": "App starts faster automatically. DevHub tools load on first open."
+        }
+      ]
+    },
+    {
+      "label": "YouTube",
+      "features": [
+        {
+          "type": "fix",
+          "label": "⚠️ YouTube Ad Blocker Temporarily Removed",
+          "desc": "The YouTube ad blocker has been temporarily removed. YouTube's advanced detection system detects DOM manipulation, playbackRate changes, and executeJavaScript injection — all triggered the 'Ad blockers violate YouTube's Terms of Service' popup. A better, undetectable solution is coming in v4.6.0.",
+          "howto": "Improved YouTube ad blocking is expected in v4.6.0."
+        }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "Storage path fix — passwords, permissions, addresses",
+          "desc": "passwordHandlers, permissionHandlers, and addressHandlers were using the wrong storage path (vortex/storage/ instead of storage/). Fixed to use STORAGE_DIR from storage.js."
+        },
+        {
+          "type": "fix",
+          "label": "WhatsApp Panel crash on toolbar click",
+          "desc": "The WhatsAppPanel module was missing after restructure, causing the toolbar button to crash on click. Module created and loaded correctly."
+        },
+        {
+          "type": "fix",
+          "label": "Storage:read duplicate handler crash on startup",
+          "desc": "Both main.js and ipcHandler.js were registering storage IPC handlers, causing Electron to crash on startup with 'Attempted to register a second handler'. Fixed — only ipcHandler.js registers handlers."
+        },
+        {
+          "type": "fix",
+          "label": "Find in page not working after restructure",
+          "desc": "A DOMContentLoaded wrapper prevented event listeners from binding after the restructure. Wrapper removed, listeners now bind directly on module load."
+        }
+      ]
+    }
+  ]
+}

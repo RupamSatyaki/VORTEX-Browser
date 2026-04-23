@@ -218,27 +218,18 @@ app.on('web-contents-created', (_e, contents) => {
   });
 
   // Intercept native dialogs — show custom UI in renderer
-  // This fires BEFORE the native OS dialog appears
   contents.on('dialog', (_ev, dialogType, messageText, defaultPromptText, callback) => {
     try {
       const win = BrowserWindow.getFocusedWindow() || BrowserWindow.getAllWindows()[0];
-      if (!win || win.isDestroyed()) {
-        callback('', false);
-        return;
-      }
+      if (!win || win.isDestroyed()) { callback('', false); return; }
       const origin = (() => { try { return new URL(contents.getURL()).hostname; } catch { return ''; } })();
       win.webContents.send('dialog:show', {
-        type: dialogType,
-        message: messageText || '',
-        defaultValue: defaultPromptText || '',
-        origin,
+        type: dialogType, message: messageText || '',
+        defaultValue: defaultPromptText || '', origin,
       });
-      // Respond immediately — custom UI is shown async
-      if (dialogType === 'alert')   callback('');
+      if (dialogType === 'alert')        callback('');
       else if (dialogType === 'confirm') callback('', false);
-      else callback(defaultPromptText || '', false);
-    } catch {
-      callback('', false);
-    }
+      else                               callback(defaultPromptText || '', false);
+    } catch { callback('', false); }
   });
 });

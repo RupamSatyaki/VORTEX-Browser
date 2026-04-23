@@ -64,7 +64,10 @@ const WVListeners = (() => {
     }
 
     wv.addEventListener('dom-ready', forceIframeSize);
-    wv.addEventListener('dom-ready', () => WVYTAdblock.inject(wv));
+    wv.addEventListener('dom-ready', () => {
+      const url = wv.src || '';
+      if (url.includes('youtube.com')) WVYTAdblock.inject(wv);
+    });
 
     wv.addEventListener('did-start-loading', () => {
       if (activeIdGetter() === tabId) { Navigation.startProgress(); NetStatus.onLoadStart(wv); }
@@ -104,15 +107,15 @@ const WVListeners = (() => {
     wv.addEventListener('did-navigate-in-page', (e) => {
       if (activeIdGetter() === tabId) Navigation.setURL(e.url);
       if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
-      if (activeIdGetter() === tabId && typeof PasswordAutofill !== 'undefined') {
-        PasswordAutofill.onNavigate(e.url, wv.src);
+      if (WVYTAdblock.isEnabled()) WVYTAdblock.inject(wv);
+      if (activeIdGetter() === tabId && typeof PasswordAutofill !== 'undefined') {        PasswordAutofill.onNavigate(e.url, wv.src);
       }
     });
 
     wv.addEventListener('did-finish-load', () => {
       forceIframeSize();
       wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
-      WVYTAdblock.inject(wv);
+      if (WVYTAdblock.isEnabled()) WVYTAdblock.inject(wv);
       Prefetch.prefetchPageLinks(wv);
       setTimeout(() => WebView._captureTab(tabId, wv), 800);
       const zoomLevel = WVZoom.get(tabId);

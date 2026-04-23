@@ -47,33 +47,20 @@ const BLOCKLISTS = [
   {
     id: 'youtube-ads',
     name: 'YouTube Ad Blocker',
-    desc: 'Blocks YouTube ads at network level (IMA SDK + ad domains)',
+    desc: 'Blocks YouTube ads at network level (ad domains only, NOT IMA SDK)',
     category: 'youtube',
-    url: null,       // built-in — no download needed
+    url: null,
     builtin: true,
-    defaultEnabled: true,
-    // Domains to block — imasdk.googleapis.com is the key one (IMA SDK)
+    defaultEnabled: false, // DISABLED — DOM removal approach is better (no detection)
     builtinDomains: [
-      'imasdk.googleapis.com',       // Google IMA SDK — blocks ALL YouTube ads
+      // DO NOT block imasdk.googleapis.com — it breaks video playback
       'googleadservices.com',
       'googlesyndication.com',
       'doubleclick.net',
       'ad.doubleclick.net',
       'static.doubleclick.net',
-      'stats.g.doubleclick.net',
-      'googletagmanager.com',
-      'googletagservices.com',
-      'pagead2.googlesyndication.com',
-      'tpc.googlesyndication.com',
     ],
-    // URL patterns to block (partial match on full URL)
-    builtinPatterns: [
-      '/api/stats/ads',
-      '/pagead/',
-      '/ptracking',
-      '/get_video_info?',
-      'ctier=L',                     // ad-quality tier param
-    ],
+    builtinPatterns: [],
   },
 ];
 
