@@ -1,0 +1,143 @@
+================================================================================
+VORTEX BROWSER — YouTube Ad Blocker v4.6.0
+================================================================================
+
+APPROACH: Dedicated Electron Session + Auto Skip
+STATUS: ✅ Working — No Detection
+
+================================================================================
+HOW IT WORKS
+================================================================================
+
+YouTube runs in a DEDICATED Electron session (persist:youtube) that has its own
+webRequest interceptor. This is completely separate from the main browser session.
+
+Flow:
+  1. User navigates to youtube.com
+  2. Webview is created with partition='persist:youtube'
+  3. YouTube session has webRequest.onBeforeRequest registered
+  4. Ad video requests are blocked at network level
+  5. Skip button is auto-clicked via executeJavaScript
+  6. Overlay/companion ads are hidden via display:none
+
+================================================================================
+WHY THIS WORKS (NO DETECTION)
+================================================================================
+
+Previous approaches that FAILED:
+  ❌ Blocking imasdk.googleapis.com → YouTube detects IMA SDK failure
+  ❌ DOM removal (el.remove()) → YouTube's MutationObserver detects missing elements
+  ❌ display:none on ad containers → YouTube DOM integrity check detects it
+  ❌ playbackRate = 16 → YouTube monitors video.playbackRate
+  ❌ video.currentTime jump → YouTube monitors currentTime changes
+  ❌ fetch/XHR override → YouTube checks native function toString()
+  ❌ executeJavaScript injection → YouTube scans for injected globals
+
+Current approach that WORKS:
+  ✅ Session-level webRequest blocking → YouTube sees "network error", not adblock
+  ✅ IMA SDK loads normally → No detection trigger
+  ✅ Only ad VIDEO CONTENT URLs blocked (ctier=L param)
+  ✅ Skip button click → YouTube expects this, not suspicious
+  ✅ display:none on overlay (not ad container) → Less detectable than remove()
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+src/main/ytBlocker/
+├── index.js          ← Entry point, init + exports
+├── session.js        ← YouTube dedicated session + webRequest rules
+├── adPatterns.js     ← Ad URL pattern matching logic
+└── ipcHandlers.js    ← IPC: getPartition, getBlockedCount, setEnabled
+
+src/renderer/js/features/ytBlocker/
+└── index.js          ← Renderer: detect YouTube URL, assign partition
+
+src/renderer/js/browser/webview/scripts/
+└── ytAdblock.js      ← executeJavaScript: skip button + overlay hide
+
+================================================================================
+AD PATTERNS BLOCKED
+================================================================================
+
+1. Ad video content (googlevideo.com):
+   - ctier=L  → Ad content tier (most reliable signal)
+   - oad=1    → Original ad flag
+   - adformat= → Ad format parameter
+   - ad_type=  → Ad type parameter
+
+2. YouTube ad tracking endpoints:
+   - /api/stats/ads
+   - /pagead/
+   - /ptracking
+   - /get_midroll_info
+   - /ad_data_204
+
+3. Ad domains (only when referrer is youtube.com):
+   - pagead2.googlesyndication.com
+   - tpc.googlesyndication.com
+   - ad.doubleclick.net
+   - googleads.g.doubleclick.net
+   - pubads.g.doubleclick.net
+   - securepubads.g.doubleclick.net
+   - googleadservices.com
+
+NOT BLOCKED (intentional):
+   - imasdk.googleapis.com → IMA SDK must load or YouTube detects adblock
+
+================================================================================
+DOM MANIPULATION (executeJavaScript)
+================================================================================
+
+Injected via wv.executeJavaScript() on dom-ready and did-navigate:
+
+1. Skip button auto-click:
+   .ytp-ad-skip-button-modern
+   .ytp-ad-skip-button
+   .ytp-skip-ad-button
+   .videoAdUiSkipButton
+
+2. Ad module hide (display:none):
+   .ytp-ad-module          ← Full ad container
+   .ytp-ad-overlay-slot    ← Bottom overlay banner
+
+3. Companion/sponsored card hide:
+   #companion-ad-container
+   ytd-companion-slot-renderer
+   #google-container-id
+   .ytp-ad-overlay-container
+   .ytp-image-background-gradient-vertical
+
+================================================================================
+SETTINGS
+================================================================================
+
+Settings → YouTube:
+  - YouTube Ad Blocker toggle (ytAdblock)
+  - Ad Skip Speed (ytAdSpeed: 4x/8x/16x/32x/64x/256x)
+  - Remove Sponsored Cards (ytRemoveCards)
+  - Remove Homepage Promotions (ytRemoveHomepageAds)
+
+IPC Channels:
+  ytBlocker:getPartition    → returns 'persist:youtube'
+  ytBlocker:getBlockedCount → returns blocked request count
+  ytBlocker:resetCount      → resets counter
+  ytBlocker:setEnabled      → enable/disable blocking
+  ytBlocker:isEnabled       → current state
+
+================================================================================
+KNOWN LIMITATIONS
+================================================================================
+
+1. YouTube must be opened in a NEW TAB after enabling for session to take effect
+   (Electron partition cannot be changed after webview creation)
+
+2. Some unskippable ads may still show briefly before skip button appears
+   (YouTube controls when skip button becomes clickable)
+
+3. Homepage banner ads may occasionally flash before being hidden
+   (display:none applied after DOM mutation, not before render)
+
+================================================================================
+END
+================================================================================

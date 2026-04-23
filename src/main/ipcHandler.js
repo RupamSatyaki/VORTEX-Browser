@@ -66,6 +66,10 @@ function registerHandlers() {
   const BlocklistEngine = require('./blocklist/engine');
   BlocklistEngine.registerHandlers();
 
+  // ── YouTube Ad Blocker (dedicated session) ────────────────────────────────
+  const YTBlocker = require('./ytBlocker/index');
+  YTBlocker.init();
+
   const { registerProxyHandlers } = require('./proxy/ipcHandlers');
   registerProxyHandlers(pushToRenderer);
 }

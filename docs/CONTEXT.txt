@@ -1,6 +1,6 @@
 ================================================================================
 VORTEX BROWSER — PROJECT CONTEXT FILE
-Last Updated: v4.5.0 | April 23, 2026
+Last Updated: v4.6.0 | April 23, 2026
 GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
 Branch: VORTEX-Browser-Restructure
 ================================================================================
@@ -47,7 +47,8 @@ vortex/
 │   ├── analyze.py
 │   ├── ASSISTANT_PLAN.txt
 │   ├── CONTEXT.txt
-│   └── RELEASE_v4.5.0.md
+│   ├── RELEASE_v4.6.0.md
+│   └── YT_ADBLOCKER_v4.6.0.txt
 ├── src/
 │   ├── assets/
 │   │   ├── 55.jpg
@@ -77,6 +78,11 @@ vortex/
 │   │   │   ├── proxyManager.js
 │   │   │   ├── torDownloader.js
 │   │   │   └── torProcess.js
+│   │   ├── ytBlocker/
+│   │   │   ├── adPatterns.js
+│   │   │   ├── index.js
+│   │   │   ├── ipcHandlers.js
+│   │   │   └── session.js
 │   │   ├── ipcHandler.js
 │   │   ├── menuManager.js
 │   │   ├── storage.js
@@ -180,7 +186,8 @@ vortex/
 │       │   │   │   ├── v4.2.0.json
 │       │   │   │   ├── v4.3.0.json
 │       │   │   │   ├── v4.4.0.json
-│       │   │   │   └── v4.5.0.json
+│       │   │   │   ├── v4.5.0.json
+│       │   │   │   └── v4.6.0.json
 │       │   │   └── index.js
 │       │   ├── core/
 │       │   │   ├── app/
@@ -345,6 +352,8 @@ vortex/
 │       │   │   │   │   └── summarizerHandler.js
 │       │   │   │   ├── ui/
 │       │   │   │   │   └── summarizerUI.js
+│       │   │   │   └── index.js
+│       │   │   ├── ytBlocker/
 │       │   │   │   └── index.js
 │       │   │   ├── cookieManager.js
 │       │   │   ├── faq.js
@@ -573,6 +582,7 @@ TOTAL IMPACT:
 VERSION HISTORY (newest first)
 ================================================================================
 
+v4.6.0 — YouTube Ad Blocker Undetectable (Dedicated session blocking, ad video URL patterns, auto skip + overlay hide, FOUC fix, 2 bug fixes)
 v4.5.0 — AI Assistant + Code Restructure (Built-in Ollama AI assistant, 34 MCP browser tools, thinking model support, page reading, streaming chat; Full codebase restructure 130+ modular files; DevHub lazy loading; YouTube ad blocker improved; 4 bug fixes)
 v4.4.0 — Proxy & Tor Privacy System + Browser Polish (HTTP/SOCKS5/Tor proxy, auto Tor downloader, Real/Current IP full details, toolbar indicator, bypass list, setup guide; Address bar clean URL + security icons + popup; Favicon cache system; Settings tab persist; Update badge; Download manager improvements; YouTube ad blocker redesign; 6 bug fixes)
 v4.3.0 — Ad & Tracker Blocklist System (EasyList/EasyPrivacy/Peter Lowe/Steven Black/Malware, network-level blocking, toolbar badge, custom rules, modular components)

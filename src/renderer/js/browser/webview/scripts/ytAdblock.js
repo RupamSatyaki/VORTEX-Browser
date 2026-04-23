@@ -14,8 +14,35 @@ const WVYTAdblock = (() => {
     if (window.__vxObs) return;
 
     function skipAd() {
-      var btn = document.querySelector('.ytp-skip-ad-button,.ytp-ad-skip-button,.ytp-ad-skip-button-modern,.videoAdUiSkipButton');
+      // Click skip button
+      var btn = document.querySelector(
+        '.ytp-ad-skip-button-modern, .ytp-ad-skip-button, ' +
+        '.ytp-skip-ad-button, .videoAdUiSkipButton'
+      );
       if (btn && btn.offsetParent !== null) { try { btn.click(); } catch(e){} }
+
+      // Hide ad module container
+      var adModule = document.querySelector('.ytp-ad-module');
+      if (adModule) { try { adModule.style.display = 'none'; } catch(e){} }
+
+      // Hide overlay banner ad (bottom of video)
+      var overlay = document.querySelector('.ytp-ad-overlay-slot');
+      if (overlay) { try { overlay.style.display = 'none'; } catch(e){} }
+
+      // Hide companion/sponsored card
+      var companion = document.querySelector(
+        '#companion-ad-container, ytd-companion-slot-renderer, ' +
+        '#google-container-id, .ytp-ad-overlay-container, ' +
+        '.ytp-image-background-gradient-vertical'
+      );
+      if (companion) {
+        var root = companion.closest(
+          '.ytp-ad-overlay-container, #companion-ad-container, ' +
+          'ytd-companion-slot-renderer, #google-container-id'
+        ) || companion.parentElement;
+        if (root) { try { root.style.display = 'none'; } catch(e){} }
+        else { try { companion.style.display = 'none'; } catch(e){} }
+      }
     }
 
     window.__vxObs = new MutationObserver(function() { skipAd(); });
@@ -31,7 +58,11 @@ const WVYTAdblock = (() => {
   function isEnabled() { return _enabled; }
 
   function inject(wv) {
-    // DISABLED FOR TESTING
+    try {
+      const url = wv.src || '';
+      if (!url.includes('youtube.com') || !_enabled) return;
+      wv.executeJavaScript(JS.replace('__SPEED__', _speed)).catch(() => {});
+    } catch (_) {}
   }
 
   function injectEarly(wv) {}
