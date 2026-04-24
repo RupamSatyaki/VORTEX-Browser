@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' vortex-app: file:; script-src 'self' vortex-app: file:; style-src 'self' 'unsafe-inline' vortex-app: file:; img-src 'self' https: data: vortex-app: file:; connect-src 'self' https://suggestqueries.google.com https://translate.googleapis.com http://localhost:11434 http://127.0.0.1:11434; frame-src vortex-app: file:;" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' vortex-app: file:; script-src 'self' vortex-app: file:; style-src 'self' 'unsafe-inline' vortex-app: file:; img-src 'self' https: data: vortex-app: file:; connect-src 'self' https://suggestqueries.google.com https://translate.googleapis.com http://localhost:11434 http://127.0.0.1:11434 https://raw.githubusercontent.com; frame-src vortex-app: file:;" />
   <title>Vortex</title>
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="js/passwords/styles.css" />
   <link rel="stylesheet" href="js/permissions/styles.css" />
   <link rel="stylesheet" href="js/features/assistant/ui/assistantStyles.css" />
+  <link rel="stylesheet" href="js/features/videoDownloader/ui/downloaderStyles.css" />
 </head>
 <body>
   <div id="app">
@@ -377,5 +378,14 @@
   <script src="js/features/assistant/mcp/mcpRegistry.js"></script>
   <script src="js/features/assistant/mcp/mcpExecutor.js"></script>
   <script src="js/features/assistant/index.js"></script>
+
+  <!-- Video Downloader -->
+  <script src="js/features/videoDownloader/ui/downloaderPanel.js"></script>
+  <script src="js/features/videoDownloader/ui/formatSelector.js"></script>
+  <script src="js/features/videoDownloader/ui/progressCard.js"></script>
+  <script src="js/features/videoDownloader/scripts/panelController.js"></script>
+  <script src="js/features/videoDownloader/scripts/infoHandler.js"></script>
+  <script src="js/features/videoDownloader/scripts/downloadHandler.js"></script>
+  <script src="js/features/videoDownloader/index.js"></script>
 </body>
 </html>

@@ -34,6 +34,8 @@ const SettingsApp = (() => {
     proxy:        { module: () => ProxySection        },
     performance:  { module: () => PerformanceSection  },
     youtube:      { module: () => YoutubeSection      },
+    // Tools
+    videodownloader: { module: () => VideoDownloaderSection },
     // Account
     profile:      { module: () => ProfileSection      },
     sync:         { module: () => SyncSection         },
@@ -111,7 +113,24 @@ const SettingsApp = (() => {
   function _navigateTo(sectionId, persist = true) {
     const navItem  = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
     const secEl    = document.getElementById('sec-' + sectionId);
+
     if (!navItem || !secEl) return;
+    _currentSection = sectionId;
+    if (persist) sessionStorage.setItem('settings-section', sectionId);
+
+    navItem.classList.add('active');
+    document.querySelectorAll('.nav-item[data-section]').forEach(n => {
+      if (n !== navItem) n.classList.remove('active');
+    });
+
+    // Show/hide sections — CSS class toggle only, no re-render
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    secEl.classList.add('active');
+
+    // Refresh dynamic sections on every navigate
+    if (sectionId === 'videodownloader' && typeof VideoDownloaderSection !== 'undefined') {
+      try { VideoDownloaderSection.refresh(); } catch {}
+    }    if (!navItem || !secEl) return;
 
     // Update nav active state
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));

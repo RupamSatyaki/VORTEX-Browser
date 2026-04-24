@@ -1,6 +1,6 @@
 ================================================================================
 VORTEX BROWSER — PROJECT CONTEXT FILE
-Last Updated: v4.6.0 | April 23, 2026
+Last Updated: v4.7.0 | April 24, 2026
 GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
 Branch: VORTEX-Browser-Restructure
 ================================================================================
@@ -47,6 +47,7 @@ vortex/
 │   ├── analyze.py
 │   ├── ASSISTANT_PLAN.txt
 │   ├── CONTEXT.txt
+│   ├── folder_structure.txt
 │   ├── RELEASE_v4.6.0.md
 │   └── YT_ADBLOCKER_v4.6.0.txt
 ├── src/
@@ -78,6 +79,12 @@ vortex/
 │   │   │   ├── proxyManager.js
 │   │   │   ├── torDownloader.js
 │   │   │   └── torProcess.js
+│   │   ├── videoDownloader/
+│   │   │   ├── downloader.js
+│   │   │   ├── index.js
+│   │   │   ├── infoFetcher.js
+│   │   │   ├── ipcHandlers.js
+│   │   │   └── ytdlpManager.js
 │   │   ├── ytBlocker/
 │   │   │   ├── adPatterns.js
 │   │   │   ├── index.js
@@ -187,7 +194,8 @@ vortex/
 │       │   │   │   ├── v4.3.0.json
 │       │   │   │   ├── v4.4.0.json
 │       │   │   │   ├── v4.5.0.json
-│       │   │   │   └── v4.6.0.json
+│       │   │   │   ├── v4.6.0.json
+│       │   │   │   └── v4.7.0.json
 │       │   │   └── index.js
 │       │   ├── core/
 │       │   │   ├── app/
@@ -352,6 +360,17 @@ vortex/
 │       │   │   │   │   └── summarizerHandler.js
 │       │   │   │   ├── ui/
 │       │   │   │   │   └── summarizerUI.js
+│       │   │   │   └── index.js
+│       │   │   ├── videoDownloader/
+│       │   │   │   ├── scripts/
+│       │   │   │   │   ├── downloadHandler.js
+│       │   │   │   │   ├── infoHandler.js
+│       │   │   │   │   └── panelController.js
+│       │   │   │   ├── ui/
+│       │   │   │   │   ├── downloaderPanel.js
+│       │   │   │   │   ├── downloaderStyles.css
+│       │   │   │   │   ├── formatSelector.js
+│       │   │   │   │   └── progressCard.js
 │       │   │   │   └── index.js
 │       │   │   ├── ytBlocker/
 │       │   │   │   └── index.js
@@ -521,6 +540,12 @@ vortex/
 │       │   │   │   │   ├── ui/
 │       │   │   │   │   │   └── updatesUI.js
 │       │   │   │   │   └── index.js
+│       │   │   │   ├── videoDownloader/
+│       │   │   │   │   ├── scripts/
+│       │   │   │   │   │   └── videoDownloaderHandler.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   └── videoDownloaderUI.js
+│       │   │   │   │   └── index.js
 │       │   │   │   └── youtube/
 │       │   │   │       ├── scripts/
 │       │   │   │       │   └── youtubeHandler.js
@@ -582,6 +607,7 @@ TOTAL IMPACT:
 VERSION HISTORY (newest first)
 ================================================================================
 
+v4.7.0 — Built-in Video Downloader (yt-dlp, 1000+ sites, sidebar panel, quality selector, ffmpeg merge, downloads integration, settings section, supported sites browser)
 v4.6.0 — YouTube Ad Blocker Undetectable (Dedicated session blocking, ad video URL patterns, auto skip + overlay hide, FOUC fix, 2 bug fixes)
 v4.5.0 — AI Assistant + Code Restructure (Built-in Ollama AI assistant, 34 MCP browser tools, thinking model support, page reading, streaming chat; Full codebase restructure 130+ modular files; DevHub lazy loading; YouTube ad blocker improved; 4 bug fixes)
 v4.4.0 — Proxy & Tor Privacy System + Browser Polish (HTTP/SOCKS5/Tor proxy, auto Tor downloader, Real/Current IP full details, toolbar indicator, bypass list, setup guide; Address bar clean URL + security icons + popup; Favicon cache system; Settings tab persist; Update badge; Download manager improvements; YouTube ad blocker redesign; 6 bug fixes)

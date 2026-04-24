@@ -1,0 +1,110 @@
+{
+  "id": "v4.7.0",
+  "version": "4.7.0",
+  "badge": "latest",
+  "name": "Built-in Video Downloader",
+  "date": "2026-04-24",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 8, "improve": 4, "fix": 3 },
+  "categories": [
+    {
+      "label": "Video Downloader",
+      "features": [
+        {
+          "type": "new",
+          "label": "Built-in Video Downloader (yt-dlp)",
+          "desc": "Download videos from YouTube, Instagram, Twitter/X, TikTok, Facebook, Reddit, Vimeo, Twitch, Dailymotion, SoundCloud, Bilibili and 1000+ more sites. Powered by yt-dlp.",
+          "howto": "Click the video icon in toolbar or press Ctrl+Shift+D to open the downloader panel."
+        },
+        {
+          "type": "new",
+          "label": "Sidebar Panel",
+          "desc": "Video downloader opens as a sidebar panel (same as Assistant). Webview shrinks to make room. Auto-detects video URLs from the current page — just click Fetch to load info.",
+          "howto": "Navigate to a video page, open the panel — URL is auto-filled. Click Fetch then Download."
+        },
+        {
+          "type": "new",
+          "label": "Quality Selector",
+          "desc": "Choose from all available qualities — 4K, 1080p, 720p, 480p, 360p, Audio only. Pre-merged formats shown first (no ffmpeg needed). High quality formats auto-merge video+audio with ffmpeg.",
+          "howto": "After fetching video info, select quality from the dropdown and click Download."
+        },
+        {
+          "type": "new",
+          "label": "ffmpeg Integration",
+          "desc": "ffmpeg is required for 1080p+ downloads (video+audio merge). Install from Settings → Video Downloader. Warning shown in panel when high quality is selected but ffmpeg is missing.",
+          "howto": "Settings → Video Downloader → Install ffmpeg button."
+        },
+        {
+          "type": "new",
+          "label": "Downloads Manager Integration",
+          "desc": "Video downloads appear in the main Downloads panel with progress bar, speed, and file size. Open downloaded file directly from the downloads panel.",
+          "howto": "Click the Downloads button in toolbar to see video download progress."
+        },
+        {
+          "type": "new",
+          "label": "Settings → Video Downloader Section",
+          "desc": "Dedicated settings section with yt-dlp status, ffmpeg status, install/update buttons, yt-dlp and ffmpeg paths, default quality selector.",
+          "howto": "Settings → Privacy & Performance → Video Downloader."
+        },
+        {
+          "type": "new",
+          "label": "Supported Sites Browser",
+          "desc": "View all 1000+ supported sites in a searchable modal with favicons. Live search with highlight. Click 'View all 1000+ →' in the settings section.",
+          "howto": "Settings → Video Downloader → View all 1000+ button."
+        },
+        {
+          "type": "new",
+          "label": "Appearance Toggle",
+          "desc": "Show/hide the Video Downloader button in the toolbar from Settings → Appearance.",
+          "howto": "Settings → Appearance → Show Video Downloader Button toggle."
+        }
+      ]
+    },
+    {
+      "label": "Improvements",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Settings — Video Downloader refreshes on every navigate",
+          "desc": "yt-dlp and ffmpeg status is re-checked every time you navigate to the Video Downloader settings section."
+        },
+        {
+          "type": "improve",
+          "label": "Supported sites with real logos",
+          "desc": "YouTube, Instagram, Twitter/X, TikTok, Facebook, Reddit, Vimeo, Twitch, Dailymotion, SoundCloud, Bilibili — all shown with their official brand icons."
+        },
+        {
+          "type": "improve",
+          "label": "Video icon across toolbar, sidebar, and settings",
+          "desc": "Consistent video/play icon (film frame with play button) used in toolbar button, sidebar panel header, and settings section header."
+        },
+        {
+          "type": "improve",
+          "label": "Modal scrollbar themed",
+          "desc": "Supported sites modal scrollbar matches the app's dark teal theme."
+        }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "yt-dlp EBUSY error on update",
+          "desc": "yt-dlp.exe was locked when running — update now downloads to .new file and applies on next launch if file is locked."
+        },
+        {
+          "type": "fix",
+          "label": "Only 360p showing in quality dropdown",
+          "desc": "YouTube 1080p/720p formats are video-only — they need merging with audio. Fixed to show all available heights including video-only formats."
+        },
+        {
+          "type": "fix",
+          "label": "File size showing 0 in downloads manager",
+          "desc": "yt-dlp reports size as string (e.g. 45.23MiB) — now parsed to bytes for proper display in downloads manager."
+        }
+      ]
+    }
+  ]
+}
