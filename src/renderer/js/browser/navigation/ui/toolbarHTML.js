@@ -68,6 +68,12 @@ const NavToolbarHTML = (() => {
       </button>
 
       <div class="toolbar-right">
+        <button class="toolbar-btn" id="nav-video-dl" title="Video Downloader (Ctrl+Shift+D)">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="2" ry="2"/>
+            <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/>
+          </svg>
+        </button>
         <button class="toolbar-btn" id="nav-summarize" title="Summarize Page (AI)">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2z"/>

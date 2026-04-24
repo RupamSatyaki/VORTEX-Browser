@@ -47,6 +47,13 @@ const AppearanceToggleHandler = (() => {
       await SettingsStorage.save(settings);
       SettingsLiveApply.notify(settings);
     });
+
+    // Video Downloader button toggle
+    SettingsToggle.bind(container, 'set-videodl-btn', async (checked) => {
+      settings.videoDlBtn = checked;
+      await SettingsStorage.save(settings);
+      SettingsLiveApply.notify(settings);
+    });
   }
 
   return { bind };

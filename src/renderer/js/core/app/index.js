@@ -102,6 +102,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     typeof YTBlocker !== 'undefined' ? YTBlocker.init() : Promise.resolve(),
   ]);
 
+  // Init VideoDownloader (non-blocking)
+  if (typeof VideoDownloader !== 'undefined') VideoDownloader.init().catch(() => {});
+
   // Apply settings
   Navigation.applySettings(appSettings);
   AppThemes.applyAccent(appSettings.accentColor || '#00c8b4');

@@ -87,6 +87,9 @@ window.addEventListener('DOMContentLoaded', () => {
   ['proxy:statusUpdate','proxy:changed','tor:bootstrapProgress','tor:ready','tor:stopped','tor:error','tor:downloadProgress']
     .forEach(ch => IPC.on(ch, (data) => IPCIndicators.forwardToFrame(ch, data)));
 
+  // Video downloader progress → forward to settings iframe
+  IPC.on('vdl:ytdlpProgress', (data) => IPCIndicators.forwardToFrame('vdl:ytdlpProgress', data));
+
   // Menu accelerators
   IPC.on('menu:newTab',        () => QuickLaunch.open());
   IPC.on('menu:newWindow',     () => window.vortexAPI.send('window:new'));

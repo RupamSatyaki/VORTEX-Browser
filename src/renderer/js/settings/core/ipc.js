@@ -12,12 +12,16 @@ const SettingsIPC = (() => {
     'updater:fetchCommits',
     'updater:fetchLatestRelease',
     'updater:fetchAllReleases',
+    'vdl:getYtdlpStatus',
+    'vdl:fetchInfo',
   ];
 
   // Channels with no timeout (downloads can take minutes)
   const NO_TIMEOUT_CHANNELS = [
     'updater:installRelease',
     'tor:download',
+    'vdl:downloadYtdlp',
+    'vdl:downloadFfmpeg',
   ];
 
   // ── invoke — request/response via postMessage ─────────────────────────────

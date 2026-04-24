@@ -13,6 +13,7 @@ const SettingsStorage = (() => {
     bookmarksbar:     false,
     whatsappBtn:      true,
     devhubBtn:        true,
+    videoDlBtn:       true,
     accentColor:      '#00c8b4',
     bgTheme:          'teal',
     downloadFolder:   '',
