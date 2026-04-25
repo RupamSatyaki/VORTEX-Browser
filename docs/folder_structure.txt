@@ -1,63 +1,63 @@
 ========================================================================
 VORTEX PROJECT ANALYSIS
-Generated : 2026-04-24 13:53:00
+Generated : 2026-04-25 22:27:41
 Root      : C:\Users\HARIPADA\Desktop\VORTEX\vortex
 ========================================================================
 
 ── SUMMARY ──────────────────────────────────────────────────────────
-  Total Files      : 375
-  Total Lines      : 60,556
-  Total Characters : 2,442,227
-  Total Size       : 2385.0 KB  (2.33 MB)
+  Total Files      : 388
+  Total Lines      : 61,722
+  Total Characters : 2,863,500
+  Total Size       : 2796.4 KB  (2.73 MB)
 
 ── BY FILE TYPE ─────────────────────────────────────────────────────
   Ext         Files     Lines       Chars
   ----------------------------------------
-  .js           302    36,765   1,576,443
-  .css           14     7,567     234,106
-  .json          44     6,134     238,010
+  .js           313    37,613   1,988,731
+  .css           15     7,727     236,973
+  .json          45     6,194     240,699
   .jpg            1     4,094     147,062
-  .html           6     3,115     111,745
-  .txt            4     1,940      77,920
+  .html           6     3,126     112,521
+  .txt            4     1,992      80,052
   .png            1       573      41,152
   .py             1       236       8,245
+  .md             1        85       2,690
   .nsh            1        82       5,375
-  .md             1        50       2,169
 
 ── LANGUAGE BREAKDOWN (% of total code lines) ───────────────────────
   Language        Files     Lines   % of Code   % of All
   --------------------------------------------------------
-  JavaScript        302    36,765    77.5%     60.7%  ██████████████████████████████
-  HTML                6     3,115     6.6%      5.1%  ██
-  CSS                14     7,567    15.9%     12.5%  ██████
-  JSON               44     6,134        —     10.1%  █████
-  Other               9     6,975        —     11.5%  █████
+  JavaScript        313    37,613    77.6%     60.9%  ██████████████████████████████
+  HTML                6     3,126     6.4%      5.1%  ██
+  CSS                15     7,727    15.9%     12.5%  ██████
+  JSON               45     6,194        —     10.0%  █████
+  Other               9     7,062        —     11.4%  █████
 
   Code breakdown (JS + HTML + CSS = 100%):
-    JavaScript    77.5%  ██████████████████████████████████████
-    HTML           6.6%  ███
+    JavaScript    77.6%  ██████████████████████████████████████
+    HTML           6.4%  ███
     CSS           15.9%  ███████
 
 ── TOP 20 LARGEST FILES (by lines) ──────────────────────────────────
    1.  4094 lines  src\assets\55.jpg
-   2.  3861 lines  package-lock.json
+   2.  3867 lines  package-lock.json
    3.  2607 lines  src\renderer\css\style.css
    4.  1273 lines  src\renderer\js\devhub\devhub.js
    5.  1106 lines  src\renderer\js\devhub\tools\regex-tester.js
    6.  1051 lines  src\renderer\js\proxy\proxyQuickPanel.js
    7.   868 lines  src\renderer\js\features\assistant\ui\assistantStyles.css
-   8.   823 lines  src\renderer\js\passwords\index.js
-   9.   804 lines  docs\CONTEXT.txt
+   8.   831 lines  docs\CONTEXT.txt
+   9.   823 lines  src\renderer\js\passwords\index.js
   10.   781 lines  src\renderer\js\devhub\tools\image-converter\converter.js
   11.   769 lines  src\renderer\js\devhub\tools\color-picker.js
   12.   711 lines  src\renderer\downloads.html
   13.   658 lines  src\renderer\js\devhub\tools\json-viewer.js
   14.   634 lines  src\renderer\history.html
   15.   595 lines  src\renderer\js\features\cookieManager.js
-  16.   591 lines  src\renderer\js\settings\styles.css
-  17.   584 lines  src\renderer\js\passwords\autofill.js
-  18.   573 lines  src\assets\icon.png
-  19.   568 lines  docs\folder_structure.txt
+  16.   593 lines  docs\folder_structure.txt
+  17.   591 lines  src\renderer\js\settings\styles.css
+  18.   584 lines  src\renderer\js\passwords\autofill.js
+  19.   573 lines  src\assets\icon.png
   20.   557 lines  src\renderer\js\devhub\tools\image-editor\editor.js
 
 ── FOLDER STRUCTURE ─────────────────────────────────────────────────
@@ -68,7 +68,7 @@ vortex/
 │   ├── ASSISTANT_PLAN.txt
 │   ├── CONTEXT.txt
 │   ├── folder_structure.txt
-│   ├── RELEASE_v4.6.0.md
+│   ├── RELEASE_v4.7.0.md
 │   └── YT_ADBLOCKER_v4.6.0.txt
 ├── src/
 │   ├── assets/
@@ -152,6 +152,22 @@ vortex/
 │       │   │   │   │   └── tabRenderer.js
 │       │   │   │   └── index.js
 │       │   │   ├── webview/
+│       │   │   │   ├── errorPages/
+│       │   │   │   │   ├── lib/
+│       │   │   │   │   │   └── three.min.js
+│       │   │   │   │   ├── scenes/
+│       │   │   │   │   │   ├── dnsError.js
+│       │   │   │   │   │   ├── noInternet.js
+│       │   │   │   │   │   ├── notFound.js
+│       │   │   │   │   │   ├── redirectLoop.js
+│       │   │   │   │   │   ├── sslError.js
+│       │   │   │   │   │   └── timeout.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── errorLayout.js
+│       │   │   │   │   │   └── errorStyles.css
+│       │   │   │   │   ├── errorMap.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   └── renderer.js
 │       │   │   │   ├── scripts/
 │       │   │   │   │   ├── favicon.js
 │       │   │   │   │   ├── find.js
@@ -215,7 +231,8 @@ vortex/
 │       │   │   │   ├── v4.4.0.json
 │       │   │   │   ├── v4.5.0.json
 │       │   │   │   ├── v4.6.0.json
-│       │   │   │   └── v4.7.0.json
+│       │   │   │   ├── v4.7.0.json
+│       │   │   │   └── v4.8.0.json
 │       │   │   └── index.js
 │       │   ├── core/
 │       │   │   ├── app/

@@ -77,6 +77,26 @@ const WVListeners = (() => {
       if (activeIdGetter() === tabId) { Navigation.endProgress(); NetStatus.onLoadFinish(wv); }
     });
 
+    // Custom 3D error pages
+    wv.addEventListener('did-fail-load', (e) => {
+      if (!e.isMainFrame) return;
+      if (e.errorCode === -3) return; // ERR_ABORTED — navigation cancelled, ignore
+
+      // Show the failed URL in the address bar
+      if (activeIdGetter() === tabId && e.validatedURL) {
+        Navigation.setURL(e.validatedURL);
+        Tabs.updateTab(tabId, { url: e.validatedURL });
+      }
+
+      if (typeof WVErrorPage !== 'undefined') {
+        WVErrorPage.show(wv, {
+          errorCode:        e.errorCode,
+          errorDescription: e.errorDescription,
+          url:              e.validatedURL,
+        });
+      }
+    });
+
     wv.addEventListener('did-navigate', (e) => {
       if (activeIdGetter() === tabId) Navigation.setURL(e.url);
       Tabs.updateTab(tabId, { url: e.url });
@@ -108,7 +128,8 @@ const WVListeners = (() => {
       if (activeIdGetter() === tabId) Navigation.setURL(e.url);
       if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, e.url, null, null);
       if (WVYTAdblock.isEnabled()) WVYTAdblock.inject(wv);
-      if (activeIdGetter() === tabId && typeof PasswordAutofill !== 'undefined') {        PasswordAutofill.onNavigate(e.url, wv.src);
+      if (activeIdGetter() === tabId && typeof PasswordAutofill !== 'undefined') {
+        PasswordAutofill.onNavigate(e.url, wv.src);
       }
     });
 
