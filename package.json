@@ -1,6 +1,6 @@
 {
   "name": "vortex",
-  "version": "4.7.0",
+  "version": "4.8.0",
   "description": "Vortex Browser - Electron based browser",
   "main": "main.js",
   "author": "Vortex",
@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@ghostery/adblocker-electron": "^2.14.1",
-    "adblock-rs": "^0.12.2"
+    "adblock-rs": "^0.12.2",
+    "three": "^0.184.0"
   }
 }

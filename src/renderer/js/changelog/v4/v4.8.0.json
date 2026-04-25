@@ -1,0 +1,53 @@
+{
+  "id": "v4.8.0",
+  "version": "4.8.0",
+  "badge": "latest",
+  "name": "Error Pages Redesign",
+  "date": "2026-04-25",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 1, "improve": 6, "fix": 0 },
+  "categories": [
+    {
+      "label": "Error Pages",
+      "features": [
+        {
+          "type": "new",
+          "label": "Fully Redesigned Error Pages",
+          "desc": "All error pages (No Internet, DNS Error, SSL Error, Timeout, Not Found, Redirect Loop) have been completely redesigned with a clean, professional two-column layout — icon on the left, content on the right.",
+          "howto": "Trigger any network error (e.g. visit a fake domain) to see the new error page."
+        },
+        {
+          "type": "improve",
+          "label": "Full-screen 3D Background",
+          "desc": "Each error type now has a unique subtle 3D background animation using Three.js — particles, wireframe shapes, and slow rotations. Canvas fills the entire viewport as a background layer."
+        },
+        {
+          "type": "improve",
+          "label": "Glassmorphism Layout replaced with Clean Side-by-Side Design",
+          "desc": "Previous heavy glassmorphism card replaced with a minimal two-column layout. Icon box on the left with accent color tint, text content on the right — similar to Chrome/Arc error pages but with a dark theme."
+        },
+        {
+          "type": "improve",
+          "label": "Per-scene Accent Colors",
+          "desc": "Each error type has its own accent color — teal for No Internet, purple for DNS, red for SSL, amber for Timeout, indigo for Not Found, yellow for Redirect Loop. Colors applied to icon, dots, badge, and primary button."
+        },
+        {
+          "type": "improve",
+          "label": "Monospace Error Code Badge",
+          "desc": "Error code (e.g. ERR -105) shown in a styled monospace badge below the icon for quick identification."
+        },
+        {
+          "type": "improve",
+          "label": "Staggered Entry Animations",
+          "desc": "Title, subtitle, tips, and buttons each animate in with a staggered slide-up — fast and clean at 0.35s, not flashy."
+        },
+        {
+          "type": "improve",
+          "label": "Responsive Layout",
+          "desc": "On narrow viewports the layout stacks vertically — icon and badge on top, content below."
+        }
+      ]
+    }
+  ]
+}

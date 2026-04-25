@@ -1,6 +1,6 @@
 ================================================================================
 VORTEX BROWSER — PROJECT CONTEXT FILE
-Last Updated: v4.7.0 | April 24, 2026
+Last Updated: v4.8.0 | April 25, 2026
 GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
 Branch: VORTEX-Browser-Restructure
 ================================================================================
@@ -48,7 +48,7 @@ vortex/
 │   ├── ASSISTANT_PLAN.txt
 │   ├── CONTEXT.txt
 │   ├── folder_structure.txt
-│   ├── RELEASE_v4.6.0.md
+│   ├── RELEASE_v4.7.0.md
 │   └── YT_ADBLOCKER_v4.6.0.txt
 ├── src/
 │   ├── assets/
@@ -132,6 +132,22 @@ vortex/
 │       │   │   │   │   └── tabRenderer.js
 │       │   │   │   └── index.js
 │       │   │   ├── webview/
+│       │   │   │   ├── errorPages/
+│       │   │   │   │   ├── lib/
+│       │   │   │   │   │   └── three.min.js
+│       │   │   │   │   ├── scenes/
+│       │   │   │   │   │   ├── dnsError.js
+│       │   │   │   │   │   ├── noInternet.js
+│       │   │   │   │   │   ├── notFound.js
+│       │   │   │   │   │   ├── redirectLoop.js
+│       │   │   │   │   │   ├── sslError.js
+│       │   │   │   │   │   └── timeout.js
+│       │   │   │   │   ├── ui/
+│       │   │   │   │   │   ├── errorLayout.js
+│       │   │   │   │   │   └── errorStyles.css
+│       │   │   │   │   ├── errorMap.js
+│       │   │   │   │   ├── index.js
+│       │   │   │   │   └── renderer.js
 │       │   │   │   ├── scripts/
 │       │   │   │   │   ├── favicon.js
 │       │   │   │   │   ├── find.js
@@ -195,7 +211,8 @@ vortex/
 │       │   │   │   ├── v4.4.0.json
 │       │   │   │   ├── v4.5.0.json
 │       │   │   │   ├── v4.6.0.json
-│       │   │   │   └── v4.7.0.json
+│       │   │   │   ├── v4.7.0.json
+│       │   │   │   └── v4.8.0.json
 │       │   │   └── index.js
 │       │   ├── core/
 │       │   │   ├── app/
@@ -607,6 +624,7 @@ TOTAL IMPACT:
 VERSION HISTORY (newest first)
 ================================================================================
 
+v4.8.0 — Error Pages Redesign (Clean professional two-column layout, full-screen 3D background per error type, per-scene accent colors, monospace error badge, staggered animations, responsive)
 v4.7.0 — Built-in Video Downloader (yt-dlp, 1000+ sites, sidebar panel, quality selector, ffmpeg merge, downloads integration, settings section, supported sites browser)
 v4.6.0 — YouTube Ad Blocker Undetectable (Dedicated session blocking, ad video URL patterns, auto skip + overlay hide, FOUC fix, 2 bug fixes)
 v4.5.0 — AI Assistant + Code Restructure (Built-in Ollama AI assistant, 34 MCP browser tools, thinking model support, page reading, streaming chat; Full codebase restructure 130+ modular files; DevHub lazy loading; YouTube ad blocker improved; 4 bug fixes)

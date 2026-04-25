@@ -1,0 +1,160 @@
+/**
+ * errorPages/ui/errorStyles.css
+ * Shared styles for all 3D error pages.
+ * Inlined into the error page HTML by errorLayout.js — this file is the
+ * canonical source of truth; keep errorLayout.js in sync if you change it.
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #c8e8e5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* ── Three.js canvas ─────────────────────────────────────────────────────── */
+
+#three-canvas {
+  width: 100%;
+  max-width: 420px;
+  height: 260px;
+  display: block;
+  margin-bottom: 24px;
+}
+
+/* ── Error content ───────────────────────────────────────────────────────── */
+
+.error-content {
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+}
+
+.error-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.error-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #e0f4f4;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+
+.error-subtitle {
+  font-size: 13px;
+  color: #4a8080;
+  margin-bottom: 20px;
+}
+
+/* ── Tips box ────────────────────────────────────────────────────────────── */
+
+.error-tips {
+  background: #0f2222;
+  border: 1px solid #1e3838;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 12px;
+  color: #7aadad;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.error-tip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.error-tip-row:last-child {
+  margin-bottom: 0;
+}
+
+.error-tip-arrow {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Action buttons ──────────────────────────────────────────────────────── */
+
+.error-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 9px 22px;
+  border-radius: 8px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  /* background-color set inline via scene color */
+  color: #001a18;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: scale(1.03);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: #7aadad;
+  border: 1px solid #1e3838;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #c8e8e5;
+}
+
+/* ── Footer meta ─────────────────────────────────────────────────────────── */
+
+.error-code {
+  margin-top: 16px;
+  font-size: 10px;
+  color: #2a5050;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.error-url {
+  font-size: 10px;
+  color: #1e4040;
+  margin-top: 4px;
+  word-break: break-all;
+  max-width: 400px;
+  margin-inline: auto;
+}
