@@ -103,7 +103,13 @@ const WVYTAdblock = (() => {
     try {
       const url = wv.src || '';
       if (!url.includes('youtube.com') || !_enabled) return;
-      wv.executeJavaScript(JS.replace('__SPEED__', _speed)).catch(() => {});
+      // Small delay in case page context isn't fully ready (packaged build timing)
+      const _doInject = () => {
+        wv.executeJavaScript(JS).catch(() => {});
+      };
+      // Try immediately, then retry once after 500ms as fallback for packaged builds
+      _doInject();
+      setTimeout(_doInject, 500);
     } catch (_) {}
   }
 

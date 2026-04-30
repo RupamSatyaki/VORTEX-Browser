@@ -1,0 +1,37 @@
+{
+  "id": "v4.8.2",
+  "version": "4.8.2",
+  "badge": "latest",
+  "name": "Packaged Build Fix",
+  "date": "2026-04-30",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 0, "improve": 0, "fix": 4 },
+  "categories": [
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "YouTube Ad Blocker Not Working in Packaged Build",
+          "desc": "webRequest handlers on the persist:youtube session were not registering correctly in packaged builds due to a session initialization timing issue. Fixed with setImmediate + retry mechanism to ensure handlers register after the session is fully ready."
+        },
+        {
+          "type": "fix",
+          "label": "webviewPreload.js Path Resolution in Packaged Build",
+          "desc": "webviewPreload.js path was resolving incorrectly on Windows in packaged builds — a leading backslash was being prepended to the drive letter (e.g. \\C:\\...). Fixed with proper path normalization and a 3-step fallback: app.asar.unpacked → __dirname → app.getAppPath()."
+        },
+        {
+          "type": "fix",
+          "label": "YouTube Ad Injection Timing in Packaged Build",
+          "desc": "executeJavaScript injection was firing before the page context was fully ready in packaged builds. Now injects immediately and retries once after 500ms. Duplicate injection is safely prevented by the existing document property guard."
+        },
+        {
+          "type": "fix",
+          "label": "Windows Path Backslash Bug in webview Preload",
+          "desc": "file:///C:/... URL conversion was producing \\C:\\... (extra leading backslash) on Windows. Fixed path normalization in webview/index.js to correctly strip the leading backslash when a drive letter follows."
+        }
+      ]
+    }
+  ]
+}

@@ -17,6 +17,7 @@ const VERSION_GROUPS = [
     major: 4,
     label: 'Version 4',
     files: [
+      'v4/v4.8.2.json',
       'v4/v4.8.1.json',
       'v4/v4.8.0.json',
       'v4/v4.7.0.json',

@@ -23,7 +23,23 @@ let _blockedCount = 0;
 function init() {
   _ytSession = session.fromPartition(YT_PARTITION);
 
-  // Block ad requests — but use redirect for critical detection endpoints
+  // In packaged builds, session may not be fully initialized immediately.
+  // Use setImmediate to ensure the session is ready before registering handlers.
+  setImmediate(() => {
+    _registerWebRequest();
+  });
+
+  console.log('[YTBlocker] YouTube session initialized with ad blocking');
+}
+
+function _registerWebRequest() {
+  if (!_ytSession) {
+    console.warn('[YTBlocker] Session not ready, retrying...');
+    setTimeout(_registerWebRequest, 500);
+    return;
+  }
+
+  // Block ad requests — but allow critical detection endpoints
   _ytSession.webRequest.onBeforeRequest(
     {
       urls: [
@@ -41,9 +57,7 @@ function init() {
       const referrer = details.referrer || '';
       const type     = details.resourceType || '';
 
-      // Special handling for pagead/id — allow it through
-      // Blocking or redirecting this triggers ERR_UNSAFE_REDIRECT or detection
-      // The actual ad video content (ctier=L) is what we block, not the ID endpoint
+      // Allow pagead/id — blocking triggers ERR_BLOCKED_BY_CLIENT detection
       if (url.includes('doubleclick.net/pagead/id')) {
         callback({});
         return;
@@ -59,13 +73,11 @@ function init() {
   );
 
   // Strip ad-detection response headers from YouTube responses
-  // YouTube uses these headers to verify ad requests completed successfully
   _ytSession.webRequest.onHeadersReceived(
     { urls: ['*://*.youtube.com/*', '*://*.googlevideo.com/*'] },
     (details, callback) => {
       const headers = details.responseHeaders || {};
 
-      // Remove headers that YouTube uses to track ad delivery confirmation
       const headersToRemove = [
         'x-ad-impressions',
         'x-ad-request-id',
@@ -81,7 +93,7 @@ function init() {
     }
   );
 
-  console.log('[YTBlocker] YouTube session initialized with ad blocking');
+  console.log('[YTBlocker] webRequest handlers registered on persist:youtube session');
 }
 
 function getPartition()    { return YT_PARTITION; }
