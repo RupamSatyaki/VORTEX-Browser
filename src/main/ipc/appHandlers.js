@@ -17,9 +17,21 @@ function register(_getWin) {
     const { app } = require('electron');
     const appPath = app.getAppPath();
     const fs = require('fs');
-    const unpackedPath = path.join(appPath.replace('app.asar', 'app.asar.unpacked'), 'src/renderer/js/webviewPreload.js');
-    const normalPath   = path.join(__dirname, '../../renderer/js/webviewPreload.js');
-    return fs.existsSync(unpackedPath) ? unpackedPath : normalPath;
+
+    // In packaged build, webviewPreload.js must be in app.asar.unpacked
+    // (listed in package.json build.asarUnpack)
+    const unpackedPath = path.join(
+      appPath.replace('app.asar', 'app.asar.unpacked'),
+      'src/renderer/js/webviewPreload.js'
+    );
+    if (fs.existsSync(unpackedPath)) return unpackedPath;
+
+    // Dev mode — direct path
+    const devPath = path.join(__dirname, '../../renderer/js/webviewPreload.js');
+    if (fs.existsSync(devPath)) return devPath;
+
+    // Last resort fallback
+    return path.join(appPath, 'src/renderer/js/webviewPreload.js');
   });
 
   ipcMain.handle('app:downloadsPage', () => path.join(__dirname, '../../renderer/downloads.html'));

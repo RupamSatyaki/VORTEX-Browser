@@ -1,11 +1,11 @@
 {
   "id": "v4.8.1",
   "version": "4.8.1",
-  "badge": "latest",
+  "badge": "stable",
   "name": "YouTube Ad Blocker Hardening",
   "date": "2026-04-30",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 0, "improve": 4, "fix": 3 },
   "categories": [
     {

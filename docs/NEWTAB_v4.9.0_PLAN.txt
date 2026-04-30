@@ -1,0 +1,359 @@
+================================================================================
+VORTEX BROWSER — Custom New Tab Page v4.9.0 PLAN
+Created: April 30, 2026
+Status: APPROVED — Pending Implementation
+================================================================================
+
+================================================================================
+OVERVIEW
+================================================================================
+
+Current newtab (vortex://newtab) mein sirf clock, quick links, aur typing test hai.
+v4.9.0 mein isko fully customizable banaenge:
+
+  - Weather widget (OpenWeatherMap free API)
+  - Clock (already exists — improve karo)
+  - Custom background image / gradient / solid color
+  - Quick Notes widget (localStorage persist)
+  - Quick links (already exists — improve karo)
+  - Typing test (already exists — keep as-is)
+  - Settings panel (gear icon) — toggle widgets on/off, set background
+
+Sab kuch ek hi file mein rahega: newtab.html
+Koi external JS files nahi — self-contained page.
+
+================================================================================
+UI LAYOUT
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────┐
+│  [BG: custom image / gradient]                          [⚙️]   │
+│                                                                  │
+│              🕐  14:32:07                                        │
+│              Thursday, April 30, 2026                           │
+│                                                                  │
+│  ┌─────────────────────┐    ┌──────────────────────────────┐   │
+│  │  🌤️ Weather          │    │  📝 Quick Notes              │   │
+│  │  Mumbai              │    │  ┌──────────────────────┐   │   │
+│  │  28°C  Partly Cloudy │    │  │ Type your notes...   │   │   │
+│  │  H:31° L:24°         │    │  │                      │   │   │
+│  │  Humidity: 72%       │    │  └──────────────────────┘   │   │
+│  └─────────────────────┘    └──────────────────────────────┘   │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  Quick Links: [G] [▶] [GH] [R] [𝕏]  [+ Add]            │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  ⌨️ Typing Speed Test                                     │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
+
+Settings Panel (slide-in from right, gear icon click):
+┌──────────────────────────┐
+│  ⚙️ New Tab Settings      │
+│  ─────────────────────── │
+│  Background              │
+│  ○ Default (dark)        │
+│  ○ Solid Color  [#0d1f1f]│
+│  ○ Gradient     [pick]   │
+│  ○ Custom Image [upload] │
+│  ─────────────────────── │
+│  Widgets                 │
+│  [✓] Clock               │
+│  [✓] Weather             │
+│  [✓] Quick Notes         │
+│  [✓] Quick Links         │
+│  [✓] Typing Test         │
+│  ─────────────────────── │
+│  Weather                 │
+│  City: [Mumbai      ]    │
+│  Unit: ○ °C  ○ °F        │
+│  API Key: [optional]     │
+└──────────────────────────┘
+
+================================================================================
+WIDGETS — DETAILED SPEC
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+1. CLOCK (improve existing)
+────────────────────────────────────────────────────────────────────────────────
+
+Current: Basic clock with date
+Improve:
+  - 12h / 24h toggle (settings mein)
+  - Seconds show/hide toggle
+  - Font weight: 200 (keep)
+  - Greeting text: "Good morning, [name]" / "Good afternoon" / "Good evening"
+    - Name: settings → profile se lena (vortexAPI.invoke('storage:read', 'profile'))
+    - Fallback: sirf "Good morning" without name
+
+Storage key: newtab_settings.clock_24h, newtab_settings.clock_seconds
+
+────────────────────────────────────────────────────────────────────────────────
+2. WEATHER WIDGET
+────────────────────────────────────────────────────────────────────────────────
+
+API: OpenWeatherMap (free tier)
+  - Endpoint: https://api.openweathermap.org/data/2.5/weather?q={city}&appid={key}&units=metric
+  - Free tier: 1000 calls/day — more than enough
+  - Default API key: user apna daalega settings mein
+  - Fallback: agar no API key → widget hidden, settings mein prompt dikhao
+
+Default city: "Mumbai" (user change kar sakta hai)
+Refresh: har 30 min (localStorage mein cache karo with timestamp)
+
+Display:
+  - City name
+  - Temperature (°C ya °F)
+  - Weather description (e.g. "Partly Cloudy")
+  - Weather icon (OpenWeatherMap icon URL: https://openweathermap.org/img/wn/{icon}@2x.png)
+  - High / Low temperature
+  - Humidity %
+  - Wind speed
+
+Error states:
+  - No API key → "Add API key in settings to see weather"
+  - City not found → "City not found"
+  - Network error → "Weather unavailable" + last cached data agar available ho
+
+Storage keys:
+  newtab_settings.weather_city     → city name
+  newtab_settings.weather_unit     → 'metric' | 'imperial'
+  newtab_settings.weather_apikey   → API key
+  newtab_weather_cache             → { data, timestamp } (30 min cache)
+
+────────────────────────────────────────────────────────────────────────────────
+3. QUICK NOTES WIDGET
+────────────────────────────────────────────────────────────────────────────────
+
+Simple textarea — auto-save to localStorage on every keystroke (debounced 500ms)
+No title, no formatting — just plain text notes
+Character count shown bottom-right (e.g. "142 chars")
+Placeholder: "Jot something down..."
+
+Features:
+  - Auto-save (debounced 500ms)
+  - "Saved" indicator (fades in/out after save)
+  - Clear button (with confirmation)
+  - Monospace font option (toggle in settings)
+
+Storage key: newtab_notes
+
+────────────────────────────────────────────────────────────────────────────────
+4. QUICK LINKS (improve existing)
+────────────────────────────────────────────────────────────────────────────────
+
+Current: Hardcoded 5 links (Google, YouTube, GitHub, Reddit, Twitter)
+Improve:
+  - User add/remove/reorder links
+  - Favicon auto-fetch: https://www.google.com/s2/favicons?domain={domain}&sz=32
+  - Max 12 links
+  - "+ Add" button → small popup: URL input + label input
+  - Right-click on link → "Remove" option
+  - Drag to reorder (simple swap on drop)
+
+Storage key: newtab_quicklinks → array of { url, label, favicon? }
+Default links: Google, YouTube, GitHub, Reddit, Twitter (same as current)
+
+────────────────────────────────────────────────────────────────────────────────
+5. BACKGROUND CUSTOMIZATION
+────────────────────────────────────────────────────────────────────────────────
+
+Options:
+  a) Default — current dark teal (#0d1f1f)
+  b) Solid Color — color picker
+  c) Gradient — two color pickers + direction (horizontal/vertical/diagonal)
+  d) Custom Image — file input (image/*)
+     - Store as base64 in localStorage (max ~2MB warning)
+     - Blur amount slider (0-20px) — for readability
+     - Overlay opacity slider (0-80%) — dark overlay on top of image
+
+Storage keys:
+  newtab_settings.bg_type          → 'default' | 'solid' | 'gradient' | 'image'
+  newtab_settings.bg_color         → hex color
+  newtab_settings.bg_gradient      → { color1, color2, direction }
+  newtab_settings.bg_image         → base64 string
+  newtab_settings.bg_blur          → 0-20
+  newtab_settings.bg_overlay       → 0-80
+
+────────────────────────────────────────────────────────────────────────────────
+6. SETTINGS PANEL
+────────────────────────────────────────────────────────────────────────────────
+
+Trigger: Gear icon (⚙️) top-right corner
+Animation: Slide-in from right (300px wide)
+Backdrop: semi-transparent, click to close
+
+Sections:
+  1. Background (type selector + options)
+  2. Widgets (toggle each widget on/off)
+  3. Clock (12h/24h, show seconds)
+  4. Weather (city, unit, API key)
+  5. Quick Notes (monospace toggle, clear button)
+
+All changes apply LIVE — no save button needed.
+
+================================================================================
+FILE STRUCTURE
+================================================================================
+
+newtab.html — single self-contained file
+  All CSS inline in <style>
+  All JS inline in <script>
+
+Sections in JS:
+  // ── Storage helpers ──
+  // ── Settings load/save ──
+  // ── Background apply ──
+  // ── Clock ──
+  // ── Weather ──
+  // ── Quick Notes ──
+  // ── Quick Links ──
+  // ── Typing Test (keep existing) ──
+  // ── Settings Panel ──
+  // ── Init ──
+
+No external dependencies.
+No IPC calls (newtab runs in webview, vortexAPI available but minimize usage).
+Weather API call: direct fetch() from page context.
+
+================================================================================
+STORAGE SCHEMA (localStorage)
+================================================================================
+
+newtab_settings = {
+  // Clock
+  clock_24h: true,
+  clock_seconds: true,
+  clock_greeting: true,
+
+  // Widgets visibility
+  show_weather: true,
+  show_notes: true,
+  show_quicklinks: true,
+  show_typing: true,
+
+  // Weather
+  weather_city: 'Mumbai',
+  weather_unit: 'metric',
+  weather_apikey: '',
+
+  // Background
+  bg_type: 'default',
+  bg_color: '#0d1f1f',
+  bg_gradient: { color1: '#0d1f1f', color2: '#1a0a2e', direction: 'diagonal' },
+  bg_image: '',
+  bg_blur: 8,
+  bg_overlay: 40,
+
+  // Notes
+  notes_monospace: false,
+}
+
+newtab_notes = ''  (plain text)
+
+newtab_quicklinks = [
+  { url: 'https://www.google.com', label: 'Google' },
+  { url: 'https://www.youtube.com', label: 'YouTube' },
+  { url: 'https://github.com', label: 'GitHub' },
+  { url: 'https://www.reddit.com', label: 'Reddit' },
+  { url: 'https://twitter.com', label: 'Twitter' },
+]
+
+newtab_weather_cache = {
+  data: { ... },   // OpenWeatherMap response
+  timestamp: 0,    // Date.now()
+  city: 'Mumbai',
+}
+
+================================================================================
+WEATHER API — SETUP GUIDE (for docs)
+================================================================================
+
+1. Go to https://openweathermap.org/api
+2. Sign up (free)
+3. Go to API Keys section
+4. Copy your API key
+5. Paste in New Tab Settings → Weather → API Key
+
+Free tier limits:
+  - 1,000 calls/day
+  - 60 calls/minute
+  - Current weather data ✅
+  - Forecast (5 day) ✅ (future feature)
+
+We cache for 30 minutes → ~48 calls/day per user. Well within limits.
+
+================================================================================
+IMPLEMENTATION ORDER
+================================================================================
+
+Phase 1 — Structure + Settings:
+  1. newtab.html skeleton with gear icon
+  2. Settings panel HTML + CSS
+  3. localStorage helpers (get/set/defaults)
+  4. Settings panel open/close animation
+
+Phase 2 — Background:
+  5. Background type selector
+  6. Solid color picker
+  7. Gradient picker
+  8. Image upload + blur + overlay
+
+Phase 3 — Widgets:
+  9. Clock improvements (greeting, 12h/24h)
+  10. Weather widget (fetch + cache + display)
+  11. Quick Notes (textarea + autosave)
+  12. Quick Links (add/remove/favicon)
+
+Phase 4 — Polish:
+  13. Widget toggle (show/hide)
+  14. Responsive layout
+  15. Animations (widget fade-in on load)
+  16. Error states (weather API errors)
+
+================================================================================
+DESIGN TOKENS (CSS Variables)
+================================================================================
+
+--nt-bg          : background color/image
+--nt-surface     : widget card background (#122222 default)
+--nt-border      : widget border (#1e3838 default)
+--nt-text        : primary text (#c8e8e5)
+--nt-text-muted  : secondary text (#4a8080)
+--nt-accent      : accent color (#00c8b4)
+--nt-radius      : border radius (14px)
+
+================================================================================
+WHAT NOT TO BUILD (scope limit)
+================================================================================
+
+❌ Multiple note pages / rich text editor → too complex, use DevHub Notepad
+❌ Weather forecast (5-day) → v4.9.x mein add kar sakte hain
+❌ Bookmarks sync with browser bookmarks → already in QuickLaunch panel
+❌ Search bar on newtab → already in address bar
+❌ Widgets drag-to-reorder → too complex for v4.9.0
+❌ Online wallpaper gallery → bandwidth + complexity
+❌ Multiple themes/presets → user can set manually
+
+================================================================================
+CHANGELOG ENTRY (for v4.9.0.json)
+================================================================================
+
+name: "Custom New Tab Page"
+categories:
+  New Features:
+    - Custom Background (solid/gradient/image with blur + overlay)
+    - Weather Widget (OpenWeatherMap, 30min cache, °C/°F)
+    - Quick Notes Widget (auto-save, localStorage)
+    - Quick Links customization (add/remove/favicon auto-fetch)
+    - New Tab Settings Panel (gear icon, live apply)
+  Improvements:
+    - Clock: greeting text, 12h/24h toggle, seconds toggle
+    - Quick Links: favicon support, max 12 links
+
+================================================================================
+END OF PLAN
+================================================================================
