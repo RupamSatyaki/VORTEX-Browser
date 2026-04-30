@@ -1,0 +1,57 @@
+{
+  "id": "v4.8.1",
+  "version": "4.8.1",
+  "badge": "latest",
+  "name": "YouTube Ad Blocker Hardening",
+  "date": "2026-04-30",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 0, "improve": 4, "fix": 3 },
+  "categories": [
+    {
+      "label": "Improvements",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Expanded Ad URL Pattern Detection",
+          "desc": "Added 15+ new ad URL parameters to the block list — adsid, adslot, correlator, pucrd, rdid, vad_type, label=preroll/midroll/postroll and more. Covers newer YouTube ad delivery signals that were previously slipping through."
+        },
+        {
+          "type": "improve",
+          "label": "Smart /api/stats/atr Blocking",
+          "desc": "Previously the entire /api/stats/atr endpoint was blocked, which could trigger detection. Now only ad-specific requests (el=adunit, is_ad=1) are blocked — regular video stats (el=detailpage) are allowed through."
+        },
+        {
+          "type": "improve",
+          "label": "Anti-Fingerprint DOM Injection",
+          "desc": "Replaced window.__vxObs global (detectable by YouTube) with a randomized non-enumerable document property. MutationObserver now targets #movie_player only instead of document.documentElement — far less suspicious. Added setInterval fallback for ads that slip through the observer."
+        },
+        {
+          "type": "improve",
+          "label": "Blocklist Engine Whitelist",
+          "desc": "Added a permanent whitelist to the blocklist engine — fonts.googleapis.com, YouTube infrastructure, imasdk.googleapis.com and other essential domains are never blocked even if they appear in EasyList or EasyPrivacy."
+        }
+      ]
+    },
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "Fixed /youtubei/v1/log_event Detection Trigger",
+          "desc": "log_event was being blocked, causing YouTube to detect adblock since this endpoint is used for all events (video play, navigation, autoplay) — not just ads. Now correctly allowed through."
+        },
+        {
+          "type": "fix",
+          "label": "Fixed PiP Button TrustedHTML Error on YouTube",
+          "desc": "PiP button was using innerHTML to create the button element, which YouTube's Trusted Types policy blocks. Rebuilt using createElement and createElementNS — no more console errors."
+        },
+        {
+          "type": "fix",
+          "label": "Fixed PiP MutationObserver Crash",
+          "desc": "webviewPreload.js was crashing with 'parameter 1 is not of type Node' because document.documentElement was null in some webview contexts. Now retries with a 50ms delay until the target node is available."
+        }
+      ]
+    }
+  ]
+}

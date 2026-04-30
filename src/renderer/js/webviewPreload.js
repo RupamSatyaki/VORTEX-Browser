@@ -53,13 +53,47 @@ window.addEventListener('keydown', (e) => {
 // ── PiP Button ────────────────────────────────────────────────────────────────
 (function initPiP() {
   let _pipBtn = null, _currentVideo = null, _hideTimer = null;
-  const BTN_HTML = `<button id="__vortex_pip_btn" title="Picture in Picture" style="position:absolute;z-index:2147483647;background:rgba(0,0,0,0.72);border:none;border-radius:8px;color:#fff;cursor:pointer;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:12px;font-family:sans-serif;backdrop-filter:blur(4px);pointer-events:all;transition:opacity 0.15s;"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="12" y="11" width="9" height="7" rx="1" fill="currentColor" stroke="none"/></svg>PiP</button>`;
+
   function _createBtn() {
     if (_pipBtn) return;
-    const wrap = document.createElement('div');
-    wrap.innerHTML = BTN_HTML;
-    _pipBtn = wrap.firstElementChild;
-    _pipBtn.addEventListener('click', (e) => {
+
+    // Build button using DOM methods — avoids TrustedHTML policy on YouTube
+    const btn = document.createElement('button');
+    btn.id = '__vortex_pip_btn';
+    btn.title = 'Picture in Picture';
+    btn.setAttribute('style',
+      'position:absolute;z-index:2147483647;background:rgba(0,0,0,0.72);' +
+      'border:none;border-radius:8px;color:#fff;cursor:pointer;padding:6px 10px;' +
+      'display:flex;align-items:center;gap:6px;font-size:12px;font-family:sans-serif;' +
+      'backdrop-filter:blur(4px);pointer-events:all;transition:opacity 0.15s;'
+    );
+
+    // SVG icon via DOM
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '16');
+    svg.setAttribute('height', '16');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '2');
+    const rect1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect1.setAttribute('x', '2'); rect1.setAttribute('y', '4');
+    rect1.setAttribute('width', '20'); rect1.setAttribute('height', '16');
+    rect1.setAttribute('rx', '2');
+    const rect2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect2.setAttribute('x', '12'); rect2.setAttribute('y', '11');
+    rect2.setAttribute('width', '9'); rect2.setAttribute('height', '7');
+    rect2.setAttribute('rx', '1');
+    rect2.setAttribute('fill', 'currentColor');
+    rect2.setAttribute('stroke', 'none');
+    svg.appendChild(rect1);
+    svg.appendChild(rect2);
+
+    const label = document.createTextNode('PiP');
+    btn.appendChild(svg);
+    btn.appendChild(label);
+
+    btn.addEventListener('click', (e) => {
       e.stopPropagation(); e.preventDefault();
       if (_currentVideo) {
         if (document.pictureInPictureElement) document.exitPictureInPicture().catch(() => {});
@@ -67,7 +101,9 @@ window.addEventListener('keydown', (e) => {
       }
       _hideBtn();
     });
-    document.body.appendChild(_pipBtn);
+
+    document.body.appendChild(btn);
+    _pipBtn = btn;
   }
   function _showBtn(video) {
     _createBtn(); _currentVideo = video; clearTimeout(_hideTimer);
@@ -87,7 +123,13 @@ window.addEventListener('keydown', (e) => {
   function _scan() { document.querySelectorAll('video').forEach(_attachToVideo); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _scan);
   else _scan();
-  new MutationObserver(_scan).observe(document.documentElement, { childList: true, subtree: true });
+  // Guard: document.documentElement may not exist yet in some webview contexts
+  function _startObserver() {
+    const target = document.documentElement || document.body;
+    if (!target) { setTimeout(_startObserver, 50); return; }
+    new MutationObserver(_scan).observe(target, { childList: true, subtree: true });
+  }
+  _startObserver();
 })();
 
 // YouTube ad blocking handled by ytAdblock.js via wv.executeJavaScript()

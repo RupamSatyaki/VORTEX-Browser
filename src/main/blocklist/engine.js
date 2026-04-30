@@ -111,9 +111,31 @@ function _extractDomain(url) {
   } catch { return ''; }
 }
 
+// Domains that must never be blocked — fonts, CDNs, YouTube infrastructure
+const _WHITELIST = new Set([
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'accounts.google.com',
+  'youtube.com',
+  'www.youtube.com',
+  'ytimg.com',
+  'i.ytimg.com',
+  's.ytimg.com',
+  'yt3.ggpht.com',
+  'googlevideo.com',
+  'imasdk.googleapis.com',
+]);
+
 function _isBlocked(url) {
   const domain = _extractDomain(url);
   if (!domain) return false;
+
+  // Never block whitelisted domains
+  if (_WHITELIST.has(domain)) return false;
+  // Check if domain ends with a whitelisted domain
+  for (const w of _WHITELIST) {
+    if (domain.endsWith('.' + w)) return false;
+  }
 
   // Domain match
   if (_blockedDomains.has(domain)) return true;

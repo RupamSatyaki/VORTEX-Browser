@@ -1,8 +1,9 @@
 ================================================================================
-VORTEX BROWSER — YouTube Ad Blocker v4.6.0
+VORTEX BROWSER — YouTube Ad Blocker
+Last Updated: v4.8.0 | April 30, 2026
 ================================================================================
 
-APPROACH: Dedicated Electron Session + Auto Skip
+APPROACH: Dedicated Electron Session + Auto Skip + Smart Pattern Matching
 STATUS: ✅ Working — No Detection
 
 ================================================================================
@@ -31,14 +32,23 @@ Previous approaches that FAILED:
   ❌ playbackRate = 16 → YouTube monitors video.playbackRate
   ❌ video.currentTime jump → YouTube monitors currentTime changes
   ❌ fetch/XHR override → YouTube checks native function toString()
-  ❌ executeJavaScript injection → YouTube scans for injected globals
+  ❌ window.__vxObs global → YouTube scans for unknown globals (fingerprint)
+  ❌ Blocking /youtubei/v1/log_event → YouTube uses this for ALL events, not just ads
+  ❌ Blocking /pagead/id → YouTube JS catches ERR_BLOCKED_BY_CLIENT and detects adblock
+  ❌ data: URL redirect for pagead/id → Electron blocks with ERR_UNSAFE_REDIRECT
+  ❌ MutationObserver on document.documentElement → Too aggressive, triggers integrity checks
 
 Current approach that WORKS:
   ✅ Session-level webRequest blocking → YouTube sees "network error", not adblock
   ✅ IMA SDK loads normally → No detection trigger
-  ✅ Only ad VIDEO CONTENT URLs blocked (ctier=L param)
+  ✅ Only ad VIDEO CONTENT URLs blocked (ctier=L and other ad params)
+  ✅ /youtubei/v1/log_event ALLOWED → YouTube's event bus must not be blocked
+  ✅ /pagead/id ALLOWED → Ad ID endpoint must not be blocked
+  ✅ /api/stats/atr blocked ONLY when el=adunit or is_ad=1 (not el=detailpage)
   ✅ Skip button click → YouTube expects this, not suspicious
-  ✅ display:none on overlay (not ad container) → Less detectable than remove()
+  ✅ Randomized non-enumerable key instead of window.__vxObs → No fingerprint
+  ✅ MutationObserver on #movie_player only → Less suspicious than full DOM watch
+  ✅ setInterval(skipAd, 1000) fallback → Catches ads that slip through observer
 
 ================================================================================
 FILE STRUCTURE
@@ -56,15 +66,36 @@ src/renderer/js/features/ytBlocker/
 src/renderer/js/browser/webview/scripts/
 └── ytAdblock.js      ← executeJavaScript: skip button + overlay hide
 
+src/renderer/js/webviewPreload.js
+└── PiP button built with DOM methods (not innerHTML — Trusted Types policy)
+
+src/main/blocklist/engine.js
+└── _WHITELIST Set — domains that blocklist engine must never block
+
 ================================================================================
-AD PATTERNS BLOCKED
+AD PATTERNS BLOCKED (adPatterns.js)
 ================================================================================
 
 1. Ad video content (googlevideo.com):
-   - ctier=L  → Ad content tier (most reliable signal)
-   - oad=1    → Original ad flag
-   - adformat= → Ad format parameter
-   - ad_type=  → Ad type parameter
+   - ctier=L        → Ad content tier (classic signal)
+   - ctier=A&       → Some ad variants
+   - oad=1          → Original ad flag
+   - &oad=          → Alternate oad position
+   - adformat=      → Ad format parameter
+   - ad_type=       → Ad type parameter
+   - adunit=        → Ad unit identifier
+   - ad_len=        → Ad length parameter (newer)
+   - adslot=        → Ad slot parameter
+   - correlator=    → Ad correlator
+   - adsid=         → Ad session ID
+   - adtagurl=      → Ad tag URL
+   - pucrd=         → Ad-specific param (newer YouTube)
+   - rdid=          → Rewarded ad ID
+   - vad_type=      → Video ad type
+   - idpj=          → Ad impression param
+   - label=preroll  → Preroll label
+   - label=midroll  → Midroll label
+   - label=postroll → Postroll label
 
 2. YouTube ad tracking endpoints:
    - /api/stats/ads
@@ -72,8 +103,22 @@ AD PATTERNS BLOCKED
    - /ptracking
    - /get_midroll_info
    - /ad_data_204
+   - /api/stats/qoe?adformat
+   - /pagead/adview
+   - /pagead/conversion/
+   - /pagead/viewthroughconversion/
+   - /api/stats/atr (ONLY when el=adunit OR is_ad=1 — NOT el=detailpage)
 
-3. Ad domains (only when referrer is youtube.com):
+3. Ad domain paths (always blocked regardless of referrer):
+   - /pagead/adview
+   - /pagead/conversion
+   - /simgad/             → tpc.googlesyndication.com image ads
+   - /safeframe/          → Safe frame ad container
+   - /activeview/         → Active view tracking
+   - /xbbe               → Ad beacon
+   - /ddm/activity        → DoubleClick activity
+
+4. Ad domains (blocked when referrer is youtube.com):
    - pagead2.googlesyndication.com
    - tpc.googlesyndication.com
    - ad.doubleclick.net
@@ -82,23 +127,68 @@ AD PATTERNS BLOCKED
    - securepubads.g.doubleclick.net
    - googleadservices.com
 
-NOT BLOCKED (intentional):
-   - imasdk.googleapis.com → IMA SDK must load or YouTube detects adblock
+NOT BLOCKED — DETECTION TRIGGERS (never block these):
+   - imasdk.googleapis.com          → IMA SDK must load
+   - /youtubei/v1/log_event         → General event bus (video play, navigation, etc.)
+   - /pagead/id                     → Ad ID fingerprinting endpoint
+   - /api/stats/atr?el=detailpage   → Regular video stats
+   - /api/timedtext                 → Subtitles/captions
+   - /youtubei/v1/player            → Player initialization
+   - fonts.googleapis.com           → Google Fonts (blocked by EasyPrivacy — whitelisted)
 
 ================================================================================
-DOM MANIPULATION (executeJavaScript)
+SAFE PATHS WHITELIST (YT_SAFE_PATHS in adPatterns.js)
 ================================================================================
 
-Injected via wv.executeJavaScript() on dom-ready and did-navigate:
+These YouTube paths are NEVER blocked (false positive prevention):
+  - /api/timedtext        → Subtitles/captions
+  - /api/timedtext_video  → Video captions
+  - /youtubei/v1/player   → Player init
+  - /youtubei/v1/next     → Next video suggestions
+  - /youtubei/v1/search   → Search
+  - /youtubei/v1/browse   → Browse/homepage
+  - /youtubei/v1/guide    → Sidebar guide
+  - /youtubei/v1/account  → Account info
+  - /watch                → Watch page
+  - /results              → Search results
 
-1. Skip button auto-click:
+================================================================================
+BLOCKLIST ENGINE WHITELIST (_WHITELIST in engine.js)
+================================================================================
+
+These domains are NEVER blocked by the main blocklist engine
+(even if EasyList/EasyPrivacy contains them):
+  - fonts.googleapis.com
+  - fonts.gstatic.com
+  - accounts.google.com
+  - youtube.com / www.youtube.com
+  - ytimg.com / i.ytimg.com / s.ytimg.com
+  - yt3.ggpht.com
+  - googlevideo.com
+  - imasdk.googleapis.com
+
+================================================================================
+DOM MANIPULATION (ytAdblock.js — executeJavaScript)
+================================================================================
+
+Injected via wv.executeJavaScript() on dom-ready and did-navigate.
+
+Anti-fingerprint measures:
+  - No window.__vxObs or any known global name
+  - Uses randomized non-enumerable document property (_vx + random string)
+  - Object.defineProperty with enumerable:false → invisible to Object.keys()
+  - MutationObserver targets #movie_player only (not document.documentElement)
+  - setInterval(skipAd, 1000) as fallback
+
+1. Skip button auto-click (tries all known selectors):
    .ytp-ad-skip-button-modern
    .ytp-ad-skip-button
    .ytp-skip-ad-button
    .videoAdUiSkipButton
+   [class*="skip-button"]
+   button.ytp-ad-skip-button-container button
 
-2. Ad module hide (display:none):
-   .ytp-ad-module          ← Full ad container
+2. Overlay banner hide (style.setProperty with !important):
    .ytp-ad-overlay-slot    ← Bottom overlay banner
 
 3. Companion/sponsored card hide:
@@ -107,6 +197,16 @@ Injected via wv.executeJavaScript() on dom-ready and did-navigate:
    #google-container-id
    .ytp-ad-overlay-container
    .ytp-image-background-gradient-vertical
+
+================================================================================
+RESPONSE HEADER STRIPPING (session.js — onHeadersReceived)
+================================================================================
+
+These headers are stripped from YouTube/googlevideo responses:
+  - x-ad-impressions
+  - x-ad-request-id
+  - x-adblock-key
+  - x-youtube-ad-signals
 
 ================================================================================
 SETTINGS
@@ -126,6 +226,56 @@ IPC Channels:
   ytBlocker:isEnabled       → current state
 
 ================================================================================
+TROUBLESHOOTING — DETECTION WAPAS AAYE TO
+================================================================================
+
+STEP 1 — DevTools Network tab kholo
+  YouTube tab → Ctrl+Shift+I → Network → filter:
+  doubleclick OR googlevideo OR youtube.com/api OR youtube.com/youtubei
+
+STEP 2 — Kya dekho
+
+  Yeh ERR_BLOCKED_BY_CLIENT hona chahiye (good):
+    ctier=L googlevideo URLs
+    pagead/adview
+    api/stats/ads
+    simgad/
+    ddm/trackimp
+
+  Yeh kabhi block NAHI hona chahiye (detection triggers):
+    /youtubei/v1/log_event   → general event logging
+    /youtubei/v1/player      → player init
+    /api/timedtext           → subtitles
+    fonts.googleapis.com     → fonts
+    pagead/id                → ad ID
+    imasdk.googleapis.com    → IMA SDK (KABHI BLOCK MAT KARO)
+
+STEP 3 — Fix kahan karna hai
+
+  | Problem                              | File              | Fix                          |
+  | Naya ad URL block nahi ho raha       | adPatterns.js     | AD_VIDEO_PARAMS mein add karo|
+  | Zaruri URL galti se block ho raha    | adPatterns.js     | YT_SAFE_PATHS mein add karo  |
+  | Blocklist se site galti se block     | blocklist/engine  | _WHITELIST mein add karo     |
+  | DOM injection detect ho rahi hai     | ytAdblock.js      | Skip selectors update karo   |
+
+STEP 4 — Quick checklist
+
+  1. Network log mein dekho kaunsa URL ERR_BLOCKED_BY_CLIENT hai
+  2. Agar woh "safe" URL hai → YT_SAFE_PATHS mein add karo
+  3. Agar naya ad URL hai → AD_VIDEO_PARAMS mein add karo
+  4. App restart karo (main process changes ke liye)
+  5. YouTube tab close karke naya tab kholo (partition reset)
+
+GOLDEN RULES — Kabhi mat bhoolna:
+  ✅ ctier=L → hamesha block
+  ✅ imasdk.googleapis.com → hamesha ALLOW (detection trigger)
+  ✅ log_event → hamesha ALLOW (detection trigger)
+  ✅ pagead/id → hamesha ALLOW (detection trigger)
+  ✅ fonts/subtitles/player → hamesha ALLOW
+  ✅ App restart zaruri hai main process changes ke baad
+  ✅ YouTube new tab mein kholna padega partition reset ke liye
+
+================================================================================
 KNOWN LIMITATIONS
 ================================================================================
 
@@ -137,6 +287,9 @@ KNOWN LIMITATIONS
 
 3. Homepage banner ads may occasionally flash before being hidden
    (display:none applied after DOM mutation, not before render)
+
+4. YouTube periodically updates its detection algorithms — patterns may need
+   updating. Use the troubleshooting guide above when detection occurs.
 
 ================================================================================
 END
