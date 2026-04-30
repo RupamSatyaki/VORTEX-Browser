@@ -23,7 +23,7 @@ let _blockedCount = 0;
 function init() {
   _ytSession = session.fromPartition(YT_PARTITION);
 
-  // Apply ad blocking webRequest on YouTube session only
+  // Block ad requests — but use redirect for critical detection endpoints
   _ytSession.webRequest.onBeforeRequest(
     {
       urls: [
@@ -41,12 +41,43 @@ function init() {
       const referrer = details.referrer || '';
       const type     = details.resourceType || '';
 
+      // Special handling for pagead/id — allow it through
+      // Blocking or redirecting this triggers ERR_UNSAFE_REDIRECT or detection
+      // The actual ad video content (ctier=L) is what we block, not the ID endpoint
+      if (url.includes('doubleclick.net/pagead/id')) {
+        callback({});
+        return;
+      }
+
       if (isAdRequest(url, referrer, type)) {
         _blockedCount++;
         callback({ cancel: true });
       } else {
         callback({});
       }
+    }
+  );
+
+  // Strip ad-detection response headers from YouTube responses
+  // YouTube uses these headers to verify ad requests completed successfully
+  _ytSession.webRequest.onHeadersReceived(
+    { urls: ['*://*.youtube.com/*', '*://*.googlevideo.com/*'] },
+    (details, callback) => {
+      const headers = details.responseHeaders || {};
+
+      // Remove headers that YouTube uses to track ad delivery confirmation
+      const headersToRemove = [
+        'x-ad-impressions',
+        'x-ad-request-id',
+        'x-adblock-key',
+        'x-youtube-ad-signals',
+      ];
+      headersToRemove.forEach(h => {
+        const key = Object.keys(headers).find(k => k.toLowerCase() === h);
+        if (key) delete headers[key];
+      });
+
+      callback({ responseHeaders: headers });
     }
   );
 

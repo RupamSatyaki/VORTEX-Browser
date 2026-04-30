@@ -1,6 +1,6 @@
 ================================================================================
 VORTEX BROWSER — PROJECT CONTEXT FILE
-Last Updated: v4.8.0 | April 25, 2026
+Last Updated: v4.8.1 | April 30, 2026
 GitHub: https://github.com/RupamSatyaki/VORTEX-Browser
 Branch: VORTEX-Browser-Restructure
 ================================================================================
@@ -624,6 +624,7 @@ TOTAL IMPACT:
 VERSION HISTORY (newest first)
 ================================================================================
 
+v4.8.1 — YouTube Ad Blocker Hardening (Expanded ad URL patterns, smart /api/stats/atr blocking, anti-fingerprint DOM injection, blocklist engine whitelist, 3 bug fixes)
 v4.8.0 — Error Pages Redesign (Clean professional two-column layout, full-screen 3D background per error type, per-scene accent colors, monospace error badge, staggered animations, responsive)
 v4.7.0 — Built-in Video Downloader (yt-dlp, 1000+ sites, sidebar panel, quality selector, ffmpeg merge, downloads integration, settings section, supported sites browser)
 v4.6.0 — YouTube Ad Blocker Undetectable (Dedicated session blocking, ad video URL patterns, auto skip + overlay hide, FOUC fix, 2 bug fixes)
