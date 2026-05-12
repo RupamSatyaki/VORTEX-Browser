@@ -13,36 +13,146 @@ const WVListeners = (() => {
   `;
 
   function attachVortex(wv, tabId, vortexUrl, vortexPages, webviewPreloadPath, webviewsRef, activeIdGetter) {
-    const meta     = vortexPages[vortexUrl];
     const isNewtab = vortexUrl === 'vortex://newtab';
+    const isIncognito = !!(webviewsRef[tabId]?.dataset?.incognito === '1');
 
-    Tabs.updateTab(tabId, { title: meta.title });
+    const _onReady = () => {
+      const currentUrl = wv.src || '';
+      const isInternal = currentUrl.startsWith('vortex://');
+      const meta = vortexPages[currentUrl] || vortexPages[vortexUrl];
+      
+      if (isInternal && meta) {
+        Tabs.updateTab(tabId, { title: meta.title });
+        if (activeIdGetter() === tabId) {
+          Navigation.setURL(currentUrl);
+          document.title = meta.title + ' — Vortex';
+        }
+      }
+      
+      // Inject minimal CSS fix instead of invasive JS
+      wv.insertCSS(`
+        html, body { height: 100vh !important; width: 100vw !important; overflow: auto !important; margin: 0 !important; }
+      `).catch(() => {});
 
-    wv.addEventListener('did-finish-load', () => {
-      Tabs.updateTab(tabId, { title: meta.title });
-      if (activeIdGetter() === tabId) {
-        Navigation.setURL(vortexUrl);
-        document.title = meta.title + ' — Vortex';
-      }
-      if (!isNewtab) {
-        wv.executeJavaScript(`
-          (function() {
-            var h = window.innerHeight + 'px'; var w = window.innerWidth + 'px';
-            document.documentElement.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;';
-            document.body.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;';
-            var page = document.querySelector('.page');
-            if (page) page.style.cssText = 'max-width:800px;width:100%;margin:0 auto;padding:40px 28px 20px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;height:' + h + ';';
-          })();
-        `).catch(() => {});
-      }
-      if (vortexUrl === 'vortex://downloads') {
+      if (currentUrl === 'vortex://downloads') {
         document.dispatchEvent(new CustomEvent('vortex-downloads-ready', { detail: wv }));
+      }
+    };
+
+    // Use dom-ready for faster, more reliable initialization of internal pages
+    wv.addEventListener('dom-ready', _onReady);
+
+    wv.addEventListener('did-start-navigation', (e) => {
+      if (!e.isMainFrame) return;
+      const url = e.url || '';
+      const isInternal = url.startsWith('vortex://');
+      if (activeIdGetter() === tabId) {
+        Navigation.setURL(url);
+        if (isInternal) {
+          const placeholderTitle = vortexPages[url]?.title || 'Vortex';
+          document.title = placeholderTitle + ' — Vortex';
+        }
+      }
+      const updateData = { url: url };
+      if (isInternal) updateData.title = vortexPages[url]?.title || 'New Tab';
+      Tabs.updateTab(tabId, updateData);
+      if (!isInternal && url) {
+        const fav = WVFavicon.getUrl(url);
+        if (fav) Tabs.updateTab(tabId, { favicon: fav });
       }
     });
 
-    wv.addEventListener('did-navigate', () => {
-      if (activeIdGetter() === tabId) Navigation.setURL(vortexUrl);
-      Tabs.updateTab(tabId, { url: vortexUrl });
+    wv.addEventListener('did-redirect-navigation', (e) => {
+      if (!e.isMainFrame) return;
+      const url = e.newURL || e.url || '';
+      const isInternal = url.startsWith('vortex://');
+      if (activeIdGetter() === tabId) {
+        Navigation.setURL(url);
+        if (isInternal) {
+          const placeholderTitle = vortexPages[url]?.title || 'Vortex';
+          document.title = placeholderTitle + ' — Vortex';
+        }
+      }
+      const updateData = { url: url };
+      if (isInternal) updateData.title = vortexPages[url]?.title || 'New Tab';
+      Tabs.updateTab(tabId, updateData);
+    });
+
+    wv.addEventListener('will-navigate', (e) => {
+      const url = e.url || '';
+      const isInternal = url.startsWith('vortex://');
+      if (activeIdGetter() === tabId) {
+        Navigation.setURL(url);
+        if (isInternal) {
+          const placeholderTitle = vortexPages[url]?.title || 'Vortex';
+          document.title = placeholderTitle + ' — Vortex';
+        }
+      }
+      const updateData = { url: url };
+      if (isInternal) updateData.title = vortexPages[url]?.title || 'New Tab';
+      Tabs.updateTab(tabId, updateData);
+    });
+
+    wv.addEventListener('update-target-url', (e) => {
+      if (activeIdGetter() !== tabId) return;
+      const preview = document.getElementById('link-preview');
+      if (!preview) return;
+      if (e.url) { preview.textContent = e.url; preview.classList.add('visible'); }
+      else        { preview.classList.remove('visible'); }
+    });
+
+    wv.addEventListener('did-navigate', (e) => {
+      const url = e.url || wv.src;
+      const isInternal = url.startsWith('vortex://');
+      if (activeIdGetter() === tabId) Navigation.setURL(url);
+      Tabs.updateTab(tabId, { url: url });
+
+      if (!isInternal) {
+        const fav = WVFavicon.getUrl(url);
+        if (fav) Tabs.updateTab(tabId, { favicon: fav });
+        wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
+        WVYTAdblock.inject(wv);
+        if (!isIncognito && window.TabHistory) TabHistory.onNavigate(tabId, url, null, fav);
+        if (Tabs.touchTab) Tabs.touchTab(tabId);
+        WVTranslateBar.hide();
+      }
+    });
+
+    wv.addEventListener('page-title-updated', (e) => {
+      Tabs.updateTab(tabId, { title: e.title });
+      if (activeIdGetter() === tabId) document.title = e.title + ' — Vortex';
+      if (!wv.src.startsWith('vortex://') && !isIncognito && window.TabHistory) {
+        TabHistory.onTitleUpdate(tabId, e.title);
+      }
+    });
+
+    wv.addEventListener('page-favicon-updated', (e) => {
+      if (e.favicons && e.favicons.length && !wv.src.startsWith('vortex://')) {
+        const favUrl = e.favicons[0];
+        wv.executeJavaScript(`
+          fetch(${JSON.stringify(favUrl)}, { cache: 'force-cache' })
+            .then(r => r.ok ? r.blob() : Promise.reject())
+            .then(blob => new Promise(resolve => { var rd = new FileReader(); rd.onload = () => resolve(rd.result); rd.onerror = () => resolve(null); rd.readAsDataURL(blob); }))
+            .catch(() => null)
+        `, true).then(base64 => {
+          const icon = (base64 && base64.startsWith('data:')) ? base64 : favUrl;
+          Tabs.updateTab(tabId, { favicon: icon });
+          if (!isIncognito && window.TabHistory) TabHistory.onFaviconUpdate(tabId, icon);
+        }).catch(() => { Tabs.updateTab(tabId, { favicon: favUrl }); });
+      }
+    });
+
+    wv.addEventListener('did-finish-load', () => {
+      if (!wv.src.startsWith('vortex://')) {
+        WVFavicon.extract(wv, tabId, isIncognito);
+        wv.insertCSS(SCROLLBAR_CSS).catch(() => {});
+        WVYTAdblock.inject(wv);
+      }
+      setTimeout(() => WebView._captureTab(tabId, wv), 800);
+    });
+
+    wv.addEventListener('context-menu', (e) => { 
+      if (!wv.src.startsWith('vortex://')) ContextMenu.show(e.params.x, e.params.y, e.params, wv); 
     });
 
     if (isNewtab) {
@@ -94,6 +204,25 @@ const WVListeners = (() => {
           errorDescription: e.errorDescription,
           url:              e.validatedURL,
         });
+      }
+    });
+
+    wv.addEventListener('did-start-navigation', (e) => {
+      if (e.isMainFrame && activeIdGetter() === tabId) {
+        Navigation.setURL(e.url);
+      }
+      ContextMenu.hide();
+    });
+
+    wv.addEventListener('did-redirect-navigation', (e) => {
+      if (e.isMainFrame && activeIdGetter() === tabId) {
+        Navigation.setURL(e.newURL);
+      }
+    });
+
+    wv.addEventListener('will-navigate', (e) => {
+      if (activeIdGetter() === tabId) {
+        Navigation.setURL(e.url);
       }
     });
 
@@ -189,8 +318,6 @@ const WVListeners = (() => {
         if (typeof VortexDialog !== 'undefined') VortexDialog.show(d.type, d.message, d.origin, d.defaultValue);
       }
     });
-
-    wv.addEventListener('did-start-navigation', () => ContextMenu.hide());
 
     wv.addEventListener('update-target-url', (e) => {
       if (activeIdGetter() !== tabId) return;

@@ -82,13 +82,21 @@ const NavAddressBar = (() => {
   function setURL(url) {
     const bar = document.getElementById('url-bar');
     if (bar) {
-      bar.dataset.fullUrl = url || '';
-      bar.value = cleanDisplayUrl(url || '');
+      const fullUrl = url || '';
+      bar.dataset.fullUrl = fullUrl;
+      bar.value = cleanDisplayUrl(fullUrl);
+      
+      // Update security icon based on protocol
+      if (fullUrl === 'vortex://newtab' || !fullUrl) {
+        NavSecurityIcon.update(''); // Show default search icon
+      } else {
+        NavSecurityIcon.update(fullUrl);
+      }
     }
   }
 
   function cleanDisplayUrl(url) {
-    if (!url) return '';
+    if (!url || url === 'vortex://newtab') return '';
     if (url.startsWith('vortex://') || url.startsWith('about:')) return url;
     try {
       const u = new URL(url);

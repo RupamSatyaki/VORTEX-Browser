@@ -78,7 +78,7 @@ const WebView = (() => {
 
     const container = document.getElementById('webview-container');
     const wv = document.createElement('webview');
-    wv.src = url || 'https://www.google.com';
+    wv.src = url || 'vortex://newtab';
     wv.setAttribute('allowpopups', '');
     wv.setAttribute('nodeintegration', '');
     if (webviewPreloadPath) wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
@@ -120,18 +120,6 @@ const WebView = (() => {
       const tab = Tabs.getActiveTab();
       const displayUrl = (tab?.url?.startsWith('vortex://')) ? tab.url : wv.src;
       Navigation.setURL(displayUrl);
-
-      if (tab?.url?.startsWith('vortex://') && tab.url !== 'vortex://newtab') {
-        wv.executeJavaScript(`
-          (function() {
-            var h = window.innerHeight + 'px'; var w = window.innerWidth + 'px';
-            document.documentElement.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;';
-            document.body.style.cssText = 'width:' + w + ';height:' + h + ';overflow:hidden;margin:0;padding:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:0;';
-            var page = document.querySelector('.page');
-            if (page) page.style.cssText = 'max-width:800px;width:100%;margin:0 auto;padding:40px 28px 20px;flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;height:' + h + ';';
-          })();
-        `).catch(() => {});
-      }
       WVZoomBar.show(WVZoom.get(tabId));
     }
   }

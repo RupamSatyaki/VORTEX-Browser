@@ -37,7 +37,7 @@ const Tabs = (() => {
     return id;
   }
 
-  function createTab(url = 'https://www.google.com', opts = {}) {
+  function createTab(url = 'vortex://newtab', opts = {}) {
     if (url === 'vortex://settings')  { Panel.open('settings');  return null; }
     if (url === 'vortex://downloads') { Panel.open('downloads'); return null; }
     const id = Date.now().toString();
@@ -57,7 +57,7 @@ const Tabs = (() => {
     return id;
   }
 
-  function createIncognitoTab(url = 'https://www.google.com') {
+  function createIncognitoTab(url = 'vortex://newtab') {
     return createTab(url, { incognito: true });
   }
 

@@ -4,10 +4,10 @@
  * Delegates to: themes.js, updateBadge.js
  */
 
-const DEFAULT_URL = 'https://www.google.com';
+const DEFAULT_URL = 'vortex://newtab';
 
 const SETTINGS_DEFAULTS = {
-  startup: 'session', homepage: 'https://www.google.com',
+  startup: 'session', homepage: 'vortex://newtab',
   engine: 'google', suggestions: true, prefetch: true, tabpreview: true,
   tabsleep: true, tabsleepMinutes: 10,
   accentColor: '#00c8b4',

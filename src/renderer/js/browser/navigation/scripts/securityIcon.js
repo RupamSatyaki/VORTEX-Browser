@@ -18,7 +18,7 @@ const NavSecurityIcon = (() => {
     if (!old) return;
 
     let icon, borderColor = '';
-    if (!url || url === '' || url.startsWith('about:')) icon = SEARCH_ICON;
+    if (!url || url === '' || url === 'vortex://newtab' || url.startsWith('about:')) icon = SEARCH_ICON;
     else if (url.startsWith('vortex://'))              icon = VORTEX_ICON;
     else if (_isLocalAddress(url))                     icon = LOCAL_ICON;
     else if (url.startsWith('https://'))               icon = LOCK_ICON;

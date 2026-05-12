@@ -98,7 +98,7 @@ const TabRenderer = (() => {
     btn.className = 'tab-add';
     btn.title     = 'New Tab';
     btn.innerHTML = `<svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="3" x2="8" y2="13"/><line x1="3" y1="8" x2="13" y2="8"/></svg>`;
-    btn.addEventListener('click', () => QuickLaunch.open());
+    btn.addEventListener('click', () => Tabs.createTab(Navigation.newTabURL()));
     return btn;
   }
 

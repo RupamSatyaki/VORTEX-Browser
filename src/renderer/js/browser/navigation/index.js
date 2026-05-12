@@ -123,7 +123,7 @@ const Navigation = (() => {
       if (e.key === 'F11') { e.preventDefault(); window.vortexAPI.send('window:fullscreen'); return; }
       if (!e.ctrlKey) return;
       switch (e.key) {
-        case 't': e.preventDefault(); QuickLaunch.open(); break;
+        case 't': e.preventDefault(); Tabs.createTab(Navigation.newTabURL()); break;
         case 'n':
           if (e.shiftKey) { e.preventDefault(); NavMenuDropdown._showComingSoon?.('Incognito Mode'); }
           else            { e.preventDefault(); window.vortexAPI.send('window:new'); }
@@ -151,7 +151,7 @@ const Navigation = (() => {
     await NavProfileMenu.init();
   }
 
-  function _newTabURL() { return 'https://www.google.com'; }
+  function _newTabURL() { return 'vortex://newtab'; }
 
   // ── Public API (same as old navigation.js) ─────────────────────────────────
   return {
