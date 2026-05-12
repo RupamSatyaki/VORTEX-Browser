@@ -65,6 +65,18 @@ function _registerWebRequest() {
 
       if (isAdRequest(url, referrer, type)) {
         _blockedCount++;
+        
+        // Use redirects instead of cancel: true to avoid ERR_BLOCKED_BY_CLIENT detection
+        if (type === 'script' || url.includes('.js')) {
+          return callback({ redirectURL: 'data:application/javascript;base64,dmFyIF92eCA9IHRydWU7' }); // var _vx = true;
+        }
+        if (type === 'image' || url.includes('.png') || url.includes('.jpg') || url.includes('.gif')) {
+          return callback({ redirectURL: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' });
+        }
+        if (type === 'xhr' || type === 'fetch') {
+          return callback({ redirectURL: 'data:application/json;base64,e30=' }); // {}
+        }
+        
         callback({ cancel: true });
       } else {
         callback({});

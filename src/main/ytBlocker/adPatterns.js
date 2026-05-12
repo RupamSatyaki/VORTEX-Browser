@@ -58,13 +58,14 @@ const AD_DOMAINS_YT_ONLY = [
   'pubads.g.doubleclick.net',
   'securepubads.g.doubleclick.net',
   'googleadservices.com',
+  'static.doubleclick.net',
+  'adservice.google.com',
 ];
 
 // These ad domain paths are ALWAYS blocked regardless of referrer
 // because they are pure ad/tracking endpoints with no legitimate use
 const AD_DOMAIN_ALWAYS_BLOCK_PATHS = [
-  // NOTE: /pagead/id is intentionally NOT here — blocking it triggers detection
-  // It is allowed through in session.js
+  // NOTE: /pagead/id and /pagead/js are intentionally NOT here — blocking them triggers detection
   '/pagead/adview',
   '/pagead/conversion',
   '/simgad/',             // tpc.googlesyndication.com/simgad/ — image ads
@@ -72,6 +73,7 @@ const AD_DOMAIN_ALWAYS_BLOCK_PATHS = [
   '/activeview/',         // Active view tracking
   '/xbbe',                // Ad beacon
   '/ddm/activity',        // DoubleClick activity
+  '/pcs/view',            // Pixel tracking
 ];
 
 // YouTube-specific paths that are NEVER ads — whitelist to prevent false positives
@@ -84,8 +86,12 @@ const YT_SAFE_PATHS = [
   '/youtubei/v1/browse',  // Browse/homepage
   '/youtubei/v1/guide',   // Sidebar guide
   '/youtubei/v1/account', // Account info
+  '/youtubei/v1/get_transcript',
+  '/youtubei/v1/feedback',
   '/watch',               // Watch page
   '/results',             // Search results
+  '/sw.js',               // Service worker
+  '/manifest.json',
 ];
 
 /**

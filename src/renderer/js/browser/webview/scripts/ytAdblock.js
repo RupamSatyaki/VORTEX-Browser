@@ -17,8 +17,17 @@ const WVYTAdblock = (() => {
     if (document[_key]) return;
     Object.defineProperty(document, _key, { value: true, enumerable: false, configurable: false });
 
+    // 1. CSS-based stealth hiding (harder to detect than JS manipulation)
+    var styleId = 'vx-' + Math.random().toString(36).slice(2, 7);
+    if (!document.getElementById(styleId)) {
+      var style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = ".ad-showing video { opacity: 0.01 !important; pointer-events: none !important; } .ytp-ad-overlay-slot, #companion-ad-container, ytd-companion-slot-renderer, .ytp-ad-message-container, .ytp-ad-survey-container, ytd-enforcement-message-view-model, yt-playability-error-supported-renderers, #ad-block-allow-ads-dialog { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }";
+      (document.head || document.documentElement).appendChild(style);
+    }
+
     function skipAd() {
-      // Click skip button — try all known selectors
+      // 1. Click skip button — try all known selectors
       var skipSelectors = [
         '.ytp-ad-skip-button-modern',
         '.ytp-ad-skip-button',
@@ -30,27 +39,68 @@ const WVYTAdblock = (() => {
       for (var i = 0; i < skipSelectors.length; i++) {
         var btn = document.querySelector(skipSelectors[i]);
         if (btn && btn.offsetParent !== null) {
-          try { btn.click(); } catch(e){}
-          break;
+          try { 
+            // Simulate natural click
+            btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+            btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+            btn.click(); 
+          } catch(e){}
         }
       }
 
-      // Hide overlay banner ad (bottom of video) — less detectable than hiding full module
-      var overlay = document.querySelector('.ytp-ad-overlay-slot');
-      if (overlay) { try { overlay.style.setProperty('display','none','important'); } catch(e){} }
-
-      // Hide companion/sponsored card
-      var companionSelectors = [
-        '#companion-ad-container',
-        'ytd-companion-slot-renderer',
-        '#google-container-id',
-        '.ytp-ad-overlay-container',
-        '.ytp-image-background-gradient-vertical'
+      // 2. Clear enforcement messages more aggressively
+      var antiAdblockSelectors = [
+        'ytd-enforcement-message-view-model',
+        'yt-playability-error-supported-renderers',
+        '#ad-block-allow-ads-dialog'
       ];
-      for (var j = 0; j < companionSelectors.length; j++) {
-        var el = document.querySelector(companionSelectors[j]);
-        if (el) { try { el.style.setProperty('display','none','important'); } catch(e){} }
+      antiAdblockSelectors.forEach(function(s) {
+        var el = document.querySelector(s);
+        if (el) {
+          try {
+            el.innerHTML = '';
+            el.remove();
+          } catch(e){}
+        }
+      });
+
+      // 3. Fast-forward and mute if an ad is playing
+      var video = document.querySelector('video');
+      var ad = document.querySelector('.ad-showing, .ad-interrupting');
+      if (ad && video) {
+        try {
+          if (!video.muted) video.muted = true;
+          video.playbackRate = 16;
+          if (isFinite(video.duration) && video.duration > 0 && video.currentTime < video.duration - 0.5) {
+            video.currentTime = video.duration - 0.1;
+          }
+        } catch(e){}
       }
+
+      // 4. Auto-resume video if paused by ad/message
+      if (!ad && video && video.paused && !video.ended && video.readyState > 2) {
+        var playBtn = document.querySelector('.ytp-play-button');
+        if (playBtn && playBtn.getAttribute('aria-label') && (playBtn.getAttribute('aria-label').includes('Play') || playBtn.getAttribute('aria-label').includes('कें'))) {
+           try { video.play(); } catch(e){}
+        }
+      }
+    }
+
+    // Proxy the MutationObserver to hide our presence
+    if (typeof window.MutationObserver !== 'undefined' && !window.MutationObserver.isProxied) {
+      var OriginalObserver = window.MutationObserver;
+      window.MutationObserver = function(callback) {
+        var obs = new OriginalObserver(function(mutations) {
+          // Filter out our own style changes from being detected
+          var filtered = mutations.filter(function(m) {
+            return m.target.id !== styleId;
+          });
+          if (filtered.length > 0) callback(filtered, obs);
+        });
+        return obs;
+      };
+      window.MutationObserver.isProxied = true;
+      window.MutationObserver.prototype = OriginalObserver.prototype;
     }
 
     // Use a targeted observer — only watch the player container, not entire DOM
