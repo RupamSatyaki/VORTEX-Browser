@@ -95,11 +95,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Update badge check (non-blocking)
   AppUpdateBadge.check();
 
-  // Parallel: WebView init + settings load
+  // Parallel: WebView init + settings load + YTBlocker init
   const [, appSettings] = await Promise.all([
     WebView.init(),
     isIncognito ? Promise.resolve({ ...SETTINGS_DEFAULTS }) : loadSettings(),
+    typeof YTBlocker !== 'undefined' ? YTBlocker.init() : Promise.resolve(),
   ]);
+
+  // Init VideoDownloader (non-blocking)
+  if (typeof VideoDownloader !== 'undefined') VideoDownloader.init().catch(() => {});
 
   // Apply settings
   Navigation.applySettings(appSettings);

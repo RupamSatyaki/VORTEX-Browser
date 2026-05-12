@@ -82,7 +82,14 @@ const WebView = (() => {
     wv.setAttribute('allowpopups', '');
     wv.setAttribute('nodeintegration', '');
     if (webviewPreloadPath) wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
-    if (opts.incognito)     wv.setAttribute('partition', 'incognito');
+    // YouTube gets dedicated ad-blocking session (partition must be set before src)
+    if (typeof YTBlocker !== 'undefined') {
+      const ytPartition = YTBlocker.getPartitionForUrl(url || '');
+      if (ytPartition) wv.setAttribute('partition', ytPartition);
+      else if (opts.incognito) wv.setAttribute('partition', 'incognito');
+    } else if (opts.incognito) {
+      wv.setAttribute('partition', 'incognito');
+    }
     wv.className = 'vortex-wv';
     wv.dataset.tabId = tabId;
     if (opts.incognito) wv.dataset.incognito = '1';
@@ -165,7 +172,14 @@ const WebView = (() => {
     }
 
     if (preloadPath) {
-      webviewPreloadPath = preloadPath.replace(/^file:\/\/\/?/, '').replace(/\//g, '\\');
+      // Normalize to absolute Windows path (strip file:// prefix, fix slashes)
+      webviewPreloadPath = preloadPath
+        .replace(/^file:\/\/\/?/, '')
+        .replace(/\//g, '\\');
+      // On Windows, file:///C:/... → strip leading backslash if drive letter follows
+      if (webviewPreloadPath.match(/^\\[A-Za-z]:\\/)) {
+        webviewPreloadPath = webviewPreloadPath.slice(1);
+      }
     }
     if (!webviewPreloadPath) {
       for (const s of document.querySelectorAll('script[src]')) {

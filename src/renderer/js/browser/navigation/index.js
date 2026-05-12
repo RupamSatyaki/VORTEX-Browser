@@ -112,6 +112,8 @@ const Navigation = (() => {
     if (waBtn) waBtn.style.display = s.whatsappBtn !== false ? '' : 'none';
     const dhBtn = document.getElementById('nav-devhub');
     if (dhBtn) dhBtn.style.display = s.devhubBtn !== false ? '' : 'none';
+    const vdlBtn = document.getElementById('nav-video-dl');
+    if (vdlBtn) vdlBtn.style.display = s.videoDlBtn !== false ? '' : 'none';
   }
 
   // ── initShortcuts ──────────────────────────────────────────────────────────
