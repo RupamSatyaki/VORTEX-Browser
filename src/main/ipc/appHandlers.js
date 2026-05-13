@@ -48,6 +48,24 @@ function register(_getWin) {
     app.exit(0);
   });
 
+  ipcMain.handle('app:getSystemStats', () => {
+    const os = require('os');
+    const free = os.freemem();
+    const total = os.totalmem();
+    const used = total - free;
+    const memPercent = Math.round((used / total) * 100);
+    
+    // Simple CPU usage estimation (load avg)
+    const load = os.loadavg()[0];
+    const cpuPercent = Math.min(Math.round((load / os.cpus().length) * 100), 100);
+
+    return {
+      cpu: cpuPercent,
+      ram: memPercent,
+      ramRaw: `${(used / 1024 / 1024 / 1024).toFixed(1)}GB / ${(total / 1024 / 1024 / 1024).toFixed(1)}GB`
+    };
+  });
+
   ipcMain.on('devhub:download', (e, { dataUrl, filename }) => {
     const win = _getWin(e);
     if (!win) return;

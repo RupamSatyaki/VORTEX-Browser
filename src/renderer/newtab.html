@@ -627,6 +627,126 @@
             text-overflow: ellipsis;
             margin-top: 2px;
         }
+
+        /* System Stats Widget */
+        .system-stats {
+            position: fixed;
+            bottom: 30px;
+            right: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--glass-bg);
+            padding: 15px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 160px;
+            animation: fadeIn 1.5s ease;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-dim);
+        }
+
+        .stat-val { color: var(--accent); }
+
+        .stat-bar-bg {
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        /* Search Switcher */
+        .engine-switcher {
+            position: absolute;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            z-index: 11;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .engine-switcher:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        #search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 16px 20px 16px 56px;
+            font-size: 18px;
+            color: var(--text-main);
+            width: 100%;
+        }
+
+        .engine-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            background: #0f2222;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 6px;
+            display: none;
+            flex-direction: column;
+            gap: 2px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+
+        .engine-dropdown.visible { display: flex; }
+
+        .engine-opt {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+
+        .engine-opt:hover {
+            background: rgba(0, 200, 180, 0.1);
+            color: var(--accent);
+        }
+
+        .engine-opt.active {
+            color: var(--accent);
+            background: rgba(0, 200, 180, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -646,10 +766,18 @@
 
     <div class="search-container">
         <div class="search-bar-wrap">
-            <svg class="search-icon-btn" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <div class="engine-switcher" id="engine-switcher" title="Switch Search Engine">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <div class="engine-dropdown" id="engine-dropdown">
+                    <div class="engine-opt" data-engine="google">Google</div>
+                    <div class="engine-opt" data-engine="duckduckgo">DuckDuckGo</div>
+                    <div class="engine-opt" data-engine="bing">Bing</div>
+                    <div class="engine-opt" data-engine="brave">Brave</div>
+                </div>
+            </div>
             <input id="search-input" type="text" placeholder="Explore the universe with Vortex..." autofocus spellcheck="false" autocomplete="off" />
             <div id="omnibox-dropdown"></div>
-            <div class="search-engine-hint">VORTEX SEARCH</div>
+            <div class="search-engine-hint" id="engine-hint">GOOGLE</div>
         </div>
     </div>
 
@@ -659,6 +787,17 @@
         </div>
         <div id="bookmarks-grid" class="bookmarks-grid">
             <!-- Dynamic bookmarks loaded here -->
+        </div>
+    </div>
+
+    <div class="system-stats">
+        <div class="stat-item">
+            <div class="stat-label"><span>CPU Usage</span><span class="stat-val" id="cpu-val">0%</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" id="cpu-bar" style="width: 0%"></div></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label"><span>RAM Usage</span><span class="stat-val" id="ram-val">0%</span></div>
+            <div class="stat-bar-bg"><div class="stat-bar-fill" id="ram-bar" style="width: 0%"></div></div>
         </div>
     </div>
 
@@ -717,8 +856,47 @@
         updateClock();
 
         // ── Search ──────────────────────────────────────────────────────────────
-        const searchInput = document.getElementById('search-input');
-        const dropdown    = document.getElementById('omnibox-dropdown');
+        const searchInput    = document.getElementById('search-input');
+        const dropdown       = document.getElementById('omnibox-dropdown');
+        const engineSwitcher = document.getElementById('engine-switcher');
+        const engineDropdown = document.getElementById('engine-dropdown');
+        const engineHint     = document.getElementById('engine-hint');
+        
+        let _currentEngine = 'google';
+
+        // Toggle engine dropdown
+        engineSwitcher.addEventListener('click', (e) => {
+            e.stopPropagation();
+            engineDropdown.classList.toggle('visible');
+        });
+
+        document.addEventListener('click', () => engineDropdown.classList.remove('visible'));
+
+        // Handle engine selection
+        engineDropdown.querySelectorAll('.engine-opt').forEach(opt => {
+            opt.addEventListener('click', () => {
+                _currentEngine = opt.dataset.engine;
+                engineHint.textContent = _currentEngine.toUpperCase();
+                engineDropdown.querySelectorAll('.engine-opt').forEach(o => o.classList.remove('active'));
+                opt.classList.add('active');
+                engineDropdown.classList.remove('visible');
+                
+                // Save preference
+                vortex.invoke('storage:read', 'settings').then(s => {
+                    if (s) { s.engine = _currentEngine; vortex.invoke('storage:write', 'settings', s); }
+                });
+            });
+        });
+
+        // Initialize engine from settings
+        vortex.invoke('storage:read', 'settings').then(s => {
+            if (s && s.engine) {
+                _currentEngine = s.engine;
+                engineHint.textContent = _currentEngine.toUpperCase();
+                const opt = engineDropdown.querySelector(`[data-engine="${_currentEngine}"]`);
+                if (opt) opt.classList.add('active');
+            }
+        });
 
         searchInput.addEventListener('keydown', (e) => {
             Omnibox.onKey(e);
@@ -732,8 +910,13 @@
                 if (isUrl) {
                     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
                 } else {
-                    const query = encodeURIComponent(val);
-                    url = `https://www.google.com/search?q=${query}`;
+                    const bases = {
+                        google: 'https://www.google.com/search?q=',
+                        duckduckgo: 'https://duckduckgo.com/?q=',
+                        bing: 'https://www.bing.com/search?q=',
+                        brave: 'https://search.brave.com/search?q='
+                    };
+                    url = (bases[_currentEngine] || bases.google) + encodeURIComponent(val);
                 }
                 
                 vortex.send('newtab:openUrl', url);
@@ -743,6 +926,46 @@
         searchInput.addEventListener('input', (e) => Omnibox.onInput(e.target.value));
         searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('visible'), 200));
         searchInput.addEventListener('focus', () => { if (searchInput.value.trim()) Omnibox.onInput(searchInput.value); });
+
+        // ── Weather Logic ───────────────────────────────────────────────────────
+        async function updateWeather() {
+            const el = document.querySelector('.weather-widget span');
+            try {
+                // Use wttr.in with JSON format for easy parsing
+                const res = await fetch('https://wttr.in?format=j1');
+                const data = await res.json();
+                const cur = data.current_condition[0];
+                const temp = cur.temp_C;
+                const desc = cur.weatherDesc[0].value;
+                el.textContent = `${temp}°C ${desc}`;
+            } catch {
+                el.textContent = "Weather unavailable";
+            }
+        }
+        updateWeather();
+        setInterval(updateWeather, 600000); // Every 10 mins
+
+        // ── System Stats Logic ──────────────────────────────────────────────────
+        async function updateStats() {
+            try {
+                const stats = await vortex.invoke('app:getSystemStats');
+                if (!stats) return;
+
+                document.getElementById('cpu-val').textContent = `${stats.cpu}%`;
+                document.getElementById('cpu-bar').style.width = `${stats.cpu}%`;
+                
+                document.getElementById('ram-val').textContent = `${stats.ram}%`;
+                document.getElementById('ram-bar').style.width = `${stats.ram}%`;
+
+                // Color warning
+                const cpuBar = document.getElementById('cpu-bar');
+                const ramBar = document.getElementById('ram-bar');
+                cpuBar.style.background = stats.cpu > 80 ? '#ff4d4d' : 'var(--accent)';
+                ramBar.style.background = stats.ram > 85 ? '#ff4d4d' : 'var(--accent)';
+            } catch {}
+        }
+        updateStats();
+        setInterval(updateStats, 2000);
 
         // ── Omnibox Logic ───────────────────────────────────────────────────────
         const Omnibox = (() => {
@@ -838,7 +1061,13 @@
                 
                 let url = item.value;
                 if (item.type === 'suggest') {
-                    url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+                    const bases = {
+                        google: 'https://www.google.com/search?q=',
+                        duckduckgo: 'https://duckduckgo.com/?q=',
+                        bing: 'https://www.bing.com/search?q=',
+                        brave: 'https://search.brave.com/search?q='
+                    };
+                    url = (bases[_currentEngine] || bases.google) + encodeURIComponent(url);
                 } else if (!/^https?:\/\//i.test(url)) {
                     url = 'https://' + url;
                 }
