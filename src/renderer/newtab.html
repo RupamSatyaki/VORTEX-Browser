@@ -549,6 +549,84 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+        /* Omnibox */
+        #omnibox-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: rgba(15, 30, 30, 0.98);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow: hidden;
+            padding: 8px 0;
+            backdrop-filter: blur(20px);
+            animation: omniIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes omniIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #omnibox-dropdown.visible { display: block; }
+
+        .omni-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .omni-row:hover, .omni-row.active {
+            background: rgba(0, 200, 180, 0.1);
+        }
+
+        .omni-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+        }
+
+        .omni-icon img {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .omni-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .omni-title {
+            font-size: 14px;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .omni-sub {
+            font-size: 11px;
+            color: var(--text-dim);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -569,7 +647,8 @@
     <div class="search-container">
         <div class="search-bar-wrap">
             <svg class="search-icon-btn" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input id="search-input" type="text" placeholder="Explore the universe with Vortex..." autofocus spellcheck="false" />
+            <input id="search-input" type="text" placeholder="Explore the universe with Vortex..." autofocus spellcheck="false" autocomplete="off" />
+            <div id="omnibox-dropdown"></div>
             <div class="search-engine-hint">VORTEX SEARCH</div>
         </div>
     </div>
@@ -639,8 +718,11 @@
 
         // ── Search ──────────────────────────────────────────────────────────────
         const searchInput = document.getElementById('search-input');
+        const dropdown    = document.getElementById('omnibox-dropdown');
+
         searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && searchInput.value.trim()) {
+            Omnibox.onKey(e);
+            if (e.key === 'Enter' && searchInput.value.trim() && !dropdown.classList.contains('visible')) {
                 const val = searchInput.value.trim();
                 let url = val;
 
@@ -657,6 +739,155 @@
                 vortex.send('newtab:openUrl', url);
             }
         });
+
+        searchInput.addEventListener('input', (e) => Omnibox.onInput(e.target.value));
+        searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('visible'), 200));
+        searchInput.addEventListener('focus', () => { if (searchInput.value.trim()) Omnibox.onInput(searchInput.value); });
+
+        // ── Omnibox Logic ───────────────────────────────────────────────────────
+        const Omnibox = (() => {
+            let _debounce = null;
+            let _items = [];
+            let _activeIdx = -1;
+            let _originalValue = '';
+
+            async function _fetchSuggest(query) {
+                try {
+                    const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+                    const res = await fetch(url);
+                    const json = await res.json();
+                    return (json[1] || []).slice(0, 5).map(s => ({ label: s, value: s, type: 'suggest' }));
+                } catch { return []; }
+            }
+
+            async function _matchLocal(query) {
+                const q = query.toLowerCase();
+                const results = [];
+                
+                // Bookmarks
+                const bms = (await vortex.invoke('storage:read', 'bookmarks')) || [];
+                bms.forEach(bm => {
+                    if ((bm.title && bm.title.toLowerCase().includes(q)) || (bm.url && bm.url.toLowerCase().includes(q))) {
+                        results.push({ label: bm.title || bm.url, value: bm.url, sub: bm.url, type: 'bookmark' });
+                    }
+                });
+
+                // History
+                const history = (await vortex.invoke('storage:read', 'tab_history')) || [];
+                history.forEach(item => {
+                    if ((item.title && item.title.toLowerCase().includes(q)) || (item.url && item.url.toLowerCase().includes(q))) {
+                        if (!results.find(r => r.value === item.url)) {
+                            results.push({ label: item.title || item.url, value: item.url, sub: item.url, type: 'history' });
+                        }
+                    }
+                });
+
+                return results.slice(0, 4);
+            }
+
+            function _render(items) {
+                _items = items;
+                _activeIdx = -1;
+                dropdown.innerHTML = '';
+                if (items.length === 0) { dropdown.classList.remove('visible'); return; }
+
+                items.forEach((item, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'omni-row';
+                    
+                    const icon = document.createElement('div');
+                    icon.className = 'omni-icon';
+                    if (item.type === 'bookmark') icon.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+                    else if (item.type === 'history') icon.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+                    else icon.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>';
+
+                    const text = document.createElement('div');
+                    text.className = 'omni-text';
+                    const title = document.createElement('div');
+                    title.className = 'omni-title';
+                    title.textContent = item.label;
+                    text.appendChild(title);
+
+                    if (item.sub) {
+                        const sub = document.createElement('div');
+                        sub.className = 'omni-sub';
+                        sub.textContent = item.sub;
+                        text.appendChild(sub);
+                    }
+
+                    row.appendChild(icon);
+                    row.appendChild(text);
+                    row.addEventListener('mousedown', (e) => { e.preventDefault(); _select(idx); });
+                    row.addEventListener('mouseover', () => _highlight(idx));
+                    dropdown.appendChild(row);
+                });
+                dropdown.classList.add('visible');
+            }
+
+            function _highlight(idx) {
+                const rows = dropdown.querySelectorAll('.omni-row');
+                rows.forEach((r, i) => r.classList.toggle('active', i === idx));
+                _activeIdx = idx;
+            }
+
+            function _select(idx) {
+                const item = _items[idx];
+                if (!item) return;
+                searchInput.value = item.value;
+                dropdown.classList.remove('visible');
+                
+                let url = item.value;
+                if (item.type === 'suggest') {
+                    url = `https://www.google.com/search?q=${encodeURIComponent(url)}`;
+                } else if (!/^https?:\/\//i.test(url)) {
+                    url = 'https://' + url;
+                }
+                vortex.send('newtab:openUrl', url);
+            }
+
+            return {
+                onInput: async (val) => {
+                    const q = val.trim();
+                    if (!q) { dropdown.classList.remove('visible'); return; }
+                    _originalValue = val;
+                    
+                    const local = await _matchLocal(q);
+                    _render(local);
+
+                    clearTimeout(_debounce);
+                    _debounce = setTimeout(async () => {
+                        const suggest = await _fetchSuggest(q);
+                        const freshLocal = await _matchLocal(q);
+                        _render([...freshLocal, ...suggest]);
+                    }, 250);
+                },
+                onKey: (e) => {
+                    if (!dropdown.classList.contains('visible')) return;
+                    if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        const next = (_activeIdx + 1) % _items.length;
+                        _highlight(next);
+                        searchInput.value = _items[next].value;
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        const next = (_activeIdx - 1 + _items.length) % _items.length;
+                        if (_activeIdx === 0) {
+                            _activeIdx = -1;
+                            _highlight(-1);
+                            searchInput.value = _originalValue;
+                        } else {
+                            _highlight(next);
+                            searchInput.value = _items[next].value;
+                        }
+                    } else if (e.key === 'Enter' && _activeIdx >= 0) {
+                        e.preventDefault();
+                        _select(_activeIdx);
+                    } else if (e.key === 'Escape') {
+                        dropdown.classList.remove('visible');
+                    }
+                }
+            };
+        })();
 
         // ── Bookmark state ──────────────────────────────────────────────────────
         let _bookmarks = [];
