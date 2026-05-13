@@ -899,8 +899,8 @@
         });
 
         searchInput.addEventListener('keydown', (e) => {
-            Omnibox.onKey(e);
-            if (e.key === 'Enter' && searchInput.value.trim() && !dropdown.classList.contains('visible')) {
+            const handled = Omnibox.onKey(e);
+            if (e.key === 'Enter' && searchInput.value.trim() && !handled) {
                 const val = searchInput.value.trim();
                 let url = val;
 
@@ -1091,12 +1091,13 @@
                     }, 250);
                 },
                 onKey: (e) => {
-                    if (!dropdown.classList.contains('visible')) return;
+                    if (!dropdown.classList.contains('visible')) return false;
                     if (e.key === 'ArrowDown') {
                         e.preventDefault();
                         const next = (_activeIdx + 1) % _items.length;
                         _highlight(next);
                         searchInput.value = _items[next].value;
+                        return true;
                     } else if (e.key === 'ArrowUp') {
                         e.preventDefault();
                         const next = (_activeIdx - 1 + _items.length) % _items.length;
@@ -1108,12 +1109,16 @@
                             _highlight(next);
                             searchInput.value = _items[next].value;
                         }
+                        return true;
                     } else if (e.key === 'Enter' && _activeIdx >= 0) {
                         e.preventDefault();
                         _select(_activeIdx);
+                        return true;
                     } else if (e.key === 'Escape') {
                         dropdown.classList.remove('visible');
+                        return true;
                     }
+                    return false;
                 }
             };
         })();
