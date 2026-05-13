@@ -18,6 +18,7 @@ const WVPreloader = (() => {
     wv.src = fileUrl;
     wv.className = 'vortex-wv';
     wv.dataset.preloadFor = vortexUrl;
+    wv.setAttribute('allowpopups', '');
     if (vortexUrl === 'vortex://newtab' && webviewPreloadPath) {
       wv.setAttribute('preload', 'file:///' + webviewPreloadPath.replace(/\\/g, '/'));
     }

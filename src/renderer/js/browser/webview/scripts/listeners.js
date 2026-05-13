@@ -81,6 +81,15 @@ const WVListeners = (() => {
     wv.addEventListener('will-navigate', (e) => {
       const url = e.url || '';
       const isInternal = url.startsWith('vortex://');
+      
+      // Fix: If a JS redirect (window.location.href) happens in a vortex page, 
+      // manually trigger navigation to ensure it works across protocols.
+      if (!isInternal && url && !url.startsWith('file://')) {
+        e.preventDefault();
+        WebView.loadURL(url);
+        return;
+      }
+
       if (activeIdGetter() === tabId) {
         Navigation.setURL(url);
         if (isInternal) {
@@ -155,9 +164,25 @@ const WVListeners = (() => {
       if (!wv.src.startsWith('vortex://')) ContextMenu.show(e.params.x, e.params.y, e.params, wv); 
     });
 
+    wv.addEventListener('did-start-loading', () => {
+      if (activeIdGetter() === tabId) { Navigation.startProgress(); if (typeof NetStatus !== 'undefined') NetStatus.onLoadStart(wv); }
+    });
+
+    wv.addEventListener('did-stop-loading', () => {
+      if (activeIdGetter() === tabId) { Navigation.endProgress(); if (typeof NetStatus !== 'undefined') NetStatus.onLoadFinish(wv); }
+    });
+
     if (isNewtab) {
       wv.addEventListener('ipc-message', (e) => {
-        if (e.channel === 'newtab:openUrl') WebView.loadURL(e.args[0]);
+        if (e.channel === 'newtab:openUrl') {
+          const url = e.args[0];
+          if (activeIdGetter() === tabId) {
+            WebView.loadURL(url);
+          } else {
+            wv.src = url;
+            Tabs.updateTab(tabId, { url });
+          }
+        }
       });
     }
   }

@@ -5,6 +5,24 @@ window.__vortexBridge = {
   sendToHost: (channel, data) => ipcRenderer.sendToHost(channel, data),
 };
 
+// Expose vortexAPI for internal vortex:// pages (newtab, etc.)
+// Uses contextBridge when available (contextIsolation=true), falls back to direct window assignment.
+(function exposeVortexAPI() {
+  const api = {
+    send:   (channel, data)    => ipcRenderer.sendToHost(channel, data),
+    invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
+    on:     (channel, cb)      => ipcRenderer.on(channel, (_e, ...a) => cb(...a)),
+  };
+
+  try {
+    const { contextBridge } = require('electron');
+    contextBridge.exposeInMainWorld('vortexAPI', api);
+  } catch (_) {
+    // contextIsolation not enabled — assign directly
+    try { window.vortexAPI = api; } catch (_) {}
+  }
+})();
+
 // ── Override alert/confirm/prompt with custom Vortex UI ───────────────────────
 (function patchDialogs() {
   const _origin = (() => { try { return location.hostname; } catch { return ''; } })();
