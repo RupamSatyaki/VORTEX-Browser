@@ -22,7 +22,7 @@ const WVYTAdblock = (() => {
     if (!document.getElementById(styleId)) {
       var style = document.createElement('style');
       style.id = styleId;
-      style.textContent = ".ad-showing video { opacity: 0.01 !important; pointer-events: none !important; } .ytp-ad-overlay-slot, #companion-ad-container, ytd-companion-slot-renderer, .ytp-ad-message-container, .ytp-ad-survey-container, ytd-enforcement-message-view-model, yt-playability-error-supported-renderers, #ad-block-allow-ads-dialog { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }";
+      style.textContent = ".ad-showing video { opacity: 0.01 !important; pointer-events: none !important; } .ytp-ad-overlay-slot, #companion-ad-container, ytd-companion-slot-renderer, .ytp-ad-message-container, .ytp-ad-survey-container, ytd-enforcement-message-view-model, yt-playability-error-supported-renderers, #ad-block-allow-ads-dialog, .ytd-action-companion-ad-renderer, ytd-ad-slot-renderer, .ytd-ad-slot-renderer, #masthead-ad, ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer, .ytd-shorts-container, #endpoint.yt-simple-endpoint[title='Shorts'] { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }";
       (document.head || document.documentElement).appendChild(style);
     }
 
@@ -34,7 +34,8 @@ const WVYTAdblock = (() => {
         '.ytp-skip-ad-button',
         '.videoAdUiSkipButton',
         '[class*="skip-button"]',
-        'button.ytp-ad-skip-button-container button'
+        'button.ytp-ad-skip-button-container button',
+        '.ytp-ad-skip-button-slot'
       ];
       for (var i = 0; i < skipSelectors.length; i++) {
         var btn = document.querySelector(skipSelectors[i]);
@@ -52,14 +53,19 @@ const WVYTAdblock = (() => {
       var antiAdblockSelectors = [
         'ytd-enforcement-message-view-model',
         'yt-playability-error-supported-renderers',
-        '#ad-block-allow-ads-dialog'
+        '#ad-block-allow-ads-dialog',
+        'tp-yt-iron-overlay-backdrop'
       ];
       antiAdblockSelectors.forEach(function(s) {
         var el = document.querySelector(s);
         if (el) {
           try {
-            el.innerHTML = '';
-            el.remove();
+            if (s.includes('backdrop')) {
+              el.style.display = 'none';
+            } else {
+              el.innerHTML = '';
+              el.remove();
+            }
           } catch(e){}
         }
       });
@@ -80,8 +86,11 @@ const WVYTAdblock = (() => {
       // 4. Auto-resume video if paused by ad/message
       if (!ad && video && video.paused && !video.ended && video.readyState > 2) {
         var playBtn = document.querySelector('.ytp-play-button');
-        if (playBtn && playBtn.getAttribute('aria-label') && (playBtn.getAttribute('aria-label').includes('Play') || playBtn.getAttribute('aria-label').includes('कें'))) {
-           try { video.play(); } catch(e){}
+        if (playBtn && playBtn.getAttribute('aria-label')) {
+           var label = playBtn.getAttribute('aria-label');
+           if (label.includes('Play') || label.includes('कें') || label.includes('चालू')) {
+              try { video.play(); } catch(e){}
+           }
         }
       }
     }

@@ -1,11 +1,11 @@
 {
   "id": "v4.8.2",
   "version": "4.8.2",
-  "badge": "latest",
+  "badge": "stable",
   "name": "Packaged Build Fix",
   "date": "2026-04-30",
-  "isCurrent": true,
-  "open": true,
+  "isCurrent": false,
+  "open": false,
   "counts": { "new": 0, "improve": 0, "fix": 4 },
   "categories": [
     {

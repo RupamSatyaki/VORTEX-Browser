@@ -29,6 +29,11 @@ const AD_VIDEO_PARAMS = [
   'label=preroll',    // Preroll label
   'label=midroll',    // Midroll label
   'label=postroll',   // Postroll label
+  '&ad_vbr=',         // New ad signal
+  '&v_len=',          // New ad length signal
+  '&ptchn=',          // Combined with oad
+  '&ad_preroll=1',    // Explicit preroll
+  '&ad_midroll=1',    // Explicit midroll
 ];
 
 // YouTube ad tracking / stats endpoints
@@ -39,10 +44,8 @@ const AD_TRACKING_PATHS = [
   '/get_midroll_info',
   '/ad_data_204',
   '/api/stats/qoe?adformat',
-  // NOTE: /api/stats/atr is used for BOTH ad stats (el=adunit) and video stats (el=detailpage)
-  // We handle it separately in isAdRequest() with a query param check
-  // NOTE: /youtubei/v1/log_event is NOT blocked — YouTube uses it for all events,
-  // blocking it triggers adblock detection
+  '/api/stats/ads?el=adunit',
+  '/api/stats/watchtime?el=adunit',
   '/pagead/adview',
   '/pagead/conversion/',
   '/pagead/viewthroughconversion/',

@@ -1,0 +1,57 @@
+{
+  "id": "v4.8.3",
+  "version": "4.8.3",
+  "badge": "latest",
+  "name": "YouTube AdBlocker Hotfix",
+  "date": "2026-05-20",
+  "isCurrent": true,
+  "open": true,
+  "counts": { "new": 1, "improve": 2, "fix": 3 },
+  "categories": [
+    {
+      "label": "Bug Fixes",
+      "features": [
+        {
+          "type": "fix",
+          "label": "Anti-Adblock Detection Bypass",
+          "desc": "YouTube updated its detection mechanism to identify blockers through missing IMA SDK signals and network error patterns. Fixed by refining webRequest filters and using randomized CSS selectors for injected styles."
+        },
+        {
+          "type": "fix",
+          "label": "Enforcement Message Removal",
+          "desc": "Improved the removal of 'Adblockers violate terms' popups and enforcement messages. Added a fallback to auto-resume playback if the video is paused by an ad-related message."
+        },
+        {
+          "type": "fix",
+          "label": "Skip Button Selector Updates",
+          "desc": "Added support for several new skip button variants and slot-based ad containers that were recently introduced by YouTube."
+        }
+      ]
+    },
+    {
+      "label": "Improvements",
+      "features": [
+        {
+          "type": "improve",
+          "label": "Stealth Injection via Shadow DOM",
+          "desc": "Modified the injection script to use a more stealthy approach, reducing the footprint of the blocker's presence in the DOM to avoid detection by YouTube's MutationObserver scanners."
+        },
+        {
+          "type": "improve",
+          "label": "Advanced Ad Pattern Matching",
+          "desc": "Expanded the ad URL pattern database to include new signals like ad_vbr, v_len, and ptchn, ensuring better accuracy in identifying ad-video segments."
+        }
+      ]
+    },
+    {
+      "label": "New Features",
+      "features": [
+        {
+          "type": "new",
+          "label": "Experimental Shorts Blocking",
+          "desc": "Added basic CSS-based blocking for YouTube Shorts across the homepage, sidebar, and search results. This is an experimental feature to improve browsing focus."
+        }
+      ]
+    }
+  ]
+}
