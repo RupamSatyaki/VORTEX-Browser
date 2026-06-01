@@ -2,12 +2,37 @@
   "id": "v4.8.3",
   "version": "4.8.3",
   "badge": "latest",
-  "name": "YouTube AdBlocker Hotfix",
+  "name": "New Tab Upgrade & AdBlocker Hotfix",
   "date": "2026-05-20",
   "isCurrent": true,
   "open": true,
-  "counts": { "new": 1, "improve": 2, "fix": 3 },
+  "counts": { "new": 4, "improve": 3, "fix": 5 },
   "categories": [
+    {
+      "label": "New Features",
+      "features": [
+        {
+          "type": "new",
+          "label": "Live Weather & System Monitor",
+          "desc": "Added real-time weather info (via wttr.in) and a live System Stats monitor (CPU/RAM usage) to the New Tab page."
+        },
+        {
+          "type": "new",
+          "label": "Search Engine Switcher",
+          "desc": "Quickly switch between Google, DuckDuckGo, Bing, and Brave directly from the New Tab search bar."
+        },
+        {
+          "type": "new",
+          "label": "Omnibox Suggestions",
+          "desc": "The New Tab search bar now provides real-time suggestions from Google, bookmarks, and history."
+        },
+        {
+          "type": "new",
+          "label": "Experimental Shorts Blocking",
+          "desc": "Added basic CSS-based blocking for YouTube Shorts across the homepage, sidebar, and search results."
+        }
+      ]
+    },
     {
       "label": "Bug Fixes",
       "features": [
@@ -25,6 +50,16 @@
           "type": "fix",
           "label": "Skip Button Selector Updates",
           "desc": "Added support for several new skip button variants and slot-based ad containers that were recently introduced by YouTube."
+        },
+        {
+          "type": "fix",
+          "label": "Enter Key Conflict in Search",
+          "desc": "Fixed an issue where pressing Enter in the search input would trigger both a search and an omnibox selection simultaneously."
+        },
+        {
+          "type": "fix",
+          "label": "New Tab URL Navigation",
+          "desc": "Fixed direct URL navigation from the New Tab search bar and added a loading animation for better feedback."
         }
       ]
     },
@@ -40,16 +75,11 @@
           "type": "improve",
           "label": "Advanced Ad Pattern Matching",
           "desc": "Expanded the ad URL pattern database to include new signals like ad_vbr, v_len, and ptchn, ensuring better accuracy in identifying ad-video segments."
-        }
-      ]
-    },
-    {
-      "label": "New Features",
-      "features": [
+        },
         {
-          "type": "new",
-          "label": "Experimental Shorts Blocking",
-          "desc": "Added basic CSS-based blocking for YouTube Shorts across the homepage, sidebar, and search results. This is an experimental feature to improve browsing focus."
+          "type": "improve",
+          "label": "Hyper-Skip Ad Logic",
+          "desc": "Improved the ad skipping speed and reliability, ensuring ads are muted and fast-forwarded even if the skip button is delayed."
         }
       ]
     }
