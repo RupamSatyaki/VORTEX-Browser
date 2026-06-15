@@ -28,6 +28,16 @@ const NavMenuDropdown = (() => {
         case 'screenshot-full':  Screenshot.capture(true); break;
         case 'print':            WebView.print(); break;
         case 'save-page':        WebView.savePage(); break;
+        case 'responsive-view': {
+          const tab = Tabs.getActiveTab();
+          if (!tab) break;
+          if (WebView.isEmulating(tab.id)) {
+            WebView.resetEmulation(tab.id);
+          } else {
+            WebView.setDevice(tab.id, 'iphone');
+          }
+          break;
+        }
         case 'devtools':         WebView.openDevTools(); break;
         case 'reload-hard':      WebView.hardReload(); break;
         case 'settings':         Panel.open('settings'); break;

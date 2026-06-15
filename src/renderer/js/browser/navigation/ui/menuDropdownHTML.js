@@ -78,6 +78,10 @@ const NavMenuHTML = (() => {
         <span class="nd-shortcut">Ctrl+S</span>
       </div>
       <div class="nd-sep"></div>
+      <div class="nd-item" data-action="responsive-view">
+        <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>
+        <span class="nd-label">Responsive View (Mobile)</span>
+      </div>
       <div class="nd-item" data-action="devtools">
         <span class="nd-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
         <span class="nd-label">Developer Tools</span>

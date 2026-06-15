@@ -34,6 +34,38 @@ const WebView = (() => {
 
   const activeIdGetter = () => activeId;
 
+  const DEVICE_PRESETS = {
+    iphone: {
+      name: 'iPhone 12/13',
+      width: 390,
+      height: 844,
+      ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+      deviceScaleFactor: 3,
+      mobile: true,
+      touch: true,
+    },
+    pixel: {
+      name: 'Pixel 5',
+      width: 393,
+      height: 851,
+      ua: 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36',
+      deviceScaleFactor: 2.75,
+      mobile: true,
+      touch: true,
+    },
+    ipad: {
+      name: 'iPad Air',
+      width: 820,
+      height: 1180,
+      ua: 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+      deviceScaleFactor: 2,
+      mobile: true,
+      touch: true,
+    }
+  };
+
+  const emulationState = {}; // { tabId: { presetKey, active } }
+
   // ── PiP helpers ────────────────────────────────────────────────────────────
   function setPiPEnabled(val)   { _pipEnabled = val; }
   function setPiPSites(sites)   { _pipSites = Array.isArray(sites) ? sites : []; }
@@ -118,6 +150,9 @@ const WebView = (() => {
 
     const wv = webviews[tabId];
     if (wv) {
+      const container = document.getElementById('webview-container');
+      container.classList.toggle('emulating', isEmulating(tabId));
+
       const tab = Tabs.getActiveTab();
       const displayUrl = (tab?.url?.startsWith('vortex://')) ? tab.url : wv.src;
       Navigation.setURL(displayUrl);
@@ -141,6 +176,7 @@ const WebView = (() => {
     const vortexUrl = Object.keys(VORTEX_PAGES).find(u => wv.src === VORTEX_PAGES[u].fileUrl());
     wv.remove();
     delete webviews[tabId];
+    delete emulationState[tabId];
     TabPreview.removeCache(tabId);
     if (vortexUrl) WVPreloader.build(vortexUrl, VORTEX_PAGES, webviewPreloadPath);
   }
@@ -226,12 +262,94 @@ const WebView = (() => {
     try { window.vortexAPI.invoke('pip:trigger', wv.getWebContentsId()).catch(() => {}); } catch (_) {}
   }
 
+  // ── Emulation ──────────────────────────────────────────────────────────────
+  function _fitDevice(tabId) {
+    const wv = webviews[tabId];
+    const state = emulationState[tabId];
+    if (!wv || !state || !state.active) return;
+
+    const preset = DEVICE_PRESETS[state.presetKey];
+    if (!preset) return;
+
+    const container = document.getElementById('webview-container');
+    const pad = 60;
+    const availW = container.clientWidth - pad;
+    const availH = container.clientHeight - pad;
+
+    const scale = Math.min(1, availW / preset.width, availH / preset.height);
+    wv.style.transform = `scale(${scale})`;
+    wv.style.transformOrigin = 'center center';
+  }
+
+  async function setDevice(tabId, presetKey) {
+    const wv = webviews[tabId];
+    const preset = DEVICE_PRESETS[presetKey];
+    if (!wv || !preset) return;
+
+    emulationState[tabId] = { presetKey, active: true };
+    wv.setUserAgent(preset.ua);
+    
+    // Resize webview element to match device dimensions
+    wv.style.width = preset.width + 'px';
+    wv.style.height = preset.height + 'px';
+    wv.style.margin = '0 auto';
+    wv.style.boxShadow = '0 0 40px rgba(0,0,0,0.5)';
+    wv.parentElement.classList.add('emulating');
+
+    _fitDevice(tabId);
+
+    try {
+      const wcId = wv.getWebContentsId();
+      await window.vortexAPI.invoke('tab:emulateDevice', wcId, {
+        screenPosition: 'mobile',
+        screenSize: { width: preset.width, height: preset.height },
+        viewSize: { width: preset.width, height: preset.height },
+        deviceScaleFactor: preset.deviceScaleFactor || 1,
+        mobile: preset.mobile || false,
+        fitToView: true,
+      });
+      wv.reload();
+    } catch (_) {}
+  }
+
+  async function resetEmulation(tabId) {
+    const wv = webviews[tabId];
+    if (!wv) return;
+
+    delete emulationState[tabId];
+    wv.setUserAgent(''); // Reset to default
+    wv.style.width = '';
+    wv.style.height = '';
+    wv.style.margin = '';
+    wv.style.boxShadow = '';
+    wv.style.transform = '';
+    wv.parentElement.classList.remove('emulating');
+
+    try {
+      const wcId = wv.getWebContentsId();
+      await window.vortexAPI.invoke('tab:resetEmulation', wcId);
+      wv.reload();
+    } catch (_) {}
+  }
+
+  function isEmulating(tabId) {
+    return !!(emulationState[tabId] && emulationState[tabId].active);
+  }
+
+  // Handle window resize to keep emulation fitted
+  window.addEventListener('resize', () => {
+    if (activeId && isEmulating(activeId)) {
+      _fitDevice(activeId);
+    }
+  });
+
   // ── Public API (same as old webview.js) ────────────────────────────────────
   return {
     init, createWebview, switchTo, destroyWebview, loadURL,
     goBack, goForward, reload, hardReload, print, savePage, openDevTools,
     findInPage, zoomIn, zoomOut, zoomReset, pip,
     setPiPEnabled, setPiPSites, setYTAdblock,
+    setDevice, resetEmulation, isEmulating, DEVICE_PRESETS,
     _captureTab,
     setActiveId(id) { activeId = id; },
     getActiveWcId() {

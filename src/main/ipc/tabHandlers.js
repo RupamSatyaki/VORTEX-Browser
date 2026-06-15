@@ -27,6 +27,24 @@ function register() {
     try { const wc = webContents.fromId(wcId); if (!wc) return null; const info = await wc.getProcessMemoryInfo(); return info.privateBytes || info.workingSetSize || 0; } catch { return null; }
   });
 
+  ipcMain.handle('tab:emulateDevice', (_e, wcId, options) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (!wc) return false;
+      // options: { screenPosition: 'mobile', screenSize: { width, height }, viewSize: { width, height }, scale: 1, ... }
+      wc.enableDeviceEmulation(options);
+      return true;
+    } catch { return false; }
+  });
+
+  ipcMain.handle('tab:resetEmulation', (_e, wcId) => {
+    try {
+      const wc = webContents.fromId(wcId);
+      if (wc) wc.disableDeviceEmulation();
+      return true;
+    } catch { return false; }
+  });
+
   ipcMain.handle('webview:setZoom', (_e, wcId, factor) => {
     try { const wc = webContents.fromId(wcId); if (wc) wc.setZoomFactor(factor); } catch (_) {}
   });
