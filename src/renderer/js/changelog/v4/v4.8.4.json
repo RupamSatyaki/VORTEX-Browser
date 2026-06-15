@@ -1,0 +1,23 @@
+{
+  "version": "4.8.4",
+  "date": "June 15, 2026",
+  "title": "Responsive View & Mobile Emulation",
+  "highlights": [
+    {
+      "type": "feature",
+      "text": "Added 'Responsive View' (Mobile Emulation) to the navigation menu, allowing you to test websites in a mobile environment."
+    },
+    {
+      "type": "improvement",
+      "text": "Implemented auto-scaling for mobile view to ensure the emulated device fits perfectly within any window size."
+    },
+    {
+      "type": "feature",
+      "text": "Integrated hardware-level emulation for touch events and viewport scaling."
+    },
+    {
+      "type": "improvement",
+      "text": "Added visual phone frame and centered backdrop for a realistic mobile testing experience."
+    }
+  ]
+}
